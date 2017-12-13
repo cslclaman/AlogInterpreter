@@ -10,19 +10,71 @@ import alog.model.Token;
 import java.util.LinkedList;
 import javax.swing.text.DefaultStyledDocument;
 import alog.view.append.TextLineNumber;
+import java.awt.Color;
+import java.util.Iterator;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.Style;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyleContext;
 
 /**
  *
  * @author Caique
  */
 public class FrmGui extends javax.swing.JFrame {
-
+    
+    StyleContext sc;
+    private final Style stylePlain;
+    private final Style stylePerc;
+    
+    private final Style styleLit;
+    private final Style styleABC123;
+    private final Style style123;
+    private final Style styleABC;
+    private final Style styleDel;
+    private final Style styleOp;
+    private final Style styleOMG;
+    
     /**
      * Creates new form FrmTeste
      */
     public FrmGui() {
+        oldText = "";
+        
+        sc = new StyleContext();
+        
+        stylePlain = sc.addStyle("plainBasicao", null);
+        stylePlain.addAttribute(StyleConstants.Foreground, Color.BLACK);
+        stylePlain.addAttribute(StyleConstants.Background, Color.WHITE);
+        
+        stylePerc = sc.addStyle("percurso", null);
+        stylePerc.addAttribute(StyleConstants.Background, Color.YELLOW);
+        
+        styleLit = sc.addStyle("literal", null);
+        styleLit.addAttribute(StyleConstants.Foreground, Color.LIGHT_GRAY);
+        
+        styleABC123 = sc.addStyle("alfanum", null);
+        styleABC123.addAttribute(StyleConstants.Foreground, Color.GREEN);
+        
+        style123 = sc.addStyle("num", null);
+        style123.addAttribute(StyleConstants.Foreground, Color.ORANGE);
+        
+        styleABC = sc.addStyle("alfa", null);
+        styleABC.addAttribute(StyleConstants.Foreground, Color.BLUE);
+        
+        styleDel = sc.addStyle("del", null);
+        styleDel.addAttribute(StyleConstants.Foreground, Color.RED);
+        
+        styleOp = sc.addStyle("oper", null);
+        styleOp.addAttribute(StyleConstants.Foreground, Color.DARK_GRAY);
+        
+        styleOMG = sc.addStyle("none", null);
+        styleOMG.addAttribute(StyleConstants.Foreground, Color.BLACK);
+        
         initComponents();
-        jTextPane1.setDocument(new DefaultStyledDocument());
+        txpIde.setDocument(new DefaultStyledDocument());
+        doc = (DefaultStyledDocument)txpIde.getDocument();
+        formated = false;
     }
 
     /**
@@ -35,30 +87,59 @@ public class FrmGui extends javax.swing.JFrame {
     private void initComponents() {
 
         jScrollPane2 = new javax.swing.JScrollPane();
-        jTextPane1 = new javax.swing.JTextPane();
-        jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
+        txpIde = new javax.swing.JTextPane();
+        btnScanner = new javax.swing.JButton();
+        btnImprToken = new javax.swing.JButton();
+        btnInicioPerc = new javax.swing.JButton();
+        btnProxPerc = new javax.swing.JButton();
+        btnFormat = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
         jScrollPane2.setVerifyInputWhenFocusTarget(false);
 
-        jTextPane1.setFont(new java.awt.Font("Consolas", 0, 12)); // NOI18N
-        jScrollPane2.setViewportView(jTextPane1);
+        txpIde.setFont(new java.awt.Font("Consolas", 0, 12)); // NOI18N
+        txpIde.setText("Início\n    Caracter: Nome;\n    Inteiro: Idade;\n    Real: Altura, CentPorDia <- 0;\n    \n    Leia(Nome, Idade, Altura);\n    \n    Idade <- Idade * 365.25;\n    CentPorDia <- Altura / Idade;\n    \n    Escreva(Nome,\" tem \",CentPorDia,\" centímetros por dia de vida\");\nFim");
+        jScrollPane2.setViewportView(txpIde);
 
-        jScrollPane2.setRowHeaderView(new TextLineNumber(jTextPane1, 2));
+        jScrollPane2.setRowHeaderView(new TextLineNumber(txpIde, 2));
 
-        jButton3.setText("Scanner");
-        jButton3.addActionListener(new java.awt.event.ActionListener() {
+        btnScanner.setText("Scanner");
+        btnScanner.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton3ActionPerformed(evt);
+                btnScannerActionPerformed(evt);
             }
         });
 
-        jButton4.setText("Imprime tokens");
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
+        btnImprToken.setText("Imprime tokens");
+        btnImprToken.setEnabled(false);
+        btnImprToken.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton4ActionPerformed(evt);
+                btnImprTokenActionPerformed(evt);
+            }
+        });
+
+        btnInicioPerc.setText("|<");
+        btnInicioPerc.setEnabled(false);
+        btnInicioPerc.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnInicioPercActionPerformed(evt);
+            }
+        });
+
+        btnProxPerc.setText(">>");
+        btnProxPerc.setEnabled(false);
+        btnProxPerc.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnProxPercActionPerformed(evt);
+            }
+        });
+
+        btnFormat.setText("Format");
+        btnFormat.setEnabled(false);
+        btnFormat.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnFormatActionPerformed(evt);
             }
         });
 
@@ -70,11 +151,17 @@ public class FrmGui extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jButton3)
+                        .addComponent(btnScanner)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton4)
-                        .addGap(0, 325, Short.MAX_VALUE))
-                    .addComponent(jScrollPane2))
+                        .addComponent(btnImprToken)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnInicioPerc)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnProxPerc)
+                        .addGap(99, 99, 99)
+                        .addComponent(btnFormat)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 507, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -82,8 +169,11 @@ public class FrmGui extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton3)
-                    .addComponent(jButton4))
+                    .addComponent(btnScanner)
+                    .addComponent(btnImprToken)
+                    .addComponent(btnInicioPerc)
+                    .addComponent(btnProxPerc)
+                    .addComponent(btnFormat))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 267, Short.MAX_VALUE)
                 .addContainerGap())
@@ -92,21 +182,89 @@ public class FrmGui extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        scn = new Scanner(jTextPane1.getText());
+    private void btnScannerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnScannerActionPerformed
+        scn = new Scanner(txpIde.getText());
         tokens = new LinkedList<>();
         while (scn.hasNext()){
             tokens.add(scn.getNext());
         }
-    }//GEN-LAST:event_jButton3ActionPerformed
+        tokenIndex = 0;
+        
+        btnImprToken.setEnabled(true);
+        btnInicioPerc.setEnabled(true);
+        btnProxPerc.setEnabled(true);
+        btnFormat.setEnabled(true);
+        
+    }//GEN-LAST:event_btnScannerActionPerformed
 
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+    private void btnImprTokenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImprTokenActionPerformed
         System.out.println("POS\tLINHA\tCOLUNA\tTIPO\tPALAVRA");
         for (Token w : tokens){
             System.out.println((w.getOrder()+1) + "\t" + (w.getLine()+1) + "\t" + (w.getColumn()+1) + "\t" + w.getType().substring(0, 2) + "\t" + w.getWord());
         }
-    }//GEN-LAST:event_jButton4ActionPerformed
+    }//GEN-LAST:event_btnImprTokenActionPerformed
+    
+    private void btnInicioPercActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInicioPercActionPerformed
+        tokenIndex = 0;
+        btnProxPerc.setEnabled(true);
+    }//GEN-LAST:event_btnInicioPercActionPerformed
 
+    private void btnProxPercActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProxPercActionPerformed
+        if (tokenIndex < tokens.size()){
+            Token t = tokens.get(tokenIndex);
+            if (tokenIndex > 0){
+                Token ant = tokens.get(tokenIndex -1);
+                doc.setCharacterAttributes(ant.getPos(), ant.getLength(), stylePlain, true);
+                if (formated){
+                    doc.setCharacterAttributes(ant.getPos(), ant.getLength(), tokenStyle(ant.getType()), true);
+                }
+            }
+            doc.setCharacterAttributes(t.getPos(), t.getLength(), stylePerc, true);
+            
+            btnProxPerc.setEnabled(tokenIndex++ < tokens.size());
+        } else {
+            if (tokenIndex > 0){
+                Token ant = tokens.get(tokenIndex -1);
+                doc.setCharacterAttributes(ant.getPos(), ant.getLength(), stylePlain, true);
+                if (formated){
+                    doc.setCharacterAttributes(ant.getPos(), ant.getLength(), tokenStyle(ant.getType()), true);
+                }
+            }
+            
+            btnProxPerc.setEnabled(tokenIndex++ < tokens.size());
+        }
+    }//GEN-LAST:event_btnProxPercActionPerformed
+
+    private void btnFormatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFormatActionPerformed
+        if (!formated){
+            for (Token t : tokens){
+                doc.setCharacterAttributes(t.getPos(), t.getLength(), tokenStyle(t.getType()), true);
+            }
+        }else {
+            doc.setCharacterAttributes(doc.getStartPosition().getOffset(), doc.getLength(), stylePlain, true);
+        }
+        formated = !formated;
+    }//GEN-LAST:event_btnFormatActionPerformed
+
+    private Style tokenStyle (String tokenType){
+        switch (tokenType){
+            case "Literal":
+                return styleLit;
+            case "Alfanumérico":
+                return styleABC123;
+            case "Número":
+                return style123;
+            case "Alfabético":
+                return styleABC;
+            case "Delimitador":
+                return styleDel;
+            case "Operador":
+                return styleOp;
+            default:
+                return styleOMG;
+        }
+    }
+    
     /**
      * @param args the command line arguments
      */
@@ -144,11 +302,18 @@ public class FrmGui extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
+    private javax.swing.JButton btnFormat;
+    private javax.swing.JButton btnImprToken;
+    private javax.swing.JButton btnInicioPerc;
+    private javax.swing.JButton btnProxPerc;
+    private javax.swing.JButton btnScanner;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTextPane jTextPane1;
+    private javax.swing.JTextPane txpIde;
     // End of variables declaration//GEN-END:variables
     private LinkedList<Token> tokens;
+    private int tokenIndex;
     private Scanner scn;
+    private DefaultStyledDocument doc;
+    private boolean formated;
+    private String oldText;
 }
