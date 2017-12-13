@@ -12,6 +12,7 @@ package alog.model;
 public class Token {
     private String word;
     private int order;
+    private int pos;
     private int lin;
     private int col;
     private int length;
@@ -60,6 +61,14 @@ public class Token {
         this.col = col;
     }
 
+    public int getPos() {
+        return pos;
+    }
+
+    public void setPos(int pos) {
+        this.pos = pos;
+    }
+
     public int getLength() {
         return length;
     }
@@ -78,7 +87,7 @@ public class Token {
 
     @Override
     public String toString(){
-        return word + " (pos " + (order + 1) + " at line " + (lin + 1) + ", column " + (col + 1);
+        return word + " (pos " + (order + 1) + " at line " + (lin + 1) + ", column " + (col + 1) + " - char no. " + pos + ")";
     }
     
 }

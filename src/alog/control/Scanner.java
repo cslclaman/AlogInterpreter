@@ -13,8 +13,8 @@ import alog.model.Token;
  */
 public class Scanner {
     
-    
     private int pos;
+    private int posnolf;
     private int order;
     private int linha;
     private int coluna;
@@ -25,7 +25,7 @@ public class Scanner {
     public Scanner(String texto) {
         this.texto = texto.toCharArray();
         len = texto.length();
-        pos = linha = coluna = order = 0;
+        pos = posnolf = linha = coluna = order = 0;
         next = len > 0;
     }
     
@@ -40,6 +40,7 @@ public class Scanner {
         boolean go = true;
         Token token = new Token();
         token.setLine(linha);
+        token.setPos(posnolf);
         token.setColumn(coluna);
         token.setOrder(order++);
         
@@ -55,6 +56,7 @@ public class Scanner {
                 }
                 token.updateWord(ch);
                 pos++;
+                posnolf++;
                 contLit++;
             } else {
                 if (isBlank(ch)){
@@ -65,6 +67,7 @@ public class Scanner {
                     } else {
                         token.updateWord(ch);
                         pos++;
+                        posnolf++;
                         coluna ++;
                         contAlpha ++;
                     }
@@ -74,6 +77,7 @@ public class Scanner {
                     } else {
                         token.updateWord(ch);
                         pos++;
+                        posnolf++;
                         coluna ++;
                         contNum ++;
                     }
@@ -81,6 +85,7 @@ public class Scanner {
                     if (token.getLength() == 0){
                         token.updateWord(ch);
                         pos++;
+                        posnolf++;
                         coluna ++;
                         contRes ++;
                     }
@@ -90,6 +95,7 @@ public class Scanner {
                         literal = true;
                         token.updateWord(ch);
                         pos++;
+                        posnolf++;
                         coluna++;
                     } else {
                         go = false;
@@ -101,6 +107,7 @@ public class Scanner {
                         token.updateWord(ch);
                         pos++;
                         coluna++;
+                        posnolf++;
                         contOper++;
                     }
                 } else {
@@ -108,6 +115,7 @@ public class Scanner {
                     token.updateWord(ch);
                     go = false;
                     pos++;
+                    posnolf++;
                     coluna++;
                 }
             }
@@ -128,13 +136,16 @@ public class Scanner {
                     pos ++;
                     coluna = 0;
                     linha ++;
+                    posnolf++;
                     break;
                 case ' ':
                     pos ++;
+                    posnolf++;
                     coluna ++;
                     break;
                 case '\t':
                     pos ++;
+                    posnolf += 4;
                     coluna += 4;
                     break;
                 default:
