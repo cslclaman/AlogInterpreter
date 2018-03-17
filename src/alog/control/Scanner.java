@@ -1,14 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package alog.control;
 
 import alog.model.Token;
 
 /**
- *
+ * Classe de scanner que realiza análise léxica em um código e retorna os tokens por meio de um iterador.
  * @author Caique
  */
 public class Scanner {
@@ -22,6 +17,10 @@ public class Scanner {
     private boolean next;
     private char[] texto;
 
+    /**
+     * Constrói uma nova instância do Scanner a partir de uma String de código-fonte.
+     * @param texto Código a ser escaneado
+     */
     public Scanner(String texto) {
         this.texto = texto.toCharArray();
         len = texto.length();
@@ -29,10 +28,18 @@ public class Scanner {
         next = len > 0;
     }
     
+    /**
+     * Retorna se ainda há algum token a ser verificado no código.
+     * @return True se ainda há tokens.
+     */
     public boolean hasNext(){
         return next;
     }
     
+    /**
+     * Retorna o próximo token encontrado, devidamente classificado.
+     * @return {@link alog.model.Token}
+     */
     public Token getNext(){
         int contLit = 0, contAlpha = 0, contNum = 0, contRes = 0, contOper = 0; 
         
