@@ -6,7 +6,11 @@
 package alog.model;
 
 /**
- *
+ * Classe que representa um token.
+ * Um token é uma unidade de código (palavra, pontuação, número, símbolo, etc).
+ * Essa unidade de código simboliza alguma coisa (operação, nome de variável, função, etc).
+ * O texto dessa unidade de código, aqui, será chamado de Word.
+ * Outros atributos, como linha e coluna onde aparece no código-fonte original, também estão presentes.
  * @author Caique
  */
 public class Token {
@@ -16,22 +20,37 @@ public class Token {
     private int lin;
     private int col;
     private int length;
-    private String type;
+    private TipoToken type;
     
+    /**
+     * Constrói um novo Token vazio (ou seja, cujo atributo Word é vazio).
+     */
     public Token() {
         word = "";
         length = 0;
     }
 
+    /**
+     * Adiciona um novo caracter à palavra (Word) do token e aumenta seu tamanho.
+     * @param ch Caracter a ser adicionado.
+     */
     public void updateWord(char ch){
         word += ch;
         length ++;
     }
     
+    /**
+     * Retorna a palavra (Word) do Token.
+     * @return Ex. "Inteiro" (para o identificador de tipo).
+     */
     public String getWord() {
         return word;
     }
 
+    /**
+     * 
+     * @param word 
+     */
     public void setWord(String word) {
         this.word = word;
         length = word.length();
@@ -77,11 +96,11 @@ public class Token {
         this.length = length;
     }
 
-    public String getType() {
+    public TipoToken getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(TipoToken type) {
         this.type = type;
     }
 
