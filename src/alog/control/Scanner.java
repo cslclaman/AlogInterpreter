@@ -1,5 +1,6 @@
 package alog.control;
 
+import alog.model.TipoToken;
 import alog.model.Token;
 
 /**
@@ -161,25 +162,25 @@ public class Scanner {
             }
         }
         if (contLit > 0){
-            token.setType("Literal");
+            token.setType(TipoToken.LITERAL);
         } else {
             if (contNum > 0){
                 if (contAlpha > 0){
-                    token.setType("Alfanumérico");
+                    token.setType(TipoToken.ALFANUMERICO);
                 } else {
-                    token.setType("Número");
+                    token.setType(TipoToken.NUMERICO);
                 }
             } else {
                 if (contAlpha > 0){
-                    token.setType("Alfabético");
+                    token.setType(TipoToken.ALFABETICO);
                 } else {
                     if (contRes > 0){
-                        token.setType("Delimitador");
+                        token.setType(TipoToken.DELIMITADOR);
                     } else {
                         if (contOper > 0){
-                            token.setType("Operador");
+                            token.setType(TipoToken.OPERADOR);
                         } else {
-                            token.setType("Indefinido");
+                            token.setType(null);
                         }
                     }
                 }
