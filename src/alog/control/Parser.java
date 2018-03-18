@@ -108,6 +108,17 @@ public class Parser {
                     funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
                     add = true;
                     break;
+                
+                //MODO: ATRIBUIÇÃO
+                case OP_ATRIBUICAO:
+                    expr.setTipo(TipoExpressao.OPERACAO_ATRIBUICAO);
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                    funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
+                    funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
+                    add = true;
+                    
                     
                 //DIVERSOS MODOS
                 case DELIM_PARENTESES_ABRE:
@@ -198,6 +209,19 @@ public class Parser {
                             funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
                             funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
                             add = true;
+                            break;
+                        case _INDEFINIDO:
+                            if (!variaveis.contains(token.getPalavra())){
+                                escreveErro(token, "Comando, variável ou função não identificada: " + token.getPalavra());
+                                add = false;
+                            } else {
+                                token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
+                                
+                                funcoesEsperadas.clear();
+                                funcoesEsperadas.add(FuncaoToken.OP_ATRIBUICAO);
+                                add = true;
+                            }
+                            
                             break;
                     }
                     break;
