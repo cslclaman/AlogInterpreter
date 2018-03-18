@@ -17,6 +17,7 @@ public class Expressao {
     
     public Expressao(){
         tokens = new ArrayList<>();
+        tipo = TipoExpressao._INDEFINIDO;
     }
     
     public void addToken(Token token){
@@ -33,6 +34,15 @@ public class Expressao {
 
     public void setTipo(TipoExpressao tipo) {
         this.tipo = tipo;
+    }
+
+    @Override
+    public String toString() {
+        String str = tipo + " -";
+        for (Token t : tokens){
+            str += " " + t.getPalavra();
+        }
+        return str;
     }
     
     

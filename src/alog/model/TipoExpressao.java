@@ -10,6 +10,7 @@ package alog.model;
  * @author Caique
  */
 public enum TipoExpressao {
+    _INDEFINIDO,
     DELIM_BLOCO_INICIO,
     DELIM_BLOCO_FIM,
     CRIACAO_VARIAVEL,
