@@ -276,7 +276,7 @@ public class FrmGui extends javax.swing.JFrame {
     private void btnImprTokenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImprTokenActionPerformed
         System.out.println("POS\tLINHA\tCOLUNA\tTIPO\tPALAVRA");
         for (Token w : tokens){
-            System.out.println((w.getOrder()+1) + "\t" + (w.getLine()+1) + "\t" + (w.getColumn()+1) + "\t" + w.getType().toString().substring(0, 2) + "\t" + w.getWord());
+            System.out.println((w.getOrdem()+1) + "\t" + (w.getLinha()+1) + "\t" + (w.getColuna()+1) + "\t" + w.getTipoToken().toString().substring(0, 2) + "\t" + w.getPalavra());
         }
     }//GEN-LAST:event_btnImprTokenActionPerformed
     
@@ -290,20 +290,20 @@ public class FrmGui extends javax.swing.JFrame {
             Token t = tokens.get(tokenIndex);
             if (tokenIndex > 0){
                 Token ant = tokens.get(tokenIndex -1);
-                doc.setCharacterAttributes(ant.getPos(), ant.getLength(), stylePlain, true);
+                doc.setCharacterAttributes(ant.getPosicao(), ant.getTamanho(), stylePlain, true);
                 if (formated){
-                    doc.setCharacterAttributes(ant.getPos(), ant.getLength(), tokenStyle(ant.getType()), true);
+                    doc.setCharacterAttributes(ant.getPosicao(), ant.getTamanho(), tokenStyle(ant.getTipoToken()), true);
                 }
             }
-            doc.setCharacterAttributes(t.getPos(), t.getLength(), stylePerc, true);
+            doc.setCharacterAttributes(t.getPosicao(), t.getTamanho(), stylePerc, true);
             
             btnProxPerc.setEnabled(tokenIndex++ < tokens.size());
         } else {
             if (tokenIndex > 0){
                 Token ant = tokens.get(tokenIndex -1);
-                doc.setCharacterAttributes(ant.getPos(), ant.getLength(), stylePlain, true);
+                doc.setCharacterAttributes(ant.getPosicao(), ant.getTamanho(), stylePlain, true);
                 if (formated){
-                    doc.setCharacterAttributes(ant.getPos(), ant.getLength(), tokenStyle(ant.getType()), true);
+                    doc.setCharacterAttributes(ant.getPosicao(), ant.getTamanho(), tokenStyle(ant.getTipoToken()), true);
                 }
             }
             
@@ -314,7 +314,7 @@ public class FrmGui extends javax.swing.JFrame {
     private void btnFormatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFormatActionPerformed
         if (!formated){
             for (Token t : tokens){
-                doc.setCharacterAttributes(t.getPos(), t.getLength(), tokenStyle(t.getType()), true);
+                doc.setCharacterAttributes(t.getPosicao(), t.getTamanho(), tokenStyle(t.getTipoToken()), true);
             }
         }else {
             doc.setCharacterAttributes(doc.getStartPosition().getOffset(), doc.getLength(), stylePlain, true);

@@ -47,10 +47,10 @@ public class Scanner {
         boolean literal = false;
         boolean go = true;
         Token token = new Token();
-        token.setLine(linha);
-        token.setPos(posnolf);
-        token.setColumn(coluna);
-        token.setOrder(order++);
+        token.setLinha(linha);
+        token.setPosicao(posnolf);
+        token.setColuna(coluna);
+        token.setOrdem(order++);
         
         while (go && next && pos < len){
             if (pos + 1 == len){
@@ -62,7 +62,7 @@ public class Scanner {
                     literal = false;
                     go = false;
                 }
-                token.updateWord(ch);
+                token.atualizaPalavra(ch);
                 pos++;
                 posnolf++;
                 contLit++;
@@ -73,7 +73,7 @@ public class Scanner {
                     if (contRes > 0 || contOper > 0){
                         go = false;
                     } else {
-                        token.updateWord(ch);
+                        token.atualizaPalavra(ch);
                         pos++;
                         posnolf++;
                         coluna ++;
@@ -83,15 +83,15 @@ public class Scanner {
                     if (contRes > 0 || contOper > 0){
                         go = false;
                     } else {
-                        token.updateWord(ch);
+                        token.atualizaPalavra(ch);
                         pos++;
                         posnolf++;
                         coluna ++;
                         contNum ++;
                     }
                 } else if (isReserved(ch)){
-                    if (token.getLength() == 0){
-                        token.updateWord(ch);
+                    if (token.getTamanho() == 0){
+                        token.atualizaPalavra(ch);
                         pos++;
                         posnolf++;
                         coluna ++;
@@ -99,9 +99,9 @@ public class Scanner {
                     }
                     go = false;
                 } else if (ch == '"'){
-                    if (token.getLength() == 0){
+                    if (token.getTamanho() == 0){
                         literal = true;
-                        token.updateWord(ch);
+                        token.atualizaPalavra(ch);
                         pos++;
                         posnolf++;
                         coluna++;
@@ -112,7 +112,7 @@ public class Scanner {
                     if (contAlpha > 0 || contNum > 0){
                         go = false;
                     } else {
-                        token.updateWord(ch);
+                        token.atualizaPalavra(ch);
                         pos++;
                         coluna++;
                         posnolf++;
@@ -120,7 +120,7 @@ public class Scanner {
                     }
                 } else {
                     System.out.println("Caractere não considerável: " + ch);
-                    token.updateWord(ch);
+                    token.atualizaPalavra(ch);
                     go = false;
                     pos++;
                     posnolf++;
@@ -162,25 +162,25 @@ public class Scanner {
             }
         }
         if (contLit > 0){
-            token.setType(TipoToken.LITERAL);
+            token.setTipoToken(TipoToken.LITERAL);
         } else {
             if (contNum > 0){
                 if (contAlpha > 0){
-                    token.setType(TipoToken.ALFANUMERICO);
+                    token.setTipoToken(TipoToken.ALFANUMERICO);
                 } else {
-                    token.setType(TipoToken.NUMERICO);
+                    token.setTipoToken(TipoToken.NUMERICO);
                 }
             } else {
                 if (contAlpha > 0){
-                    token.setType(TipoToken.ALFABETICO);
+                    token.setTipoToken(TipoToken.ALFABETICO);
                 } else {
                     if (contRes > 0){
-                        token.setType(TipoToken.DELIMITADOR);
+                        token.setTipoToken(TipoToken.DELIMITADOR);
                     } else {
                         if (contOper > 0){
-                            token.setType(TipoToken.OPERADOR);
+                            token.setTipoToken(TipoToken.OPERADOR);
                         } else {
-                            token.setType(null);
+                            token.setTipoToken(null);
                         }
                     }
                 }
