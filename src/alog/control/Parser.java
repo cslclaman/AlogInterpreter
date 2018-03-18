@@ -285,8 +285,20 @@ public class Parser {
                 case _INDEF_NUMERICO:
                     switch (expr.getTipo()){
                         case OPERACAO_ATRIBUICAO:
+                            
                             funcoesEsperadas.clear();
-                            funcoesEsperadas.add(FuncaoToken.DELIM_PONTO);
+                            
+                            Token lastToken = expr.getTokenAt(expr.getNumTokens() - 1);
+                            if (lastToken.getFuncaoToken() == FuncaoToken.CONST_REAL){
+                                lastToken.atualizaPalavra(token.getPalavra());
+                                expr.setTokenAt(expr.getNumTokens() - 1, lastToken);
+                                add = false;
+                            } else {
+                                token.setFuncaoToken(FuncaoToken.CONST_INTEIRA);
+                                add = true;
+                                funcoesEsperadas.add(FuncaoToken.DELIM_PONTO);
+                            }
+                            
                             funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
                             funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
                             funcoesEsperadas.add(FuncaoToken.OP_SOMA);
@@ -295,7 +307,7 @@ public class Parser {
                             funcoesEsperadas.add(FuncaoToken.OP_DIV_INTEIRA);
                             funcoesEsperadas.add(FuncaoToken.OP_DIV_REAL);
                             funcoesEsperadas.add(FuncaoToken.OP_MOD);
-                            add = true;
+                            
                             break;
                     }
                     break;
@@ -303,6 +315,14 @@ public class Parser {
                 case DELIM_PONTO:
                     switch (expr.getTipo()){
                         case OPERACAO_ATRIBUICAO:
+                            Token lastToken = expr.getTokenAt(expr.getNumTokens() - 1);
+                            lastToken.atualizaPalavra(token.getPalavra());
+                            lastToken.setFuncaoToken(FuncaoToken.CONST_REAL);
+                            expr.setTokenAt(expr.getNumTokens() - 1, lastToken);
+                            
+                            funcoesEsperadas.clear();
+                            funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
+                            add = false;
                             break;
                     }
                     break;
