@@ -101,6 +101,14 @@ public class Parser {
                     add = true;
                     break;
                     
+                //MODO: SAÍDA DE DADOS
+                case LIB_IO_ESCREVA:
+                    expr.setTipo(TipoExpressao.SAIDA_DE_DADOS);
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
+                    add = true;
+                    break;
+                    
                 //DIVERSOS MODOS
                 case DELIM_PARENTESES_ABRE:
                     switch (expr.getTipo()){
@@ -110,12 +118,21 @@ public class Parser {
                             funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
                             add = false;
                             break;
+                        case SAIDA_DE_DADOS:
+                            funcoesEsperadas.clear();
+                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                            funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
+                            funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
+                            add = false;
+                            break;
                     }
                     break;
                     
                 case DELIM_PARENTESES_FECHA:
                     switch (expr.getTipo()){
                         case ENTRADA_DE_DADOS:
+                        case SAIDA_DE_DADOS:
                             funcoesEsperadas.clear();
                             funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
                             add = false;
@@ -131,6 +148,25 @@ public class Parser {
                             funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
                             funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
                             add = false;
+                            break;
+                        case SAIDA_DE_DADOS:
+                            funcoesEsperadas.clear();
+                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                            funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
+                            funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
+                            add = false;
+                            break;
+                    }
+                    break;
+                
+                case CONST_CARACTER:
+                    switch (expr.getTipo()){
+                        case SAIDA_DE_DADOS:
+                            funcoesEsperadas.clear();
+                            funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
+                            funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
+                            add = true;
                             break;
                     }
                     break;
@@ -152,6 +188,7 @@ public class Parser {
                             add = true;
                             break;
                         case ENTRADA_DE_DADOS:
+                        case SAIDA_DE_DADOS:
                             if (!variaveis.contains(token.getPalavra())){
                                 escreveErro(token, "Variável \"" + token.getPalavra() + "\" não declarada");
                             }
