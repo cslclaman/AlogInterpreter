@@ -40,6 +40,11 @@ public class Token {
         tamanho ++;
     }
     
+    public void atualizaPalavra(String sub){
+        palavra += sub;
+        tamanho += sub.length();
+    }
+    
     /**
      * Retorna a palavra (Word) do Token.
      * @return Ex. "Inteiro" (para o identificador de tipo).
