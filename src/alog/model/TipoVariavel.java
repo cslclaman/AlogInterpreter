@@ -9,7 +9,7 @@ package alog.model;
  *
  * @author Caique Souza
  */
-public enum Tipo {
+public enum TipoVariavel {
     INTEIRO,
     REAL,
     CARACTER;

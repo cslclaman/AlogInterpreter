@@ -10,12 +10,12 @@ package alog.model;
  * @author Caique Souza
  */
 public class Variavel {
-    private Tipo tipo;
+    private TipoVariavel tipo;
     private String nome;
     //Substituir por implementação de subclasses
     private String valor;
 
-    public Variavel(Tipo tipo, String nome) {
+    public Variavel(TipoVariavel tipo, String nome) {
         this.tipo = tipo;
         this.nome = nome;
         this.valor = "";
@@ -25,7 +25,7 @@ public class Variavel {
         return nome;
     }
 
-    public Tipo getTipo() {
+    public TipoVariavel getTipo() {
         return tipo;
     }
 
