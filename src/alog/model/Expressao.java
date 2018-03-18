@@ -20,12 +20,20 @@ public class Expressao {
         tipo = TipoExpressao._INDEFINIDO;
     }
     
+    public int getNumTokens(){
+        return tokens.size();
+    }
+    
     public void addToken(Token token){
         tokens.add(token);
     }
     
-    public Token getLastToken(){
-        return tokens.get(tokens.size() - 1);
+    public Token getTokenAt(int i){
+        return tokens.get(i);
+    }
+    
+    public void setTokenAt(int i, Token token){
+        tokens.set(i, token);
     }
     
     public void removeToken(Token token){
