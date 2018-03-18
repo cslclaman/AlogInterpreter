@@ -15,7 +15,8 @@ public enum TipoToken {
     NUMERICO        ("Numérico"),
     DELIMITADOR     ("Delimitador"),    
     OPERADOR        ("Operador"),
-    LITERAL         ("Literal");
+    LITERAL         ("Literal"),
+    INDEFINIDO      ("Indefinido");
 
     private final String exibicao;
     

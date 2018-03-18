@@ -2,6 +2,7 @@ package alog.control;
 
 import alog.model.TipoToken;
 import alog.model.Token;
+import java.util.ArrayList;
 
 /**
  * Classe de scanner que realiza análise léxica em um código e retorna os tokens por meio de um iterador.
@@ -180,7 +181,7 @@ public class Scanner {
                         if (contOper > 0){
                             token.setTipoToken(TipoToken.OPERADOR);
                         } else {
-                            token.setTipoToken(null);
+                            token.setTipoToken(TipoToken.INDEFINIDO);
                         }
                     }
                 }
@@ -192,6 +193,18 @@ public class Scanner {
         }
         
         return token;
+    }
+    
+    /**
+     * Retorna todos os Tokens encontrados no texto.
+     * @return ArrayList com tokens
+     */
+    public ArrayList<Token> getAll(){
+        ArrayList<Token> list = new ArrayList<>();
+        while (hasNext()){
+            list.add(getNext());
+        }
+        return list;
     }
     
     private static boolean isBlank(char ch){
