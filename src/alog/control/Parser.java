@@ -57,7 +57,7 @@ public class Parser {
             switch(token.getFuncaoToken()){
                 //MODO: INÍCIO/FIM DE BLOCO
                 case RES_BLOCO_INICIO:
-                    expr.setTipo(TipoExpressao.DELIM_BLOCO_INICIO);
+                    expr.setTipo(TipoExpressao.DELIM_BLOCO);
                     
                     funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken.IDENT_TIPO_CARACTER);
@@ -68,7 +68,7 @@ public class Parser {
                     go = false;
                     break;
                 case RES_BLOCO_FIM:
-                    expr.setTipo(TipoExpressao.DELIM_BLOCO_FIM);
+                    expr.setTipo(TipoExpressao.DELIM_BLOCO);
                     
                     funcoesEsperadas.clear();
                     
