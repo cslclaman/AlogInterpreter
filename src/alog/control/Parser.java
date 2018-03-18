@@ -18,7 +18,6 @@ import java.util.ArrayList;
 public class Parser {
     private ArrayList<Token> tokens;
     private ArrayList<String> variaveis;
-    private ArrayList<Expressao> expressoes;
     
     private ArrayList<FuncaoToken> funcoesEsperadas;
     
@@ -30,7 +29,6 @@ public class Parser {
         tokens = scanner.getAll();
         
         variaveis = new ArrayList<>();
-        expressoes = new ArrayList<>();
         funcoesEsperadas = new ArrayList<>();
         funcoesEsperadas.add(FuncaoToken.RES_BLOCO_INICIO);
         
@@ -41,19 +39,18 @@ public class Parser {
         return pos < tokens.size();
     }
     
-    public boolean parseExpression(){
+    public Expressao parseExpression(){
         Expressao expr = new Expressao();
         
         boolean go = true;
         boolean add = false;
-        
-        
+        erro = "";
         
         while (go && pos < tokens.size()){
             Token token = tokens.get(pos++);
             
-            if (!estadoValido(token.getFuncaoToken())){
-                return false;
+            if (!estadoValido(token)){
+                break;
             }
             switch(token.getFuncaoToken()){
                 //MODO: INÍCIO/FIM DE BLOCO
@@ -94,9 +91,42 @@ public class Parser {
                     add = false;
                     break;
                     
+                
+                
+                //MODO: ENTRADA DE DADOS
+                case LIB_IO_LEIA:
+                    expr.setTipo(TipoExpressao.ENTRADA_DE_DADOS);
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
+                    add = true;
+                    break;
+                    
+                //DIVERSOS MODOS
+                case DELIM_PARENTESES_ABRE:
+                    switch (expr.getTipo()){
+                        case ENTRADA_DE_DADOS:
+                            funcoesEsperadas.clear();
+                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                            add = false;
+                            break;
+                    }
+                    break;
+                    
+                case DELIM_PARENTESES_FECHA:
+                    switch (expr.getTipo()){
+                        case ENTRADA_DE_DADOS:
+                            funcoesEsperadas.clear();
+                            funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
+                            add = false;
+                            break;
+                    }
+                    break;
+                    
                 case DELIM_VIRGULA:
                     switch (expr.getTipo()){
                         case CRIACAO_VARIAVEL:
+                        case ENTRADA_DE_DADOS:
                             funcoesEsperadas.clear();
                             funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
                             funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
@@ -111,19 +141,31 @@ public class Parser {
                         case CRIACAO_VARIAVEL:
                             char inicial = token.getPalavra().charAt(0);
                             if (inicial >= '0' && inicial <= '9'){
-                                erro = "Identificador de variável não pode começar com número";
-                                return false;
-                            } else {
-                                variaveis.add(token.getPalavra());
-                                token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
+                                escreveErro(token, "Identificador de variável não pode começar com número");
                             }
+                            variaveis.add(token.getPalavra());
+                            token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
+                            
                             funcoesEsperadas.clear();
                             funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
                             funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
                             add = true;
                             break;
+                        case ENTRADA_DE_DADOS:
+                            if (!variaveis.contains(token.getPalavra())){
+                                escreveErro(token, "Variável \"" + token.getPalavra() + "\" não declarada");
+                            }
+                            token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
+                            
+                            funcoesEsperadas.clear();
+                            funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
+                            funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
+                            add = true;
+                            break;
                     }
                     break;
+                    
+                
                     
                 case DELIM_PONTO_VIRGULA:
                     funcoesEsperadas.clear();
@@ -153,19 +195,37 @@ public class Parser {
             }
         }
         
-        return true;
+        return expr;
+    }
+    
+    public ArrayList<Expressao> getAllExpressions(){
+        ArrayList<Expressao> lista = new ArrayList<>();
+        String erros = "";
+        while (hasNext()){
+            lista.add(parseExpression());
+            if (!erro.isEmpty()){
+                erros += erro + "\n";
+            }
+        }
+        erro = erros;
+        return lista;
     }
     
     public String getErro(){
         return erro;
     }
     
-    private boolean estadoValido(FuncaoToken funcaoEsperada){
-        if (!funcoesEsperadas.contains(funcaoEsperada)){
-            erro = "Encontrou " + funcaoEsperada + ", mas esperava:";
+    private void escreveErro(Token token, String msg){
+        erro = "Linha " + (token.getLinha() + 1) + ", coluna " + (token.getColuna() + 1) + " - " + msg;
+    }
+    
+    private boolean estadoValido(Token token){
+        if (!funcoesEsperadas.contains(token.getFuncaoToken())){
+            String msgErro = "Encontrou " + token.getFuncaoToken() + ", mas esperava:";
             for (FuncaoToken ft: funcoesEsperadas){
-                erro += "\n - " + ft;
+                msgErro += "\n - " + ft;
             }
+            escreveErro(token, msgErro);
             return false;
         } else {
             return true;
