@@ -42,6 +42,8 @@ public class Parser {
     public Expressao parseExpression(){
         Expressao expr = new Expressao();
         
+        int balancParenteses = 0;
+        
         boolean go = true;
         boolean add = false;
         erro = "";
@@ -116,9 +118,25 @@ public class Parser {
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
                     funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
+                    funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
                     funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
                     add = true;
+                    break;
                     
+                //MODO: OPERAÇÃO ARITMÉTICA
+                case OP_SOMA:
+                case OP_SUBTRACAO:
+                case OP_MULTIPLICACAO:
+                case OP_DIV_INTEIRA:
+                case OP_DIV_REAL:
+                case OP_MOD:
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                    funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
+                    funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
+                    add = true;
+                    break;
                     
                 //DIVERSOS MODOS
                 case DELIM_PARENTESES_ABRE:
@@ -137,6 +155,15 @@ public class Parser {
                             funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
                             add = false;
                             break;
+                        case OPERACAO_ATRIBUICAO:
+                            balancParenteses ++;
+                            funcoesEsperadas.clear();
+                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                            funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
+                            funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
+                            add = true;
+                            break;
                     }
                     break;
                     
@@ -147,6 +174,19 @@ public class Parser {
                             funcoesEsperadas.clear();
                             funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
                             add = false;
+                            break;
+                        case OPERACAO_ATRIBUICAO:
+                            balancParenteses --;
+                            funcoesEsperadas.clear();
+                            funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
+                            funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
+                            funcoesEsperadas.add(FuncaoToken.OP_SOMA);
+                            funcoesEsperadas.add(FuncaoToken.OP_SUBTRACAO);
+                            funcoesEsperadas.add(FuncaoToken.OP_MULTIPLICACAO);
+                            funcoesEsperadas.add(FuncaoToken.OP_DIV_INTEIRA);
+                            funcoesEsperadas.add(FuncaoToken.OP_DIV_REAL);
+                            funcoesEsperadas.add(FuncaoToken.OP_MOD);
+                            add = true;
                             break;
                     }
                     break;
@@ -210,24 +250,63 @@ public class Parser {
                             funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
                             add = true;
                             break;
+                        case OPERACAO_ATRIBUICAO:
+                            if (!variaveis.contains(token.getPalavra())){
+                                escreveErro(token, "Variável \"" + token.getPalavra() + "\" não declarada");
+                            }
+                            token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
+                            
+                            funcoesEsperadas.clear();
+                            funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
+                            funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
+                            funcoesEsperadas.add(FuncaoToken.OP_SOMA);
+                            funcoesEsperadas.add(FuncaoToken.OP_SUBTRACAO);
+                            funcoesEsperadas.add(FuncaoToken.OP_MULTIPLICACAO);
+                            funcoesEsperadas.add(FuncaoToken.OP_DIV_INTEIRA);
+                            funcoesEsperadas.add(FuncaoToken.OP_DIV_REAL);
+                            funcoesEsperadas.add(FuncaoToken.OP_MOD);
+                            add = true;
+                            break;
                         case _INDEFINIDO:
+                        default:
                             if (!variaveis.contains(token.getPalavra())){
                                 escreveErro(token, "Comando, variável ou função não identificada: " + token.getPalavra());
-                                add = false;
-                            } else {
-                                token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
+                            } 
+                            token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
                                 
-                                funcoesEsperadas.clear();
-                                funcoesEsperadas.add(FuncaoToken.OP_ATRIBUICAO);
-                                add = true;
-                            }
+                            funcoesEsperadas.clear();
+                            funcoesEsperadas.add(FuncaoToken.OP_ATRIBUICAO);
+                            add = true;
                             
                             break;
                     }
                     break;
                     
-                
+                case _INDEF_NUMERICO:
+                    switch (expr.getTipo()){
+                        case OPERACAO_ATRIBUICAO:
+                            funcoesEsperadas.clear();
+                            funcoesEsperadas.add(FuncaoToken.DELIM_PONTO);
+                            funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
+                            funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
+                            funcoesEsperadas.add(FuncaoToken.OP_SOMA);
+                            funcoesEsperadas.add(FuncaoToken.OP_SUBTRACAO);
+                            funcoesEsperadas.add(FuncaoToken.OP_MULTIPLICACAO);
+                            funcoesEsperadas.add(FuncaoToken.OP_DIV_INTEIRA);
+                            funcoesEsperadas.add(FuncaoToken.OP_DIV_REAL);
+                            funcoesEsperadas.add(FuncaoToken.OP_MOD);
+                            add = true;
+                            break;
+                    }
+                    break;
                     
+                case DELIM_PONTO:
+                    switch (expr.getTipo()){
+                        case OPERACAO_ATRIBUICAO:
+                            break;
+                    }
+                    break;
+                
                 case DELIM_PONTO_VIRGULA:
                     funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken.IDENT_TIPO_CARACTER);
@@ -249,6 +328,10 @@ public class Parser {
                     add = false;
                     go = false;
                     break;
+            }
+            
+            if (balancParenteses != 0){
+                escreveErro(token, erro);
             }
             
             if (add){
