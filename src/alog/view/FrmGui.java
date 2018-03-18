@@ -5,13 +5,16 @@
  */
 package alog.view;
 
+import alog.control.Parser;
 import alog.control.Scanner;
+import alog.model.Expressao;
 import alog.model.TipoToken;
 import alog.model.Token;
 import java.util.LinkedList;
 import javax.swing.text.DefaultStyledDocument;
 import alog.view.append.TextLineNumber;
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Iterator;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.Style;
@@ -106,6 +109,7 @@ public class FrmGui extends javax.swing.JFrame {
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        btnScanner1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -188,6 +192,13 @@ public class FrmGui extends javax.swing.JFrame {
 
         jButton1.setText("Confirmar");
 
+        btnScanner1.setText("Parser");
+        btnScanner1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnScanner1ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -206,6 +217,11 @@ public class FrmGui extends javax.swing.JFrame {
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 311, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel1)
+                            .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 443, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel2)
+                            .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 443, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel3)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(btnScanner)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -214,13 +230,10 @@ public class FrmGui extends javax.swing.JFrame {
                                 .addComponent(btnInicioPerc)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnProxPerc)
-                                .addGap(99, 99, 99)
-                                .addComponent(btnFormat))
-                            .addComponent(jLabel1)
-                            .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 443, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel2)
-                            .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 443, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel3))
+                                .addGap(34, 34, 34)
+                                .addComponent(btnScanner1)
+                                .addGap(37, 37, 37)
+                                .addComponent(btnFormat)))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -233,7 +246,8 @@ public class FrmGui extends javax.swing.JFrame {
                     .addComponent(btnImprToken)
                     .addComponent(btnInicioPerc)
                     .addComponent(btnProxPerc)
-                    .addComponent(btnFormat))
+                    .addComponent(btnFormat)
+                    .addComponent(btnScanner1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
@@ -322,6 +336,16 @@ public class FrmGui extends javax.swing.JFrame {
         formated = !formated;
     }//GEN-LAST:event_btnFormatActionPerformed
 
+    private void btnScanner1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnScanner1ActionPerformed
+        Parser parser = new Parser(txpIde.getText());
+        expressoes = parser.getAllExpressions();
+        System.out.println("EXPRESSOES");
+        for (Expressao e : expressoes){
+            System.out.println(e.toString());
+        }
+        System.out.println(parser.getErro());
+    }//GEN-LAST:event_btnScanner1ActionPerformed
+
     private Style tokenStyle (TipoToken tokenType){
         if (tokenType == null){
             return styleOMG;
@@ -387,6 +411,7 @@ public class FrmGui extends javax.swing.JFrame {
     private javax.swing.JButton btnInicioPerc;
     private javax.swing.JButton btnProxPerc;
     private javax.swing.JButton btnScanner;
+    private javax.swing.JButton btnScanner1;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -403,6 +428,7 @@ public class FrmGui extends javax.swing.JFrame {
     private javax.swing.JTextPane txpIde;
     // End of variables declaration//GEN-END:variables
     private LinkedList<Token> tokens;
+    private ArrayList<Expressao> expressoes;
     private int tokenIndex;
     private Scanner scn;
     private DefaultStyledDocument doc;
