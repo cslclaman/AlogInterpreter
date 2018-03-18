@@ -123,11 +123,14 @@ public class Token {
                     case "real":
                         funcaoToken = FuncaoToken.IDENT_TIPO_REAL;
                         break;
-                    case "Leia":
+                    case "leia":
                         funcaoToken = FuncaoToken.LIB_IO_LEIA;
                         break;
-                    case "Escreva":
+                    case "escreva":
                         funcaoToken = FuncaoToken.LIB_IO_ESCREVA;
+                        break;
+                    default:
+                        funcaoToken = FuncaoToken._INDEF_ALFABETICO;
                         break;
                 }
                 break;
@@ -172,6 +175,9 @@ public class Token {
                     case "=":
                         funcaoToken = FuncaoToken.OP_IGUAL;
                         break;
+                    default:
+                        funcaoToken = FuncaoToken._INDEFINIDO;
+                        break;
                 }
                 break;
             case DELIMITADOR:
@@ -194,13 +200,20 @@ public class Token {
                     case ".":
                         funcaoToken = FuncaoToken.DELIM_PONTO;
                         break;
+                    default:
+                        funcaoToken = FuncaoToken._INDEFINIDO;
+                        break;
                 }
                 break;
             case LITERAL:
                 funcaoToken = FuncaoToken.CONST_CARACTER;
                 break;
             case ALFANUMERICO:
+                funcaoToken = FuncaoToken._INDEF_ALFANUMERICO;
+                break;
             case NUMERICO:
+                funcaoToken = FuncaoToken._INDEF_NUMERICO;
+                break;
             default:
                 funcaoToken = FuncaoToken._INDEFINIDO;
                 break;

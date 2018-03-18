@@ -11,6 +11,9 @@ package alog.model;
  */
 public enum FuncaoToken {
     _INDEFINIDO,
+    _INDEF_ALFABETICO,
+    _INDEF_ALFANUMERICO,
+    _INDEF_NUMERICO,
     //Palavras reservadas - início e fim de bloco
     RES_BLOCO_INICIO,
     RES_BLOCO_FIM,
