@@ -24,6 +24,10 @@ public class Expressao {
         tokens.add(token);
     }
     
+    public Token getLastToken(){
+        return tokens.get(tokens.size() - 1);
+    }
+    
     public void removeToken(Token token){
         tokens.remove(token);
     }
