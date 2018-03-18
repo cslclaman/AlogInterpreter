@@ -100,9 +100,111 @@ public class Token {
     public TipoToken getTipoToken() {
         return tipoToken;
     }
-
+    
     public void setTipoToken(TipoToken tipoToken) {
         this.tipoToken = tipoToken;
+        
+        switch(tipoToken){
+            case ALFABETICO:
+                switch (palavra.toLowerCase()){
+                    case "inicio":
+                    case "início":
+                        funcaoToken = FuncaoToken.RES_BLOCO_INICIO;
+                        break;
+                    case "fim":
+                        funcaoToken = FuncaoToken.RES_BLOCO_FIM;
+                        break;
+                    case "caracter":
+                        funcaoToken = FuncaoToken.IDENT_TIPO_CARACTER;
+                        break;
+                    case "inteiro":
+                        funcaoToken = FuncaoToken.IDENT_TIPO_INTEIRO;
+                        break;
+                    case "real":
+                        funcaoToken = FuncaoToken.IDENT_TIPO_REAL;
+                        break;
+                    case "Leia":
+                        funcaoToken = FuncaoToken.LIB_IO_LEIA;
+                        break;
+                    case "Escreva":
+                        funcaoToken = FuncaoToken.LIB_IO_ESCREVA;
+                        break;
+                }
+                break;
+            case OPERADOR:
+                switch (palavra){
+                    case "<-":
+                        funcaoToken = FuncaoToken.OP_ATRIBUICAO;
+                        break;
+                    case "+":
+                        funcaoToken = FuncaoToken.OP_SOMA;
+                        break;
+                    case "-":
+                        funcaoToken = FuncaoToken.OP_SUBTRACAO;
+                        break;
+                    case "*":
+                        funcaoToken = FuncaoToken.OP_MULTIPLICACAO;
+                        break;
+                    case "/":
+                        funcaoToken = FuncaoToken.OP_DIV_REAL;
+                        break;
+                    case "div":
+                        funcaoToken = FuncaoToken.OP_DIV_INTEIRA;
+                        break;
+                    case "mod":
+                        funcaoToken = FuncaoToken.OP_MOD;
+                        break;
+                    case ">":
+                        funcaoToken = FuncaoToken.OP_MAIOR;
+                        break;
+                    case "<":
+                        funcaoToken = FuncaoToken.OP_MENOR;
+                        break;
+                    case ">=":
+                        funcaoToken = FuncaoToken.OP_MAIOR_IGUAL;
+                        break;
+                    case "<=":
+                        funcaoToken = FuncaoToken.OP_MENOR_IGUAL;
+                        break;
+                    case "<>":
+                        funcaoToken = FuncaoToken.OP_DIFERENTE;
+                        break;
+                    case "=":
+                        funcaoToken = FuncaoToken.OP_IGUAL;
+                        break;
+                }
+                break;
+            case DELIMITADOR:
+                switch (palavra){
+                    case ":":
+                        funcaoToken = FuncaoToken.DELIM_DOIS_PONTOS;
+                        break;
+                    case ",":
+                        funcaoToken = FuncaoToken.DELIM_VIRGULA;
+                        break;
+                    case ";":
+                        funcaoToken = FuncaoToken.DELIM_PONTO_VIRGULA;
+                        break;
+                    case "(":
+                        funcaoToken = FuncaoToken.DELIM_PARENTESES_ABRE;
+                        break;
+                    case ")":
+                        funcaoToken = FuncaoToken.DELIM_PARENTESES_FECHA;
+                        break;
+                    case ".":
+                        funcaoToken = FuncaoToken.DELIM_PONTO;
+                        break;
+                }
+                break;
+            case LITERAL:
+                funcaoToken = FuncaoToken.CONST_CARACTER;
+                break;
+            case ALFANUMERICO:
+            case NUMERICO:
+            default:
+                funcaoToken = FuncaoToken._INDEFINIDO;
+                break;
+        }
     }
 
     public FuncaoToken getFuncaoToken(){
