@@ -40,3 +40,5 @@ nb-configuration.xml
 *.war
 *.ear
 
+# Test Files #
+test/alog/test/
