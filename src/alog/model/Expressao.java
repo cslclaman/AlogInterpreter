@@ -14,10 +14,42 @@ import java.util.ArrayList;
 public class Expressao {
     private TipoExpressao tipo;
     private ArrayList<Token> tokens;
+    private int indice;
+    private int linha;
     
     public Expressao(){
         tokens = new ArrayList<>();
         tipo = TipoExpressao._INDEFINIDO;
+        indice = 0;
+        linha = 0;
+    }
+    
+    public int getLinha(){
+        return linha;
+    }
+    
+    public void setLinha(int linha){
+        this.linha = linha;
+    }
+    
+    public boolean hasNext(){
+        return indice < tokens.size();
+    }
+    
+    public Token getNext(){
+        if (hasNext()){
+            return tokens.get(indice++);
+        } else {
+            return null;
+        }
+    }
+    
+    public int getIndice(){
+        return indice;
+    }
+    
+    public void setIndice(int indice){
+        this.indice = indice;
     }
     
     public int getNumTokens(){
