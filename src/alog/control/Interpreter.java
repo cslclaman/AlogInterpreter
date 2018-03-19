@@ -6,6 +6,7 @@
 package alog.control;
 
 import alog.model.Expressao;
+import alog.model.FuncaoToken;
 import alog.model.TipoVariavel;
 import alog.model.Token;
 import alog.model.Variavel;
@@ -38,8 +39,20 @@ public class Interpreter {
                 return execCriacaoVariavel(expressao);
             case ENTRADA_DE_DADOS:
                 return execEntradaDados(expressao);
+            case OPERACAO_ATRIBUICAO:
+            case OPERACAO_ARITMETICA:
+                return execOperacaoAritmetica(expressao);
+            case _INVALIDO:
+                System.err.println("Expressão inválida");
+                System.err.println("\t" + expressao.getTexto());
+                //System.err.println("\tERRO - " + expressao.getErro());
+                return false;
+            default:
+                System.err.println("Expressão indefinida");
+                System.err.println("\t" + expressao.getTexto());
+                return false;
         }
-        return false;
+        
     }
     
     public boolean execDelimBloco(Expressao expressao){
@@ -86,7 +99,7 @@ public class Interpreter {
                 System.out.println("Valor para a variável " + variavel.getNome() + " (" + variavel.getTipo() + ")");
                 java.util.Scanner sc = new java.util.Scanner(System.in);
                 
-                boolean valorValido = true;
+                boolean valorValido;
                 do {
                     valorValido = true;
                     switch(variavel.getTipo()){
@@ -119,6 +132,81 @@ public class Interpreter {
         }
         
         return true;
+    }
+    
+    public boolean execOperacaoAritmetica(Expressao expressao){
+        LinkedList<Token> pilha = new LinkedList<>();
+        LinkedList<Token> saida = new LinkedList<>();
+        
+        while (expressao.hasNext()){
+            Token token = expressao.getNext();
+            switch (token.getFuncaoToken()){
+                case IDENT_NOME_VARIAVEL:
+                case CONST_CARACTER:
+                case CONST_INTEIRA:
+                case CONST_REAL:
+                    saida.push(token);
+                    break;
+
+                case OP_ATRIBUICAO:
+                case OP_SOMA:
+                case OP_SUBTRACAO:
+                case OP_MULTIPLICACAO:
+                case OP_DIV_INTEIRA:
+                case OP_DIV_REAL:
+                case OP_MOD:
+                    while (!pilha.isEmpty() && pilha.peek().getPrecedencia() > token.getPrecedencia()){
+                        saida.push(pilha.pop());
+                    }
+                    pilha.push(token);
+                    break;
+                
+                case DELIM_PARENTESES_ABRE:
+                    pilha.push(token);
+                    break;
+                    
+                case DELIM_PARENTESES_FECHA:
+                    while (!pilha.isEmpty()){
+                        Token out = pilha.pop();
+                        if (out.getFuncaoToken() == FuncaoToken.DELIM_PARENTESES_ABRE){
+                            break;
+                        } else {
+                            
+                        }
+                    }
+                    break;
+            }
+        }
+        while (!pilha.isEmpty()){
+            saida.push(pilha.pop());
+        }
+        return true;
+    }
+    
+    private Token efetuaOperacao(Token operador, Token tok1, Token tok2){
+        switch (operador.getFuncaoToken()){
+            case OP_ATRIBUICAO:
+                int indiceVar = pesquisaVariavel(tok1.getPalavra());
+                if (indiceVar >= 0){
+                    Variavel variavel = listaVariaveis.get(indiceVar);
+                    String valor = "";
+                    switch (tok2.getFuncaoToken()){
+                        case IDENT_NOME_VARIAVEL:
+                            int indiceVar2 = pesquisaVariavel(tok1.getPalavra());
+                            
+                    }
+                } else {
+                    return null;
+                }
+                    
+            case OP_SOMA:
+            case OP_SUBTRACAO:
+            case OP_MULTIPLICACAO:
+            case OP_DIV_INTEIRA:
+            case OP_DIV_REAL:
+            case OP_MOD:
+        }
+        return operador;
     }
     
     private int pesquisaVariavel(String nome){
