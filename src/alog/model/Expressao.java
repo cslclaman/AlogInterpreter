@@ -12,6 +12,7 @@ import java.util.ArrayList;
  * @author Caique
  */
 public class Expressao {
+    private String texto;
     private TipoExpressao tipo;
     private ArrayList<Token> tokens;
     private int indice;
@@ -22,6 +23,7 @@ public class Expressao {
         tipo = TipoExpressao._INDEFINIDO;
         indice = 0;
         linha = 0;
+        texto = "";
     }
     
     public int getLinha(){
@@ -30,6 +32,22 @@ public class Expressao {
     
     public void setLinha(int linha){
         this.linha = linha;
+    }
+
+    public String getTexto() {
+        return texto;
+    }
+
+    public void setTexto(String texto) {
+        this.texto = texto;
+    }
+    
+    public void atualizaTexto(String sub){
+        if (texto.isEmpty()){
+            texto = sub;
+        } else {
+            texto += " " + sub;
+        }
     }
     
     public boolean hasNext(){

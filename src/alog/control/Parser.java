@@ -10,6 +10,7 @@ import alog.model.FuncaoToken;
 import alog.model.TipoExpressao;
 import alog.model.Token;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  * Analisador sintático que verifica uma sequência de tokens e retorna expressões executáveis.
@@ -50,6 +51,9 @@ public class Parser {
         
         while (go && pos < tokens.size()){
             Token token = tokens.get(pos++);
+            if (expr.getLinha() == 0){
+                expr.setLinha(token.getLinha() + 1);
+            }
             
             if (!estadoValido(token)){
                 break;
@@ -354,6 +358,7 @@ public class Parser {
                 escreveErro(token, erro);
             }
             
+            expr.atualizaTexto(token.getPalavra());
             if (add){
                 expr.addToken(token);
             }
@@ -362,8 +367,8 @@ public class Parser {
         return expr;
     }
     
-    public ArrayList<Expressao> getAllExpressions(){
-        ArrayList<Expressao> lista = new ArrayList<>();
+    public LinkedList<Expressao> getAllExpressions(){
+        LinkedList<Expressao> lista = new LinkedList<>();
         String erros = "";
         while (hasNext()){
             lista.add(parseExpression());
