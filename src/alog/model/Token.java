@@ -134,6 +134,12 @@ public class Token {
                     case "escreva":
                         funcaoToken = FuncaoToken.LIB_IO_ESCREVA;
                         break;
+                    case "div":
+                        funcaoToken = FuncaoToken.OP_DIV_INTEIRA;
+                        break;
+                    case "mod":
+                        funcaoToken = FuncaoToken.OP_MOD;
+                        break;
                     default:
                         funcaoToken = FuncaoToken._INDEF_ALFABETICO;
                         break;
@@ -155,12 +161,6 @@ public class Token {
                         break;
                     case "/":
                         funcaoToken = FuncaoToken.OP_DIV_REAL;
-                        break;
-                    case "div":
-                        funcaoToken = FuncaoToken.OP_DIV_INTEIRA;
-                        break;
-                    case "mod":
-                        funcaoToken = FuncaoToken.OP_MOD;
                         break;
                     case ">":
                         funcaoToken = FuncaoToken.OP_MAIOR;
