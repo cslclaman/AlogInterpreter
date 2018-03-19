@@ -10,6 +10,7 @@ import alog.model.FuncaoToken;
 import alog.model.TipoVariavel;
 import alog.model.Token;
 import alog.model.Variavel;
+import java.util.HashMap;
 import java.util.InputMismatchException;
 import java.util.LinkedList;
 
@@ -19,16 +20,16 @@ import java.util.LinkedList;
  */
 public class Interpreter {
     private int bloco;
-    private LinkedList<Variavel> listaVariaveis;
+    private HashMap<String,Variavel> variaveis;
     
     public Interpreter(){
         bloco = 0;
-        listaVariaveis = new LinkedList<>();
+        variaveis = new HashMap<>();
     }
     
     public void reseta(){
         bloco = 0;
-        listaVariaveis = new LinkedList<>();
+        variaveis = new HashMap<>();
     }
     
     public boolean executa(Expressao expressao){
@@ -83,8 +84,9 @@ public class Interpreter {
                 return false;
         }
         while (expressao.hasNext()){
-            Variavel variavel = new Variavel(tipoVar, expressao.getNext().getPalavra());
-            listaVariaveis.add(variavel);
+            String nomeVar = expressao.getNext().getPalavra();
+            Variavel variavel = new Variavel(tipoVar, nomeVar);
+            variaveis.put(nomeVar, variavel);
         }
         
         return true;
@@ -93,42 +95,43 @@ public class Interpreter {
     public boolean execEntradaDados(Expressao expressao){
         expressao.setIndice(1);
         while (expressao.hasNext()){
-            int indiceVar = pesquisaVariavel(expressao.getNext().getPalavra());
-            if (indiceVar >= 0){
-                Variavel variavel = listaVariaveis.get(indiceVar);
-                System.out.println("Valor para a variável " + variavel.getNome() + " (" + variavel.getTipo() + ")");
-                java.util.Scanner sc = new java.util.Scanner(System.in);
-                
-                boolean valorValido;
-                do {
-                    valorValido = true;
-                    switch(variavel.getTipo()){
-                        case CARACTER:
-                            variavel.setValor(sc.nextLine());
-                            break;
-                        case INTEIRO:
-                            try {
-                                int valor = sc.nextInt();
-                                variavel.setValor(String.valueOf(valor));
-                            } catch (InputMismatchException ex){
-                                System.out.println("Valor inválido - esperado valor inteiro");
-                                valorValido = false;
-                            }
-                            break;
-                        case REAL:
-                            try {
-                                double valor = sc.nextDouble();
-                                variavel.setValor(String.valueOf(valor));
-                            } catch (InputMismatchException ex){
-                                System.out.println("Valor inválido - esperado valor real");
-                                valorValido = false;
-                            }
-                            break;
-                    }
-                } while (!valorValido);
-                
-                listaVariaveis.set(indiceVar, variavel);
+            String nomeVar = expressao.getNext().getPalavra();
+            Variavel variavel = variaveis.get(nomeVar);
+            if (variavel == null){
+                return false;
             }
+            
+            System.out.println("Valor para a variável " + nomeVar + " (" + variavel.getTipo() + ")");
+            java.util.Scanner sc = new java.util.Scanner(System.in);
+
+            boolean valorValido;
+            do {
+                valorValido = true;
+                switch(variavel.getTipo()){
+                    case CARACTER:
+                        variavel.setValor(sc.nextLine());
+                        break;
+                    case INTEIRO:
+                        try {
+                            int valor = sc.nextInt();
+                            variavel.setValor(String.valueOf(valor));
+                        } catch (InputMismatchException ex){
+                            System.out.println("Valor inválido - esperado valor inteiro");
+                            valorValido = false;
+                        }
+                        break;
+                    case REAL:
+                        try {
+                            double valor = sc.nextDouble();
+                            variavel.setValor(String.valueOf(valor));
+                        } catch (InputMismatchException ex){
+                            System.out.println("Valor inválido - esperado valor real");
+                            valorValido = false;
+                        }
+                        break;
+                }
+            } while (!valorValido);
+            variaveis.put(nomeVar, variavel);
         }
         
         return true;
@@ -188,43 +191,5 @@ public class Interpreter {
         System.out.println("\n");
         
         return true;
-    }
-    
-    private Token efetuaOperacao(Token operador, Token tok1, Token tok2){
-        switch (operador.getFuncaoToken()){
-            case OP_ATRIBUICAO:
-                int indiceVar = pesquisaVariavel(tok1.getPalavra());
-                if (indiceVar >= 0){
-                    Variavel variavel = listaVariaveis.get(indiceVar);
-                    String valor = "";
-                    switch (tok2.getFuncaoToken()){
-                        case IDENT_NOME_VARIAVEL:
-                            int indiceVar2 = pesquisaVariavel(tok1.getPalavra());
-                            
-                    }
-                } else {
-                    return null;
-                }
-                    
-            case OP_SOMA:
-            case OP_SUBTRACAO:
-            case OP_MULTIPLICACAO:
-            case OP_DIV_INTEIRA:
-            case OP_DIV_REAL:
-            case OP_MOD:
-        }
-        return operador;
-    }
-    
-    private int pesquisaVariavel(String nome){
-        int indice = 0;
-        for (Variavel v : listaVariaveis){
-            if (v.getNome().equals(nome)){
-                return indice;
-            } else {
-                indice ++;
-            }
-        }
-        return -1;
     }
 }
