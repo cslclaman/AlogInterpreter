@@ -107,25 +107,26 @@ public class Interpreter {
             boolean valorValido;
             do {
                 valorValido = true;
+                String linha = sc.nextLine();
                 switch(variavel.getTipo()){
                     case CARACTER:
-                        variavel.setValor(sc.nextLine());
+                        variavel.setValor(linha);
                         break;
                     case INTEIRO:
                         try {
-                            int valor = sc.nextInt();
+                            int valor = Integer.parseInt(linha);
                             variavel.setValor(String.valueOf(valor));
-                        } catch (InputMismatchException ex){
-                            System.out.println("Valor inválido - esperado valor inteiro");
+                        } catch (NumberFormatException ex){
+                            System.out.println("Valor \"" + linha + "\" inválido - esperado valor inteiro");
                             valorValido = false;
                         }
                         break;
                     case REAL:
                         try {
-                            double valor = sc.nextDouble();
+                            double valor = Double.parseDouble(linha);
                             variavel.setValor(String.valueOf(valor));
-                        } catch (InputMismatchException ex){
-                            System.out.println("Valor inválido - esperado valor real");
+                        } catch (NumberFormatException ex){
+                            System.out.println("Valor \"" + linha + "\" inválido - esperado valor real");
                             valorValido = false;
                         }
                         break;
