@@ -8,10 +8,8 @@ package alog;
 import alog.control.Interpreter;
 import alog.control.Parser;
 import alog.model.Expressao;
-import alog.model.TipoExpressao;
 import alog.view.FrmGui;
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -26,7 +24,7 @@ public class Interpretador {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        if (args[0].equals("-console")){
+        if (args.length > 1 && args[0].equals("-console")){
             try {
                 StringBuffer codigofonte = new StringBuffer();
                 BufferedReader br = new BufferedReader(new FileReader(args[1]));
@@ -36,22 +34,44 @@ public class Interpretador {
                     codigofonte.append(texto);
                 }
                 
+                int errosParser = 0;
                 Parser parser = new Parser(codigofonte.toString());
                 LinkedList<Expressao> expressoes = new LinkedList<>();
                 while (parser.hasNext()){
                     Expressao e = parser.parseExpression();
                     if (!parser.getErro().isEmpty()){
                         System.err.println(parser.getErro());
+                        errosParser ++;
                     }
                     expressoes.add(e);
                 }
                 
+                if (errosParser > 0){
+                    System.out.println(errosParser + " erros encontrados no processo de análise sintática.");
+                    if (args.length > 2 && args[3].equals("-ignore")){
+                        System.out.println("Prosseguindo com execução/interpretação\n");
+                    } else {
+                        System.out.println("Verifique os erros, corrija o código e tente novamente.");
+                        System.exit(0);
+                    }
+                } 
+                
+                boolean execEnd = true;
+                int linha = 0;
+                
                 Interpreter interpreter = new Interpreter();
                 for (Expressao expr : expressoes){
+                    linha = expr.getLinha();
                     if (!interpreter.executa(expr)){
-                        System.err.println("Expressão \"" + expr.getTexto() + "\" não executada - linha " + expr.getLinha());
-                        System.exit(2);
+                        execEnd = false;
+                        break;
                     }
+                }
+                
+                if (execEnd){
+                    System.out.println("Execução concluída com sucesso");
+                } else {
+                    System.out.println("Execução interrompida na linha " + linha);
                 }
                 
             } catch (IOException ex){
