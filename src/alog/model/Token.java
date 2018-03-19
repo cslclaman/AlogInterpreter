@@ -14,6 +14,18 @@ package alog.model;
  * @author Caique
  */
 public class Token {
+    public static final int PRECEDENCIA_FUNCAO = 10;
+    public static final int PRECEDENCIA_ARRAY = 10;
+    public static final int PRECEDENCIA_OP_UNARIO = 9;
+    public static final int PRECEDENCIA_OP_MULTIPLICACAO = 8;
+    public static final int PRECEDENCIA_OP_SOMA = 7;
+    public static final int PRECEDENCIA_OP_RELACIONAL_GRANDEZA = 6;
+    public static final int PRECEDENCIA_OP_RELACIONAL_IGUALDADE = 5;
+    public static final int PRECEDENCIA_OP_LOGICO_E = 4;
+    public static final int PRECEDENCIA_OP_LOGICO_OU = 3;
+    public static final int PRECEDENCIA_OP_ATRIBUICAO = 2;
+    public static final int PRECEDENCIA_INDEFINIDA = 0;
+    
     private String palavra;
     private int ordem;
     private int posicao;
@@ -22,6 +34,7 @@ public class Token {
     private int tamanho;
     private TipoToken tipoToken;
     private FuncaoToken funcaoToken;
+    private int precedencia;
     
     /**
      * Constrói um novo Token vazio (ou seja, cujo atributo Word é vazio).
@@ -29,6 +42,7 @@ public class Token {
     public Token() {
         palavra = "";
         tamanho = 0;
+        precedencia = PRECEDENCIA_INDEFINIDA;
     }
 
     /**
@@ -130,15 +144,19 @@ public class Token {
                         break;
                     case "leia":
                         funcaoToken = FuncaoToken.LIB_IO_LEIA;
+                        precedencia = PRECEDENCIA_FUNCAO;
                         break;
                     case "escreva":
                         funcaoToken = FuncaoToken.LIB_IO_ESCREVA;
+                        precedencia = PRECEDENCIA_FUNCAO;
                         break;
                     case "div":
                         funcaoToken = FuncaoToken.OP_DIV_INTEIRA;
+                        precedencia = PRECEDENCIA_OP_MULTIPLICACAO;
                         break;
                     case "mod":
                         funcaoToken = FuncaoToken.OP_MOD;
+                        precedencia = PRECEDENCIA_OP_MULTIPLICACAO;
                         break;
                     default:
                         funcaoToken = FuncaoToken._INDEF_ALFABETICO;
@@ -149,36 +167,47 @@ public class Token {
                 switch (palavra){
                     case "<-":
                         funcaoToken = FuncaoToken.OP_ATRIBUICAO;
+                        precedencia = PRECEDENCIA_OP_ATRIBUICAO;
                         break;
                     case "+":
                         funcaoToken = FuncaoToken.OP_SOMA;
+                        precedencia = PRECEDENCIA_OP_SOMA;
                         break;
                     case "-":
                         funcaoToken = FuncaoToken.OP_SUBTRACAO;
+                        precedencia = PRECEDENCIA_OP_SOMA;
                         break;
                     case "*":
                         funcaoToken = FuncaoToken.OP_MULTIPLICACAO;
+                        precedencia = PRECEDENCIA_OP_MULTIPLICACAO;
                         break;
                     case "/":
                         funcaoToken = FuncaoToken.OP_DIV_REAL;
+                        precedencia = PRECEDENCIA_OP_MULTIPLICACAO;
                         break;
                     case ">":
                         funcaoToken = FuncaoToken.OP_MAIOR;
+                        precedencia = PRECEDENCIA_OP_RELACIONAL_GRANDEZA;
                         break;
                     case "<":
                         funcaoToken = FuncaoToken.OP_MENOR;
+                        precedencia = PRECEDENCIA_OP_RELACIONAL_GRANDEZA;
                         break;
                     case ">=":
                         funcaoToken = FuncaoToken.OP_MAIOR_IGUAL;
+                        precedencia = PRECEDENCIA_OP_RELACIONAL_GRANDEZA;
                         break;
                     case "<=":
                         funcaoToken = FuncaoToken.OP_MENOR_IGUAL;
+                        precedencia = PRECEDENCIA_OP_RELACIONAL_GRANDEZA;
                         break;
                     case "<>":
                         funcaoToken = FuncaoToken.OP_DIFERENTE;
+                        precedencia = PRECEDENCIA_OP_RELACIONAL_IGUALDADE;
                         break;
                     case "=":
                         funcaoToken = FuncaoToken.OP_IGUAL;
+                        precedencia = PRECEDENCIA_OP_RELACIONAL_IGUALDADE;
                         break;
                     default:
                         funcaoToken = FuncaoToken._INDEFINIDO;
