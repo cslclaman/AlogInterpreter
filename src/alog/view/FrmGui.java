@@ -8,15 +8,17 @@ package alog.view;
 import alog.control.Parser;
 import alog.control.Scanner;
 import alog.model.Expressao;
+import alog.model.TipoExpressao;
 import alog.model.TipoToken;
+import alog.model.TipoVariavel;
 import alog.model.Token;
+import alog.model.Variavel;
 import java.util.LinkedList;
 import javax.swing.text.DefaultStyledDocument;
 import alog.view.append.TextLineNumber;
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Iterator;
-import javax.swing.text.AttributeSet;
+import java.util.Collections;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
@@ -79,6 +81,8 @@ public class FrmGui extends javax.swing.JFrame {
         txpIde.setDocument(new DefaultStyledDocument());
         doc = (DefaultStyledDocument)txpIde.getDocument();
         formated = false;
+        
+        tabVariaveis = (DefaultTableModel)jTable1.getModel();
     }
 
     /**
@@ -93,7 +97,6 @@ public class FrmGui extends javax.swing.JFrame {
         jScrollPane2 = new javax.swing.JScrollPane();
         txpIde = new javax.swing.JTextPane();
         btnScanner = new javax.swing.JButton();
-        btnImprToken = new javax.swing.JButton();
         btnInicioPerc = new javax.swing.JButton();
         btnProxPerc = new javax.swing.JButton();
         btnFormat = new javax.swing.JButton();
@@ -125,14 +128,6 @@ public class FrmGui extends javax.swing.JFrame {
         btnScanner.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnScannerActionPerformed(evt);
-            }
-        });
-
-        btnImprToken.setText("Imprime tokens");
-        btnImprToken.setEnabled(false);
-        btnImprToken.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnImprTokenActionPerformed(evt);
             }
         });
 
@@ -225,14 +220,12 @@ public class FrmGui extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(btnScanner)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnImprToken)
-                                .addGap(18, 18, 18)
+                                .addComponent(btnScanner1)
+                                .addGap(80, 80, 80)
                                 .addComponent(btnInicioPerc)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnProxPerc)
-                                .addGap(34, 34, 34)
-                                .addComponent(btnScanner1)
-                                .addGap(37, 37, 37)
+                                .addGap(114, 114, 114)
                                 .addComponent(btnFormat)))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
@@ -243,7 +236,6 @@ public class FrmGui extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnScanner)
-                    .addComponent(btnImprToken)
                     .addComponent(btnInicioPerc)
                     .addComponent(btnProxPerc)
                     .addComponent(btnFormat)
@@ -278,51 +270,103 @@ public class FrmGui extends javax.swing.JFrame {
         while (scn.hasNext()){
             tokens.add(scn.getNext());
         }
-        tokenIndex = 0;
-        
-        btnImprToken.setEnabled(true);
+        exprIndex = 0;
+
         btnInicioPerc.setEnabled(true);
         btnProxPerc.setEnabled(true);
         btnFormat.setEnabled(true);
         
-    }//GEN-LAST:event_btnScannerActionPerformed
-
-    private void btnImprTokenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnImprTokenActionPerformed
         System.out.println("POS\tLINHA\tCOLUNA\tTIPO\tPALAVRA");
         for (Token w : tokens){
             System.out.println((w.getOrdem()+1) + "\t" + (w.getLinha()+1) + "\t" + (w.getColuna()+1) + "\t" + w.getTipoToken().toString().substring(0, 2) + "\t" + w.getPalavra());
         }
-    }//GEN-LAST:event_btnImprTokenActionPerformed
+    }//GEN-LAST:event_btnScannerActionPerformed
     
     private void btnInicioPercActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInicioPercActionPerformed
-        tokenIndex = 0;
+        exprIndex = 1;
         btnProxPerc.setEnabled(true);
+        btnInicioPerc.setEnabled(false);
+        
+        if (tokenAnt != null){
+            if (formated){
+                doc.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), tokenStyle(tokenAnt.getTipoToken()), true);
+            } else {
+                doc.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
+            }
+            tokenAnt = null;
+        }
+        
     }//GEN-LAST:event_btnInicioPercActionPerformed
 
+    private int bloco = 0;
+    private Token tokenAnt = null;
+    
     private void btnProxPercActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProxPercActionPerformed
-        if (tokenIndex < tokens.size()){
-            Token t = tokens.get(tokenIndex);
-            if (tokenIndex > 0){
-                Token ant = tokens.get(tokenIndex -1);
-                doc.setCharacterAttributes(ant.getPosicao(), ant.getTamanho(), stylePlain, true);
-                if (formated){
-                    doc.setCharacterAttributes(ant.getPosicao(), ant.getTamanho(), tokenStyle(ant.getTipoToken()), true);
-                }
-            }
-            doc.setCharacterAttributes(t.getPosicao(), t.getTamanho(), stylePerc, true);
-            
-            btnProxPerc.setEnabled(tokenIndex++ < tokens.size());
-        } else {
-            if (tokenIndex > 0){
-                Token ant = tokens.get(tokenIndex -1);
-                doc.setCharacterAttributes(ant.getPosicao(), ant.getTamanho(), stylePlain, true);
-                if (formated){
-                    doc.setCharacterAttributes(ant.getPosicao(), ant.getTamanho(), tokenStyle(ant.getTipoToken()), true);
-                }
-            }
-            
-            btnProxPerc.setEnabled(tokenIndex++ < tokens.size());
+        btnInicioPerc.setEnabled(true);
+        
+        if (!expressao.hasNext()){
+            expressao = expressoes.get(exprIndex++);
         }
+        
+        if (exprIndex >= expressoes.size()){
+            btnProxPerc.setEnabled(false);
+        }
+        
+        Token token = expressao.getNext();
+        if (tokenAnt != null){
+            if (formated){
+                doc.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), tokenStyle(tokenAnt.getTipoToken()), true);
+            } else {
+                doc.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
+            }
+        }
+        doc.setCharacterAttributes(token.getPosicao(), token.getTamanho(), stylePerc, true);
+
+        switch(expressao.getTipo()){
+            case DELIM_BLOCO:
+                switch (token.getFuncaoToken()){
+                    case RES_BLOCO_INICIO:
+                        bloco ++;
+                        break;
+                    case RES_BLOCO_FIM:
+                        bloco --;
+                        break;
+                }
+                break;
+            case CRIACAO_VARIAVEL:
+                TipoVariavel tipoVar;
+                switch (expressao.getTokenAt(0).getFuncaoToken()){
+                    case IDENT_TIPO_INTEIRO:
+                        tipoVar = TipoVariavel.INTEIRO;
+                        break;
+                    case IDENT_TIPO_REAL:
+                        tipoVar = TipoVariavel.REAL;
+                        break;
+                    case IDENT_TIPO_CARACTER:
+                    default:
+                        tipoVar = TipoVariavel.CARACTER;
+                        break;
+                }
+                Variavel variavel = new Variavel(tipoVar, token.getPalavra());
+                variaveis.add(variavel);
+
+                Collections.sort(variaveis, (v1, v2) -> {
+                    int comp = v1.getTipo().toString().compareTo(v2.getTipo().toString());
+                    if (comp == 0){
+                        return v1.getNome().compareToIgnoreCase(v2.getNome());
+                    } else {
+                        return comp;
+                    }
+                });
+
+                tabVariaveis.setRowCount(0);
+                for (Variavel v : variaveis){
+                    tabVariaveis.addRow(new String[]{v.getTipo().toString(),v.getNome(),v.getValor()});
+                }
+                break;
+        }
+        
+        tokenAnt = token;
     }//GEN-LAST:event_btnProxPercActionPerformed
 
     private void btnFormatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFormatActionPerformed
@@ -338,12 +382,26 @@ public class FrmGui extends javax.swing.JFrame {
 
     private void btnScanner1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnScanner1ActionPerformed
         Parser parser = new Parser(txpIde.getText());
-        expressoes = parser.getAllExpressions();
-        System.out.println("EXPRESSOES");
-        for (Expressao e : expressoes){
+        expressoes = new LinkedList<>();
+        System.out.println("EXPRESSÕES");
+        while (parser.hasNext()){
+            Expressao e = parser.parseExpression();
             System.out.println(e.toString());
+            if (!parser.getErro().isEmpty()){
+                System.err.println(parser.getErro());
+            }
+            if (e.getTipo() == TipoExpressao.CRIACAO_VARIAVEL){
+                e.setIndice(1);
+            }
+            expressoes.add(e);
         }
-        System.out.println(parser.getErro());
+        
+        variaveis = new LinkedList<>();
+        expressao = expressoes.getFirst();
+        
+        exprIndex = 1;
+        btnProxPerc.setEnabled(true);
+        btnInicioPerc.setEnabled(false);
     }//GEN-LAST:event_btnScanner1ActionPerformed
 
     private Style tokenStyle (TipoToken tokenType){
@@ -407,7 +465,6 @@ public class FrmGui extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnFormat;
-    private javax.swing.JButton btnImprToken;
     private javax.swing.JButton btnInicioPerc;
     private javax.swing.JButton btnProxPerc;
     private javax.swing.JButton btnScanner;
@@ -428,10 +485,14 @@ public class FrmGui extends javax.swing.JFrame {
     private javax.swing.JTextPane txpIde;
     // End of variables declaration//GEN-END:variables
     private LinkedList<Token> tokens;
-    private ArrayList<Expressao> expressoes;
-    private int tokenIndex;
+    private LinkedList<Expressao> expressoes;
+    private LinkedList<Variavel> variaveis;
+    private Expressao expressao;
+    private int exprIndex;
     private Scanner scn;
     private DefaultStyledDocument doc;
     private boolean formated;
     private String oldText;
+    
+    private DefaultTableModel tabVariaveis;
 }

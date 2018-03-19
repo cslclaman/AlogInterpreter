@@ -48,14 +48,12 @@
                           <Group type="102" alignment="0" attributes="0">
                               <Component id="btnScanner" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="btnImprToken" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Component id="btnScanner1" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="80" max="-2" attributes="0"/>
                               <Component id="btnInicioPerc" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="btnProxPerc" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" pref="34" max="-2" attributes="0"/>
-                              <Component id="btnScanner1" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" pref="37" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="114" max="-2" attributes="0"/>
                               <Component id="btnFormat" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
@@ -72,7 +70,6 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="btnScanner" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="btnImprToken" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnInicioPerc" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnProxPerc" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="btnFormat" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -131,15 +128,6 @@
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnScannerActionPerformed"/>
-      </Events>
-    </Component>
-    <Component class="javax.swing.JButton" name="btnImprToken">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Imprime tokens"/>
-        <Property name="enabled" type="boolean" value="false"/>
-      </Properties>
-      <Events>
-        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnImprTokenActionPerformed"/>
       </Events>
     </Component>
     <Component class="javax.swing.JButton" name="btnInicioPerc">
