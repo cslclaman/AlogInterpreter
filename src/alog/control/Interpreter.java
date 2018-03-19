@@ -145,7 +145,7 @@ public class Interpreter {
                 case CONST_CARACTER:
                 case CONST_INTEIRA:
                 case CONST_REAL:
-                    saida.push(token);
+                    saida.add(token);
                     break;
 
                 case OP_ATRIBUICAO:
@@ -156,7 +156,7 @@ public class Interpreter {
                 case OP_DIV_REAL:
                 case OP_MOD:
                     while (!pilha.isEmpty() && pilha.peek().getPrecedencia() > token.getPrecedencia()){
-                        saida.push(pilha.pop());
+                        saida.add(pilha.pop());
                     }
                     pilha.push(token);
                     break;
@@ -171,15 +171,22 @@ public class Interpreter {
                         if (out.getFuncaoToken() == FuncaoToken.DELIM_PARENTESES_ABRE){
                             break;
                         } else {
-                            
+                            saida.add(out);
                         }
                     }
                     break;
             }
         }
         while (!pilha.isEmpty()){
-            saida.push(pilha.pop());
+            saida.add(pilha.pop());
         }
+        
+        // DEPURAÇÃO APENAS
+        for (Token t : saida){
+            System.out.print(t.getPalavra() + " ");
+        }
+        System.out.println("\n");
+        
         return true;
     }
     
