@@ -37,5 +37,19 @@ public class Variavel {
         return valor;
     }
     
+    public int getValorInteiro() {
+        if (tipo != TipoVariavel.INTEIRO){
+            return 0;
+        } else {
+            return Integer.parseInt(valor);
+        }
+    }
     
+    public double getValorReal() {
+        if (tipo != TipoVariavel.REAL){
+            return 0.0;
+        } else {
+            return Double.parseDouble(valor);
+        }
+    }
 }
