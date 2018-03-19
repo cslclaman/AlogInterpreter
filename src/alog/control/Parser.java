@@ -134,6 +134,7 @@ public class Parser {
                 case OP_DIV_INTEIRA:
                 case OP_DIV_REAL:
                 case OP_MOD:
+                    expr.setTipo(TipoExpressao.OPERACAO_ARITMETICA);
                     funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
@@ -160,6 +161,7 @@ public class Parser {
                             add = false;
                             break;
                         case OPERACAO_ATRIBUICAO:
+                        case OPERACAO_ARITMETICA:
                             balancParenteses ++;
                             funcoesEsperadas.clear();
                             funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
@@ -180,6 +182,7 @@ public class Parser {
                             add = false;
                             break;
                         case OPERACAO_ATRIBUICAO:
+                        case OPERACAO_ARITMETICA:
                             balancParenteses --;
                             funcoesEsperadas.clear();
                             funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
@@ -255,6 +258,7 @@ public class Parser {
                             add = true;
                             break;
                         case OPERACAO_ATRIBUICAO:
+                        case OPERACAO_ARITMETICA:
                             if (!variaveis.contains(token.getPalavra())){
                                 escreveErro(token, "Variável \"" + token.getPalavra() + "\" não declarada");
                             }
@@ -289,6 +293,7 @@ public class Parser {
                 case _INDEF_NUMERICO:
                     switch (expr.getTipo()){
                         case OPERACAO_ATRIBUICAO:
+                        case OPERACAO_ARITMETICA:
                             
                             funcoesEsperadas.clear();
                             
@@ -319,6 +324,7 @@ public class Parser {
                 case DELIM_PONTO:
                     switch (expr.getTipo()){
                         case OPERACAO_ATRIBUICAO:
+                        case OPERACAO_ARITMETICA:
                             Token lastToken = expr.getTokenAt(expr.getNumTokens() - 1);
                             lastToken.atualizaPalavra(token.getPalavra());
                             lastToken.setFuncaoToken(FuncaoToken.CONST_REAL);
