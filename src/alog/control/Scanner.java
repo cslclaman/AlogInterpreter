@@ -120,7 +120,7 @@ public class Scanner {
                         contOper++;
                     }
                 } else {
-                    System.out.println("Caractere não considerável: " + ch);
+                    System.out.println("Caractere não considerável: " + ch + " (" + (int)ch + ")");
                     token.atualizaPalavra(ch);
                     go = false;
                     pos++;
