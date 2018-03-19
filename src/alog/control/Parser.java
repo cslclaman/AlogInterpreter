@@ -236,56 +236,63 @@ public class Parser {
                             char inicial = token.getPalavra().charAt(0);
                             if (inicial >= '0' && inicial <= '9'){
                                 escreveErro(token, "Identificador de variável não pode começar com número");
+                                add = false;
+                            } else {
+                                variaveis.add(token.getPalavra());
+                                token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
+
+                                funcoesEsperadas.clear();
+                                funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
+                                funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
+                                add = true;
                             }
-                            variaveis.add(token.getPalavra());
-                            token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
-                            
-                            funcoesEsperadas.clear();
-                            funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
-                            funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
-                            add = true;
                             break;
                         case ENTRADA_DE_DADOS:
                         case SAIDA_DE_DADOS:
                             if (!variaveis.contains(token.getPalavra())){
                                 escreveErro(token, "Variável \"" + token.getPalavra() + "\" não declarada");
+                                add = false;
+                            } else {
+                                token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
+
+                                funcoesEsperadas.clear();
+                                funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
+                                funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
+                                add = true;
                             }
-                            token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
-                            
-                            funcoesEsperadas.clear();
-                            funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
-                            funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
-                            add = true;
                             break;
                         case OPERACAO_ATRIBUICAO:
                         case OPERACAO_ARITMETICA:
                             if (!variaveis.contains(token.getPalavra())){
                                 escreveErro(token, "Variável \"" + token.getPalavra() + "\" não declarada");
+                                add = false;
+                            } else {
+                                token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
+
+                                funcoesEsperadas.clear();
+                                funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
+                                funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
+                                funcoesEsperadas.add(FuncaoToken.OP_SOMA);
+                                funcoesEsperadas.add(FuncaoToken.OP_SUBTRACAO);
+                                funcoesEsperadas.add(FuncaoToken.OP_MULTIPLICACAO);
+                                funcoesEsperadas.add(FuncaoToken.OP_DIV_INTEIRA);
+                                funcoesEsperadas.add(FuncaoToken.OP_DIV_REAL);
+                                funcoesEsperadas.add(FuncaoToken.OP_MOD);
+                                add = true;
                             }
-                            token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
-                            
-                            funcoesEsperadas.clear();
-                            funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
-                            funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
-                            funcoesEsperadas.add(FuncaoToken.OP_SOMA);
-                            funcoesEsperadas.add(FuncaoToken.OP_SUBTRACAO);
-                            funcoesEsperadas.add(FuncaoToken.OP_MULTIPLICACAO);
-                            funcoesEsperadas.add(FuncaoToken.OP_DIV_INTEIRA);
-                            funcoesEsperadas.add(FuncaoToken.OP_DIV_REAL);
-                            funcoesEsperadas.add(FuncaoToken.OP_MOD);
-                            add = true;
                             break;
                         case _INDEFINIDO:
                         default:
                             if (!variaveis.contains(token.getPalavra())){
                                 escreveErro(token, "Comando, variável ou função não identificada: " + token.getPalavra());
-                            } 
-                            token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
-                                
-                            funcoesEsperadas.clear();
-                            funcoesEsperadas.add(FuncaoToken.OP_ATRIBUICAO);
-                            add = true;
-                            
+                                add = false;
+                            } else {
+                                token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
+
+                                funcoesEsperadas.clear();
+                                funcoesEsperadas.add(FuncaoToken.OP_ATRIBUICAO);
+                                add = true;
+                            }
                             break;
                     }
                     break;
@@ -360,14 +367,26 @@ public class Parser {
                     break;
             }
             
-            if (balancParenteses != 0){
-                escreveErro(token, erro);
-            }
+            
             
             expr.atualizaTexto(token.getPalavra());
             if (add){
                 expr.addToken(token);
             }
+        }
+        
+        if (balancParenteses != 0){
+            String msg = "Parênteses não balanceados: ";
+            if (balancParenteses > 0){
+                msg += "Esperado fechamento de " + balancParenteses + " parenteses abertos";
+            } else {
+                msg += -balancParenteses + " parenteses fechados sem necessidade";
+            }
+            escreveErro(expr.getTokenAt(0), msg);
+        } 
+        
+        if (!erro.isEmpty()){
+            expr.setTipo(TipoExpressao._INVALIDO);
         }
         
         return expr;
