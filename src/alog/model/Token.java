@@ -116,6 +116,10 @@ public class Token {
         this.tamanho = tamanho;
     }
 
+    public int getPrecedencia(){
+        return precedencia;
+    }
+    
     public TipoToken getTipoToken() {
         return tipoToken;
     }
