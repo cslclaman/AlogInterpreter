@@ -11,7 +11,6 @@ import alog.model.TipoVariavel;
 import alog.model.Token;
 import alog.model.Variavel;
 import java.util.HashMap;
-import java.util.InputMismatchException;
 import java.util.LinkedList;
 
 /**
@@ -205,9 +204,7 @@ public class Interpreter {
                     Variavel op1 = retornaVariavel(pilha.pop());
                     String result = "";
                     
-                    if (op1 == null || op2 == null){
-                        return false;
-                    } else {
+                    if (op1 != null && op2 != null){
                         switch (op1.getTipo()){
                             case INTEIRO:
                                 switch (op2.getTipo()){
@@ -221,7 +218,7 @@ public class Interpreter {
                                         break;
                                     default:
                                         System.err.println("Operação " + token.getFuncaoToken()+ " inválida para tipo de dado " + op2.getTipo());
-                                        return false;
+                                        break;
                                 }
                             case REAL:
                                 token.setFuncaoToken(FuncaoToken.CONST_REAL);
@@ -234,14 +231,18 @@ public class Interpreter {
                                         break;
                                     default:
                                         System.err.println("Operação " + token.getFuncaoToken()+ " inválida para tipo de dado " + op2.getTipo());
-                                        return false;
+                                        break;
                                 }
                             default:
                                 System.err.println("Operação " + token.getFuncaoToken()+ " inválida para tipo de dado " + op1.getTipo());
-                                return false;
+                                break;
+                        }
+                        if (result.isEmpty()){
+                            return false;
                         }
                         token.setPalavra(result);
                     }
+                    break;
             }
         }
         
