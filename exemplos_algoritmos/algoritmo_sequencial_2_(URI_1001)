@@ -1,0 +1,12 @@
+Início
+    Inteiro: A;
+    Inteiro: B;
+    Inteiro: X;
+    
+    Leia(A);
+    Leia(B);
+    
+    X <- A + B;
+    
+    Escreva(X);
+Fim

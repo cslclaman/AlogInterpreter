@@ -1,0 +1,10 @@
+Início
+    Caracter: Nome;
+    Inteiro: Idade, IdadeDias;
+    
+    Leia(Nome, Idade);
+    
+    IdadeDias <- Idade * 365.25;
+    
+    Escreva(Nome," tem ",IdadeDias," dias de vida");
+Fim
