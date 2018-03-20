@@ -156,7 +156,7 @@ public class Interpreter {
                     saida = token.getPalavra();
                     break;
                 case IDENT_NOME_VARIAVEL:
-                    String nomeVar = expressao.getNext().getPalavra();
+                    String nomeVar = token.getPalavra();
                     Variavel variavel = variaveis.get(nomeVar);
                     if (variavel == null){
                         return false;
@@ -164,7 +164,7 @@ public class Interpreter {
                     saida = variavel.getValor();
             }
             
-            System.out.printf("%s%s", saida, pos++ < qtd ? " " : "\n");
+            System.out.printf("%s%s", saida, pos++ < qtd ? "" : "\n");
         }
         
         return true;
@@ -237,16 +237,12 @@ public class Interpreter {
                 case OP_MOD:
                     op2 = retornaVariavel(pilha.pop());
                     op1 = retornaVariavel(pilha.pop());
-                    //depuração apenas
-                    System.out.println(op1.getValor() + " " + token.getPalavra() + " " + op2.getValor());
                     
                     calculadora = new Calculator(token);
                     token = calculadora.executaOperacaoAritmetica(op1, op2);
                     if (token == null){
                         return false;
                     } else {
-                        //depuração apenas
-                        System.out.println(token.getPalavra());
                         pilha.push(token);
                     }
                     break;
