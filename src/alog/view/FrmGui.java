@@ -6,9 +6,8 @@
 package alog.view;
 
 import alog.control.Parser;
-import alog.control.Scanner;
 import alog.model.Expressao;
-import alog.model.TipoExpressao;
+import alog.model.FuncaoToken;
 import alog.model.TipoVariavel;
 import alog.model.Token;
 import alog.model.Variavel;
@@ -20,7 +19,6 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import javax.swing.JFormattedTextField;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.Caret;
@@ -36,7 +34,13 @@ public class FrmGui extends javax.swing.JFrame {
     
     StyleContext sc;
     private final Style stylePlain;
+    private final int FORMAT_PLAIN = 0;
+    
     private final Style stylePerc;
+    private final int FORMAT_PERC = 1;
+    
+    private final Style styleError;
+    private final int FORMAT_ERROR = 2;
     
     private final Color backgroundDisabled = javax.swing.UIManager.getDefaults().getColor("FormattedTextField.disabledBackground");
     private final Color backgroundEnabled = javax.swing.UIManager.getDefaults().getColor("FormattedTextField.background");
@@ -56,10 +60,13 @@ public class FrmGui extends javax.swing.JFrame {
         stylePerc = sc.addStyle("percurso", null);
         stylePerc.addAttribute(StyleConstants.Background, Color.YELLOW);
         
+        styleError = sc.addStyle("tokenErrado", null);
+        styleError.addAttribute(StyleConstants.Background, Color.RED);
+        
         initComponents();
         txpIde.setDocument(new DefaultStyledDocument());
         doc = (DefaultStyledDocument)txpIde.getDocument();
-        formated = false;
+        formatacao = FORMAT_PLAIN;
         
         tabVariaveis = (DefaultTableModel)jTable1.getModel();
     }
@@ -97,7 +104,6 @@ public class FrmGui extends javax.swing.JFrame {
         jScrollPane2.setVerifyInputWhenFocusTarget(false);
 
         txpIde.setFont(new java.awt.Font("Consolas", 0, 12)); // NOI18N
-        txpIde.setText("Início\n    Caracter: Nome;\n    Inteiro: Idade;\n    Real: Altura, CentPorDia <- 0;\n    \n    Leia(Nome, Idade, Altura);\n    \n    Idade <- Idade * 365.25;\n    CentPorDia <- Altura / Idade;\n    \n    Escreva(Nome,\" tem \",CentPorDia,\" centímetros por dia de vida\");\nFim");
         txpIde.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 txpIdeKeyReleased(evt);
@@ -107,7 +113,7 @@ public class FrmGui extends javax.swing.JFrame {
 
         jScrollPane2.setRowHeaderView(new TextLineNumber(txpIde, 2));
 
-        btnInicioPerc.setText("|<");
+        btnInicioPerc.setText("|< Início");
         btnInicioPerc.setEnabled(false);
         btnInicioPerc.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -115,7 +121,7 @@ public class FrmGui extends javax.swing.JFrame {
             }
         });
 
-        btnProxPerc.setText(">>");
+        btnProxPerc.setText(">> Próximo passo");
         btnProxPerc.setEnabled(false);
         btnProxPerc.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -180,7 +186,7 @@ public class FrmGui extends javax.swing.JFrame {
             }
         });
 
-        btnVerificar.setText("Verificar");
+        btnVerificar.setText("Verificar algoritmo");
         btnVerificar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnVerificarActionPerformed(evt);
@@ -216,22 +222,22 @@ public class FrmGui extends javax.swing.JFrame {
                             .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 443, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel3)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnVerificar, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(118, 118, 118)
+                                .addComponent(btnVerificar, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(85, 85, 85)
                                 .addComponent(btnInicioPerc)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnProxPerc)))
-                        .addGap(0, 433, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnInicioPerc)
-                    .addComponent(btnProxPerc)
-                    .addComponent(btnVerificar))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(btnVerificar, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
+                    .addComponent(btnInicioPerc, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(btnProxPerc, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
@@ -262,6 +268,7 @@ public class FrmGui extends javax.swing.JFrame {
         exprIndex = 1;
         btnProxPerc.setEnabled(true);
         btnInicioPerc.setEnabled(false);
+        formatacao = FORMAT_PLAIN;
         
         if (tokenAnt != null){
             doc.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
@@ -273,18 +280,25 @@ public class FrmGui extends javax.swing.JFrame {
     private void btnProxPercActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProxPercActionPerformed
         btnInicioPerc.setEnabled(true);
         
+        if (tokenAnt != null){
+            doc.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
+            if (tokenAnt.getFuncaoToken() == FuncaoToken.RES_BLOCO_FIM){
+                btnProxPerc.setEnabled(false);
+                formatacao = FORMAT_PLAIN;
+                return;
+            }
+        }
+        
         if (!expressao.hasNext()){
             expressao = expressoes.get(exprIndex++);
         }
         
-        if (exprIndex >= expressoes.size()){
+        if (exprIndex - 1 >= expressoes.size()){
             btnProxPerc.setEnabled(false);
-        }
+        } 
         
+        formatacao = FORMAT_PERC;
         Token token = expressao.getNext();
-        if (tokenAnt != null){
-            doc.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
-        }
         doc.setCharacterAttributes(token.getPosicao(), token.getTamanho(), stylePerc, true);
 
         switch(expressao.getTipo()){
@@ -345,12 +359,18 @@ public class FrmGui extends javax.swing.JFrame {
             case _INVALIDO:
                 System.err.println("Expressão inválida");
                 System.err.println("\t" + expressao.getTexto());
-                //System.err.println("\tERRO - " + expressao.getErro());
+                
+                formatacao = FORMAT_ERROR;
+                doc.setCharacterAttributes(token.getPosicao(), token.getTamanho(), styleError, true);
                 
                 break;
             default:
                 System.err.println("Expressão indefinida");
                 System.err.println("\t" + expressao.getTexto());
+                
+                formatacao = FORMAT_ERROR;
+                doc.setCharacterAttributes(token.getPosicao(), token.getTamanho(), styleError, true);
+                
                 break;
         }
         
@@ -358,14 +378,20 @@ public class FrmGui extends javax.swing.JFrame {
     }//GEN-LAST:event_btnProxPercActionPerformed
 
     private void btnVerificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerificarActionPerformed
+        oldText = txpIde.getText();
         Parser parser = new Parser(txpIde.getText());
         expressoes = new LinkedList<>();
-        System.out.println("EXPRESSÕES");
+        int erros = 0;
+        
         while (parser.hasNext()){
             Expressao e = parser.parseExpression();
-            System.out.println(e.toString());
             if (!parser.getErro().isEmpty()){
                 System.err.println(parser.getErro());
+                erros ++;
+                formatacao = FORMAT_ERROR;
+                for (Token t : e.listTokens()){
+                    doc.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
+                }
             }
             switch (e.getTipo()){
                 case CRIACAO_VARIAVEL:
@@ -379,18 +405,34 @@ public class FrmGui extends javax.swing.JFrame {
             expressoes.add(e);
         }
         
-        tabVariaveis.setRowCount(0);
-        variaveis = new HashMap<>();
-        varOrdem = new HashMap<>();
-        expressao = expressoes.getFirst();
-        
-        nomeVar = "";
-        exprIndex = 1;
-        btnProxPerc.setEnabled(true);
-        btnInicioPerc.setEnabled(false);
+        if (erros > 0){
+            JOptionPane.showMessageDialog(this, erros + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
+            btnProxPerc.setEnabled(false);
+            btnInicioPerc.setEnabled(false);
+        } else {
+            JOptionPane.showMessageDialog(this, "Nenhum erro encontrado - pronto para execução", "Verificação concluída", JOptionPane.PLAIN_MESSAGE);
+            btnVerificar.setEnabled(false);
+            
+            tabVariaveis.setRowCount(0);
+            variaveis = new HashMap<>();
+            varOrdem = new HashMap<>();
+            expressao = expressoes.getFirst();
+
+            nomeVar = "";
+            exprIndex = 1;
+            btnProxPerc.setEnabled(true);
+            btnInicioPerc.setEnabled(false);
+        }
     }//GEN-LAST:event_btnVerificarActionPerformed
 
     private void txpIdeKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txpIdeKeyReleased
+        String text = txpIde.getText();
+        if (!text.equals(oldText)){
+            btnVerificar.setEnabled(true);
+        }
+        if (formatacao != FORMAT_PLAIN){
+            doc.setCharacterAttributes(0, doc.getLength(), stylePlain, true);
+        }
         switch (evt.getKeyCode()){
             case KeyEvent.VK_TAB:
             default:
@@ -404,6 +446,7 @@ public class FrmGui extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Variável " + nomeVar + " não encontrada", "Erro de execução", JOptionPane.ERROR_MESSAGE);
         } else {
             lblVariavelEntrada.setText("Variável " + nomeVar + " (tipo " + variavel.getTipo() + "):");
+            btnProxPerc.setEnabled(false);
             
             txpEntrada.setBackground(backgroundEnabled);
             txpEntrada.setEditable(true);
@@ -417,43 +460,43 @@ public class FrmGui extends javax.swing.JFrame {
     private void btnInputEnterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInputEnterActionPerformed
         Variavel variavel = variaveis.get(nomeVar);
         
-        boolean valorValido;
-        do {
-            valorValido = true;
-            String linha = txpEntrada.getText().replace("\n", "");
+        boolean valorValido = true;
+        String linha = txpEntrada.getText().replace("\n", "");
 
-            switch(variavel.getTipo()){
-                case CARACTER:
-                    variavel.setValor(linha);
-                    break;
-                case INTEIRO:
-                    try {
-                        int valor = Integer.parseInt(linha);
-                        variavel.setValor(String.valueOf(valor));
-                    } catch (NumberFormatException ex){
-                        JOptionPane.showMessageDialog(this, "Valor \"" + linha + "\" inválido - esperado valor inteiro", "Valor inválido", JOptionPane.WARNING_MESSAGE);
-                        valorValido = false;
-                    }
-                    break;
-                case REAL:
-                    try {
-                        double valor = Double.parseDouble(linha);
-                        variavel.setValor(String.valueOf(valor));
-                    } catch (NumberFormatException ex){
-                        JOptionPane.showMessageDialog(this, "Valor \"" + linha + "\" inválido - esperado valor real", "Valor inválido", JOptionPane.WARNING_MESSAGE);
-                        valorValido = false;
-                    }
-                    break;
-            }
-        } while (!valorValido);
+        switch(variavel.getTipo()){
+            case CARACTER:
+                variavel.setValor(linha);
+                break;
+            case INTEIRO:
+                try {
+                    int valor = Integer.parseInt(linha);
+                    variavel.setValor(String.valueOf(valor));
+                } catch (NumberFormatException ex){
+                    JOptionPane.showMessageDialog(this, "Valor \"" + linha + "\" inválido - esperado valor inteiro", "Valor inválido", JOptionPane.WARNING_MESSAGE);
+                    valorValido = false;
+                }
+                break;
+            case REAL:
+                try {
+                    double valor = Double.parseDouble(linha);
+                    variavel.setValor(String.valueOf(valor));
+                } catch (NumberFormatException ex){
+                    JOptionPane.showMessageDialog(this, "Valor \"" + linha + "\" inválido - esperado valor real", "Valor inválido", JOptionPane.WARNING_MESSAGE);
+                    valorValido = false;
+                }
+                break;
+        }
         
-        variaveis.put(nomeVar, variavel);
-        tabVariaveis.setValueAt(variavel.getValor(), varOrdem.get(nomeVar), 2);
-        
-        txpEntrada.setText("");
-        lblVariavelEntrada.setText("");
-        txpEntrada.setEditable(false);
-        txpEntrada.setBackground(backgroundDisabled);
+        if (valorValido){
+            variaveis.put(nomeVar, variavel);
+            tabVariaveis.setValueAt(variavel.getValor(), varOrdem.get(nomeVar), 2);
+
+            btnProxPerc.setEnabled(true);
+            txpEntrada.setText("");
+            lblVariavelEntrada.setText("");
+            txpEntrada.setEditable(false);
+            txpEntrada.setBackground(backgroundDisabled);
+        } 
     }//GEN-LAST:event_btnInputEnterActionPerformed
 
     private void txpEntradaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txpEntradaKeyPressed
@@ -525,7 +568,7 @@ public class FrmGui extends javax.swing.JFrame {
     private int exprIndex;
     private int tabIndex;
     private DefaultStyledDocument doc;
-    private boolean formated;
+    private int formatacao;
     private String oldText;
     
     private DefaultTableModel tabVariaveis;
