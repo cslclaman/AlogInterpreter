@@ -14,11 +14,17 @@ public class Variavel {
     private String nome;
     //Substituir por implementação de subclasses
     private String valor;
+    private boolean inicializada;
 
     public Variavel(TipoVariavel tipo, String nome) {
         this.tipo = tipo;
         this.nome = nome;
         this.valor = "";
+        this.inicializada = false;
+    }
+    
+    public boolean isInicializada(){
+        return inicializada;
     }
     
     public String getNome(){
@@ -31,6 +37,7 @@ public class Variavel {
 
     public void setValor(String valor) {
         this.valor = valor;
+        this.inicializada = true;
     }
 
     public String getValor() {
@@ -38,7 +45,7 @@ public class Variavel {
     }
     
     public int getValorInteiro() {
-        if (tipo != TipoVariavel.INTEIRO){
+        if (!inicializada || tipo != TipoVariavel.INTEIRO){
             return 0;
         } else {
             return Integer.parseInt(valor);
@@ -46,10 +53,15 @@ public class Variavel {
     }
     
     public double getValorReal() {
-        if (tipo == TipoVariavel.CARACTER){
+        if (!inicializada || tipo == TipoVariavel.CARACTER){
             return 0.0;
         } else {
             return Double.parseDouble(valor);
         }
+    }
+    
+    @Override
+    public String toString(){
+        return tipo + ": " + nome;
     }
 }
