@@ -146,6 +146,8 @@ public class FrmGui extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
+        jTable1.setSelectionBackground(java.awt.Color.green);
+        jTable1.setSelectionForeground(java.awt.Color.black);
         jScrollPane1.setViewportView(jTable1);
 
         jScrollPane3.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -181,6 +183,7 @@ public class FrmGui extends javax.swing.JFrame {
         jLabel3.setText("Saída");
 
         btnInputEnter.setText("Confirmar");
+        btnInputEnter.setEnabled(false);
         btnInputEnter.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnInputEnterActionPerformed(evt);
@@ -267,14 +270,33 @@ public class FrmGui extends javax.swing.JFrame {
     
     private void btnInicioPercActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInicioPercActionPerformed
         exprIndex = 1;
+        nomeVar = "";
         btnProxPerc.setEnabled(true);
         btnInicioPerc.setEnabled(false);
         formatacao = FORMAT_PLAIN;
+        
+        for (Expressao e : expressoes){
+            switch (e.getTipo()){
+                case CRIACAO_VARIAVEL:
+                case ENTRADA_DE_DADOS:
+                case SAIDA_DE_DADOS:
+                    e.setIndice(1);
+                    break;
+                default:
+                    e.setIndice(0);
+                    break;
+            }
+        }
         
         if (tokenAnt != null){
             doc.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
             tokenAnt = null;
         }
+        
+        tabVariaveis.setRowCount(0);
+        variaveis = new HashMap<>();
+        varOrdem = new HashMap<>();
+        expressao = expressoes.getFirst();
         
     }//GEN-LAST:event_btnInicioPercActionPerformed
    
@@ -286,6 +308,7 @@ public class FrmGui extends javax.swing.JFrame {
             if (tokenAnt.getFuncaoToken() == FuncaoToken.RES_BLOCO_FIM){
                 btnProxPerc.setEnabled(false);
                 formatacao = FORMAT_PLAIN;
+                JOptionPane.showMessageDialog(this, "Execução concluída", "Execução concluída", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
         }
@@ -314,6 +337,8 @@ public class FrmGui extends javax.swing.JFrame {
                 }
                 break;
             case CRIACAO_VARIAVEL:
+                jTable1.clearSelection();
+                
                 TipoVariavel tipoVar;
                 switch (expressao.getTokenAt(0).getFuncaoToken()){
                     case IDENT_TIPO_INTEIRO:
@@ -340,19 +365,25 @@ public class FrmGui extends javax.swing.JFrame {
                         return comp;
                     }
                 });
-
+                
                 tabVariaveis.setRowCount(0);
                 for (Variavel v : lista){
                     tabVariaveis.addRow(new String[]{v.getTipo().toString(),v.getNome(),v.getValor()});
                     varOrdem.put(v.getNome(), lista.indexOf(v));
                 }
+                
+                jTable1.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
                 break;
             case ENTRADA_DE_DADOS:
+                jTable1.clearSelection();
+                
                 nomeVar = token.getPalavra();
                 execEntradaDados();
                 break;
                 
             case SAIDA_DE_DADOS:
+                jTable1.clearSelection();
+                
                 String saida = "";
                 switch (token.getFuncaoToken()){
                     case CONST_CARACTER:
@@ -365,18 +396,24 @@ public class FrmGui extends javax.swing.JFrame {
                     case IDENT_NOME_VARIAVEL:
                         nomeVar = token.getPalavra();
                         variavel = variaveis.get(nomeVar);
+                        
                         if (variavel == null){
                             System.err.println("Variável " + nomeVar + " não encontrada");
                         } else {
-                            switch (variavel.getTipo()){
-                                case REAL:
-                                    double varReal = Double.parseDouble(variavel.getValor());
-                                    saida = String.format(Locale.ENGLISH, "%.3f", varReal);
-                                    break;
-                                case INTEIRO:
-                                case CARACTER:
-                                    saida = variavel.getValor();
-                                    break;
+                            jTable1.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
+                            if (!variavel.isInicializada()){
+                                System.err.println("Variável " + nomeVar + " não inicializada");
+                            } else {
+                                switch (variavel.getTipo()){
+                                    case REAL:
+                                        double varReal = Double.parseDouble(variavel.getValor());
+                                        saida = String.format(Locale.ENGLISH, "%.3f", varReal);
+                                        break;
+                                    case INTEIRO:
+                                    case CARACTER:
+                                        saida = variavel.getValor();
+                                        break;
+                                }
                             }
                         }
                         break;
@@ -386,6 +423,7 @@ public class FrmGui extends javax.swing.JFrame {
                 
             case OPERACAO_ATRIBUICAO:
             case OPERACAO_ARITMETICA:
+                jTable1.clearSelection();
                 //return execOperacao(expressao);
             case _INVALIDO:
                 System.err.println("Expressão inválida");
@@ -441,7 +479,7 @@ public class FrmGui extends javax.swing.JFrame {
             btnProxPerc.setEnabled(false);
             btnInicioPerc.setEnabled(false);
         } else {
-            JOptionPane.showMessageDialog(this, "Nenhum erro encontrado - pronto para execução", "Verificação concluída", JOptionPane.PLAIN_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Nenhum erro encontrado - pronto para execução", "Verificação concluída", JOptionPane.INFORMATION_MESSAGE);
             btnVerificar.setEnabled(false);
             
             tabVariaveis.setRowCount(0);
@@ -476,11 +514,16 @@ public class FrmGui extends javax.swing.JFrame {
         if (variavel == null){
             JOptionPane.showMessageDialog(this, "Variável " + nomeVar + " não encontrada", "Erro de execução", JOptionPane.ERROR_MESSAGE);
         } else {
+            jTable1.clearSelection();
+            jTable1.setSelectionBackground(Color.YELLOW);
+            jTable1.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
+            
             lblVariavelEntrada.setText("Variável " + nomeVar + " (tipo " + variavel.getTipo() + "):");
             btnProxPerc.setEnabled(false);
             
             txpEntrada.setBackground(backgroundEnabled);
             txpEntrada.setEditable(true);
+            btnInputEnter.setEnabled(true);
             txpEntrada.requestFocus();
             Caret caret = txpEntrada.getCaret();
             caret.setDot(0);
@@ -520,12 +563,17 @@ public class FrmGui extends javax.swing.JFrame {
         
         if (valorValido){
             variaveis.put(nomeVar, variavel);
+            jTable1.setSelectionBackground(Color.GREEN);
             tabVariaveis.setValueAt(variavel.getValor(), varOrdem.get(nomeVar), 2);
+            
+            jTable1.clearSelection();
+            jTable1.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
 
             btnProxPerc.setEnabled(true);
             txpEntrada.setText("");
             lblVariavelEntrada.setText("");
             txpEntrada.setEditable(false);
+            btnInputEnter.setEnabled(false);
             txpEntrada.setBackground(backgroundDisabled);
         } 
     }//GEN-LAST:event_btnInputEnterActionPerformed
