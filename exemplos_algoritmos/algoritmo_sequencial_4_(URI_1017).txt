@@ -1,0 +1,13 @@
+Inicio
+    Inteiro: IdFuncionario, NumHoras;
+    Real: ValorHora, Salario;
+    
+    Leia(IdFuncionario);
+    Leia(NumHoras);
+    Leia(ValorHora);
+    
+    Salario <- NumHoras * ValorHora;
+    
+    Escreva(IdFuncionario);
+    Escreva(Salario);
+Fim
