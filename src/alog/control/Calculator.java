@@ -129,12 +129,7 @@ public class Calculator {
                     System.err.println("Operação " + operador.getFuncaoToken()+ " inválida para tipo de dado Caracter");
                     return false;
                 } else {
-                    if (op1.getTipo() == TipoVariavel.INTEIRO && op2.getTipo() == op1.getTipo()){
-                        System.err.println("Operação " + operador.getFuncaoToken()+ " inválida entre tipos de dados Inteiros");
-                        return false;
-                    } else {
-                        funcao = FuncaoToken.CONST_REAL;
-                    }
+                    funcao = FuncaoToken.CONST_REAL;
                 }
                 break;
         }
