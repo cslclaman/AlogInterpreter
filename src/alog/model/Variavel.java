@@ -46,7 +46,7 @@ public class Variavel {
     }
     
     public double getValorReal() {
-        if (tipo != TipoVariavel.REAL){
+        if (tipo == TipoVariavel.CARACTER){
             return 0.0;
         } else {
             return Double.parseDouble(valor);
