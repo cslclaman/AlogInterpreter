@@ -1,13 +1,12 @@
 Inicio
-    Inteiro: IdFuncionario, NumHoras;
-    Real: ValorHora, Salario;
+    Inteiro: TempoGasto, VelocMedia, DistPercorrida;
+    Real: Consumo;
     
-    Leia(IdFuncionario);
-    Leia(NumHoras);
-    Leia(ValorHora);
+    Leia(TempoGasto);
+    Leia(VelocMedia);
     
-    Salario <- NumHoras * ValorHora;
+    DistPercorrida <- TempoGasto * VelocMedia;
+	Consumo <- DistPercorrida / 12;
     
-    Escreva(IdFuncionario);
-    Escreva(Salario);
+    Escreva(Consumo);
 Fim
