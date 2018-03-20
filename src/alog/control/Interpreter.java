@@ -39,6 +39,8 @@ public class Interpreter {
                 return execCriacaoVariavel(expressao);
             case ENTRADA_DE_DADOS:
                 return execEntradaDados(expressao);
+            case SAIDA_DE_DADOS:
+                return execSaidaDados(expressao);
             case OPERACAO_ATRIBUICAO:
             case OPERACAO_ARITMETICA:
                 return execOperacao(expressao);
@@ -137,6 +139,37 @@ public class Interpreter {
         return true;
     }
     
+    public boolean execSaidaDados(Expressao expressao){
+        expressao.setIndice(1);
+        int pos = 1;
+        int qtd = expressao.getNumTokens() - 1;
+        while (expressao.hasNext()){
+            Token token = expressao.getNext();
+            String saida = "";
+            
+            switch (token.getFuncaoToken()){
+                case CONST_CARACTER:
+                    saida = token.getPalavra().replace("\"", "");
+                    break;
+                case CONST_INTEIRA:
+                case CONST_REAL:
+                    saida = token.getPalavra();
+                    break;
+                case IDENT_NOME_VARIAVEL:
+                    String nomeVar = expressao.getNext().getPalavra();
+                    Variavel variavel = variaveis.get(nomeVar);
+                    if (variavel == null){
+                        return false;
+                    }
+                    saida = variavel.getValor();
+            }
+            
+            System.out.printf("%s%s", saida, pos++ < qtd ? " " : "\n");
+        }
+        
+        return true;
+    }
+    
     public boolean execOperacao(Expressao expressao){
         LinkedList<Token> pilha = new LinkedList<>();
         LinkedList<Token> saida = new LinkedList<>();
@@ -184,65 +217,75 @@ public class Interpreter {
             saida.add(pilha.pop());
         }
         
-        // DEPURAÇÃO APENAS
-        for (Token t : saida){
-            System.out.print(t.getPalavra() + " ");
-        }
-        System.out.println("\n");
+        Calculator calculadora;
         
         while (!saida.isEmpty()){
             Token token = saida.pop();
+            Variavel op1, op2;
             switch (token.getFuncaoToken()){
                 case IDENT_NOME_VARIAVEL:
                 case CONST_CARACTER:
                 case CONST_INTEIRA:
                 case CONST_REAL:
-                    pilha.add(token);
+                    pilha.push(token);
                     break;
                 case OP_SOMA:
-                    Variavel op2 = retornaVariavel(pilha.pop());
-                    Variavel op1 = retornaVariavel(pilha.pop());
-                    String result = "";
+                case OP_SUBTRACAO:
+                case OP_MULTIPLICACAO:
+                case OP_DIV_INTEIRA:
+                case OP_DIV_REAL:
+                case OP_MOD:
+                    op2 = retornaVariavel(pilha.pop());
+                    op1 = retornaVariavel(pilha.pop());
+                    //depuração apenas
+                    System.out.println(op1.getValor() + " " + token.getPalavra() + " " + op2.getValor());
                     
-                    if (op1 != null && op2 != null){
-                        switch (op1.getTipo()){
-                            case INTEIRO:
-                                switch (op2.getTipo()){
-                                    case INTEIRO:
-                                        token.setFuncaoToken(FuncaoToken.CONST_INTEIRA);
-                                        result = String.valueOf( ((int)(op1.getValorInteiro() + op2.getValorInteiro())) );
-                                        break;
-                                    case REAL:
-                                        token.setFuncaoToken(FuncaoToken.CONST_REAL);
-                                        result = String.valueOf( ((double)(op1.getValorInteiro() + op2.getValorReal())) );
-                                        break;
-                                    default:
-                                        System.err.println("Operação " + token.getFuncaoToken()+ " inválida para tipo de dado " + op2.getTipo());
-                                        break;
-                                }
-                            case REAL:
-                                token.setFuncaoToken(FuncaoToken.CONST_REAL);
-                                switch (op2.getTipo()){
-                                    case INTEIRO:
-                                        result = String.valueOf( ((double)(op1.getValorReal()+ op2.getValorInteiro())) );
-                                        break;
-                                    case REAL:
-                                        result = String.valueOf( ((double)(op1.getValorReal()+ op2.getValorReal())) );
-                                        break;
-                                    default:
-                                        System.err.println("Operação " + token.getFuncaoToken()+ " inválida para tipo de dado " + op2.getTipo());
-                                        break;
-                                }
-                            default:
-                                System.err.println("Operação " + token.getFuncaoToken()+ " inválida para tipo de dado " + op1.getTipo());
-                                break;
-                        }
-                        if (result.isEmpty()){
-                            return false;
-                        }
-                        token.setPalavra(result);
+                    calculadora = new Calculator(token);
+                    token = calculadora.executaOperacaoAritmetica(op1, op2);
+                    if (token == null){
+                        return false;
+                    } else {
+                        //depuração apenas
+                        System.out.println(token.getPalavra());
+                        pilha.push(token);
                     }
                     break;
+                case OP_ATRIBUICAO:
+                    op1 = retornaVariavel(pilha.pop());
+                    Token tokVar = pilha.pop();
+                    if (tokVar.getFuncaoToken() != FuncaoToken.IDENT_NOME_VARIAVEL){
+                        System.err.println("Atribuição inválida - Esperava Variável, encontrou Constante");
+                        return false;
+                    }
+                    String nomeVar = tokVar.getPalavra();
+                    Variavel variavel = variaveis.get(nomeVar);
+                    if (variavel == null){
+                        return false;
+                    }
+                    switch (variavel.getTipo()){
+                        case INTEIRO:
+                            if (op1.getTipo() != TipoVariavel.INTEIRO){
+                                System.err.println("Atribuição inválida - Esperava " + variavel.getTipo() + ", encontrou " + op1.getTipo());
+                                return false;
+                            }
+                            variavel.setValor(op1.getValor());
+                            break;
+                        case REAL:
+                            if (op1.getTipo() != TipoVariavel.REAL && op1.getTipo() != TipoVariavel.INTEIRO){
+                                System.err.println("Atribuição inválida - Esperava " + variavel.getTipo() + ", encontrou " + op1.getTipo());
+                                return false;
+                            }
+                            variavel.setValor(op1.getValor());
+                            break;
+                        case CARACTER:
+                            if (op1.getTipo() != TipoVariavel.CARACTER){
+                                System.err.println("Atribuição inválida - Esperava " + variavel.getTipo() + ", encontrou " + op1.getTipo());
+                                return false;
+                            }
+                            variavel.setValor(op1.getValor());
+                            break;
+                    }
+                    variaveis.put(nomeVar, variavel);
             }
         }
         
@@ -261,11 +304,11 @@ public class Interpreter {
                 temp.setValor(token.getPalavra().replace("\"", ""));
                 break;
             case CONST_INTEIRA:
-                temp = new Variavel(TipoVariavel.INTEIRO, "temp" + nomeVar);
+                temp = new Variavel(TipoVariavel.INTEIRO, nomeVar);
                 temp.setValor(token.getPalavra());
                 break;
             case CONST_REAL:
-                temp = new Variavel(TipoVariavel.REAL, "temp" + nomeVar);
+                temp = new Variavel(TipoVariavel.REAL, nomeVar);
                 temp.setValor(token.getPalavra());
                 break;
             default:
