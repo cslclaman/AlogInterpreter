@@ -12,6 +12,7 @@ import alog.model.Token;
 import alog.model.Variavel;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Locale;
 
 /**
  * Classe que recebe uma expressão e executa.
@@ -161,7 +162,16 @@ public class Interpreter {
                     if (variavel == null){
                         return false;
                     }
-                    saida = variavel.getValor();
+                    switch (variavel.getTipo()){
+                        case REAL:
+                            double varReal = Double.parseDouble(variavel.getValor());
+                            saida = String.format(Locale.ENGLISH, "%.3f", varReal);
+                            break;
+                        case INTEIRO:
+                        case CARACTER:
+                            saida = variavel.getValor();
+                            break;
+                    }
             }
             
             System.out.printf("%s%s", saida, pos++ < qtd ? "" : "\n");
