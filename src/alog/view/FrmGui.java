@@ -96,9 +96,10 @@ public class FrmGui extends javax.swing.JFrame {
         txpProcessamento = new javax.swing.JTextPane();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
-        btnInputEnter = new javax.swing.JButton();
+        btnEntradaConfirma = new javax.swing.JButton();
         btnVerificar = new javax.swing.JButton();
         lblVariavelEntrada = new javax.swing.JLabel();
+        btnProcContinuar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -182,11 +183,11 @@ public class FrmGui extends javax.swing.JFrame {
 
         jLabel3.setText("Saída");
 
-        btnInputEnter.setText("Confirmar");
-        btnInputEnter.setEnabled(false);
-        btnInputEnter.addActionListener(new java.awt.event.ActionListener() {
+        btnEntradaConfirma.setText("Confirmar");
+        btnEntradaConfirma.setEnabled(false);
+        btnEntradaConfirma.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnInputEnterActionPerformed(evt);
+                btnEntradaConfirmaActionPerformed(evt);
             }
         });
 
@@ -198,6 +199,14 @@ public class FrmGui extends javax.swing.JFrame {
         });
 
         lblVariavelEntrada.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
+
+        btnProcContinuar.setText("Continuar");
+        btnProcContinuar.setEnabled(false);
+        btnProcContinuar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnProcContinuarActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -212,7 +221,7 @@ public class FrmGui extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 443, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnInputEnter, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(btnEntradaConfirma, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 311, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
@@ -223,14 +232,17 @@ public class FrmGui extends javax.swing.JFrame {
                                 .addComponent(lblVariavelEntrada, javax.swing.GroupLayout.PREFERRED_SIZE, 399, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 443, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel2)
-                            .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 443, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel3)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(btnVerificar, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(85, 85, 85)
                                 .addComponent(btnInicioPerc)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnProxPerc)))
+                                .addComponent(btnProxPerc))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 443, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnProcContinuar, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -252,12 +264,14 @@ public class FrmGui extends javax.swing.JFrame {
                     .addComponent(lblVariavelEntrada))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnInputEnter, javax.swing.GroupLayout.DEFAULT_SIZE, 41, Short.MAX_VALUE)
+                    .addComponent(btnEntradaConfirma, javax.swing.GroupLayout.DEFAULT_SIZE, 41, Short.MAX_VALUE)
                     .addComponent(jScrollPane3))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnProcContinuar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -424,7 +438,9 @@ public class FrmGui extends javax.swing.JFrame {
             case OPERACAO_ATRIBUICAO:
             case OPERACAO_ARITMETICA:
                 jTable1.clearSelection();
-                //return execOperacao(expressao);
+                execOperacao();
+                break;
+                
             case _INVALIDO:
                 System.err.println("Expressão inválida");
                 System.err.println("\t" + expressao.getTexto());
@@ -523,7 +539,7 @@ public class FrmGui extends javax.swing.JFrame {
             
             txpEntrada.setBackground(backgroundEnabled);
             txpEntrada.setEditable(true);
-            btnInputEnter.setEnabled(true);
+            btnEntradaConfirma.setEnabled(true);
             txpEntrada.requestFocus();
             Caret caret = txpEntrada.getCaret();
             caret.setDot(0);
@@ -531,7 +547,7 @@ public class FrmGui extends javax.swing.JFrame {
         }
     }
     
-    private void btnInputEnterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInputEnterActionPerformed
+    private void btnEntradaConfirmaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEntradaConfirmaActionPerformed
         Variavel variavel = variaveis.get(nomeVar);
         
         boolean valorValido = true;
@@ -573,16 +589,145 @@ public class FrmGui extends javax.swing.JFrame {
             txpEntrada.setText("");
             lblVariavelEntrada.setText("");
             txpEntrada.setEditable(false);
-            btnInputEnter.setEnabled(false);
+            btnEntradaConfirma.setEnabled(false);
             txpEntrada.setBackground(backgroundDisabled);
         } 
-    }//GEN-LAST:event_btnInputEnterActionPerformed
+    }//GEN-LAST:event_btnEntradaConfirmaActionPerformed
 
     private void txpEntradaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txpEntradaKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER){
-            btnInputEnterActionPerformed(null);
+            btnEntradaConfirmaActionPerformed(null);
         }
     }//GEN-LAST:event_txpEntradaKeyPressed
+
+    private LinkedList<Token> pilha;
+    private LinkedList<Token> saida;
+    
+    public boolean execOperacao(){
+        if (pilha == null){
+            pilha = new LinkedList<>();
+        }
+        if (saida == null){
+            saida = new LinkedList<>();
+        }
+        
+        while (expressao.hasNext()){
+            Token token = expressao.getNext();
+            switch (token.getFuncaoToken()){
+                case IDENT_NOME_VARIAVEL:
+                case CONST_CARACTER:
+                case CONST_INTEIRA:
+                case CONST_REAL:
+                    saida.add(token);
+                    break;
+
+                case OP_ATRIBUICAO:
+                case OP_SOMA:
+                case OP_SUBTRACAO:
+                case OP_MULTIPLICACAO:
+                case OP_DIV_INTEIRA:
+                case OP_DIV_REAL:
+                case OP_MOD:
+                    while (!pilha.isEmpty() && pilha.peek().getPrecedencia() > token.getPrecedencia()){
+                        saida.add(pilha.pop());
+                    }
+                    pilha.push(token);
+                    break;
+                
+                case DELIM_PARENTESES_ABRE:
+                    pilha.push(token);
+                    break;
+                    
+                case DELIM_PARENTESES_FECHA:
+                    while (!pilha.isEmpty()){
+                        Token out = pilha.pop();
+                        if (out.getFuncaoToken() == FuncaoToken.DELIM_PARENTESES_ABRE){
+                            break;
+                        } else {
+                            saida.add(out);
+                        }
+                    }
+                    break;
+            }
+        }
+        while (!pilha.isEmpty()){
+            saida.add(pilha.pop());
+        }
+        
+        Calculator calculadora;
+        
+        while (!saida.isEmpty()){
+            Token token = saida.pop();
+            Variavel op1, op2;
+            switch (token.getFuncaoToken()){
+                case IDENT_NOME_VARIAVEL:
+                case CONST_CARACTER:
+                case CONST_INTEIRA:
+                case CONST_REAL:
+                    pilha.push(token);
+                    break;
+                case OP_SOMA:
+                case OP_SUBTRACAO:
+                case OP_MULTIPLICACAO:
+                case OP_DIV_INTEIRA:
+                case OP_DIV_REAL:
+                case OP_MOD:
+                    op2 = retornaVariavel(pilha.pop());
+                    op1 = retornaVariavel(pilha.pop());
+                    
+                    calculadora = new Calculator(token);
+                    token = calculadora.executaOperacaoAritmetica(op1, op2);
+                    if (token == null){
+                        return false;
+                    } else {
+                        pilha.push(token);
+                    }
+                    break;
+                case OP_ATRIBUICAO:
+                    op1 = retornaVariavel(pilha.pop());
+                    Token tokVar = pilha.pop();
+                    if (tokVar.getFuncaoToken() != FuncaoToken.IDENT_NOME_VARIAVEL){
+                        System.err.println("Atribuição inválida - Esperava Variável, encontrou Constante");
+                        return false;
+                    }
+                    String nomeVar = tokVar.getPalavra();
+                    Variavel variavel = variaveis.get(nomeVar);
+                    if (variavel == null){
+                        return false;
+                    }
+                    switch (variavel.getTipo()){
+                        case INTEIRO:
+                            if (op1.getTipo() != TipoVariavel.INTEIRO){
+                                System.err.println("Atribuição inválida - Esperava " + variavel.getTipo() + ", encontrou " + op1.getTipo());
+                                return false;
+                            }
+                            variavel.setValor(op1.getValor());
+                            break;
+                        case REAL:
+                            if (op1.getTipo() != TipoVariavel.REAL && op1.getTipo() != TipoVariavel.INTEIRO){
+                                System.err.println("Atribuição inválida - Esperava " + variavel.getTipo() + ", encontrou " + op1.getTipo());
+                                return false;
+                            }
+                            variavel.setValor(op1.getValor());
+                            break;
+                        case CARACTER:
+                            if (op1.getTipo() != TipoVariavel.CARACTER){
+                                System.err.println("Atribuição inválida - Esperava " + variavel.getTipo() + ", encontrou " + op1.getTipo());
+                                return false;
+                            }
+                            variavel.setValor(op1.getValor());
+                            break;
+                    }
+                    variaveis.put(nomeVar, variavel);
+            }
+        }
+        
+        return true;
+    }
+    
+    private void btnProcContinuarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProcContinuarActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnProcContinuarActionPerformed
     
     /**
      * @param args the command line arguments
@@ -621,8 +766,9 @@ public class FrmGui extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnEntradaConfirma;
     private javax.swing.JButton btnInicioPerc;
-    private javax.swing.JButton btnInputEnter;
+    private javax.swing.JButton btnProcContinuar;
     private javax.swing.JButton btnProxPerc;
     private javax.swing.JButton btnVerificar;
     private javax.swing.JLabel jLabel1;
