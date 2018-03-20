@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Locale;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
@@ -438,7 +439,21 @@ public class FrmGui extends javax.swing.JFrame {
             case OPERACAO_ATRIBUICAO:
             case OPERACAO_ARITMETICA:
                 jTable1.clearSelection();
+                
+                Token ultimoExpr = expressao.getTokenAt(expressao.getNumTokens() - 1);
+                int posInicio = token.getPosicao();
+                int offset = (ultimoExpr.getPosicao() + ultimoExpr.getTamanho()) - posInicio;
+                doc.setCharacterAttributes(posInicio, offset, stylePerc, true);
+                token = new Token();
+                try {
+                    token.atualizaPalavra(doc.getText(posInicio, offset));
+                } catch (BadLocationException ex){
+                    token.atualizaPalavra(txpIde.getText().substring(posInicio, posInicio + offset));
+                }
+                
+                expressao.setIndice(0);
                 execOperacao();
+                
                 break;
                 
             case _INVALIDO:
@@ -464,7 +479,13 @@ public class FrmGui extends javax.swing.JFrame {
 
     private void btnVerificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerificarActionPerformed
         oldText = txpIde.getText();
-        Parser parser = new Parser(txpIde.getText());
+        
+        if (oldText.isEmpty()){
+            JOptionPane.showMessageDialog(this, "Nada para verificar - algoritmo vazio", "Verificação concluída", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+        
+        Parser parser = new Parser(oldText);
         expressoes = new LinkedList<>();
         int erros = 0;
         
@@ -603,7 +624,9 @@ public class FrmGui extends javax.swing.JFrame {
     private LinkedList<Token> pilha;
     private LinkedList<Token> saida;
     
-    public boolean execOperacao(){
+    private void execOperacao(){
+        btnProxPerc.setEnabled(false);
+        
         if (pilha == null){
             pilha = new LinkedList<>();
         }
@@ -611,8 +634,25 @@ public class FrmGui extends javax.swing.JFrame {
             saida = new LinkedList<>();
         }
         
+        String exibicao = "";
+        int col = 0;
+        int ordem = 0;
+        
         while (expressao.hasNext()){
             Token token = expressao.getNext();
+            
+            token.setLinha(0);
+            token.setColuna(col);
+            token.setOrdem(ordem++);
+            
+            if (exibicao.isEmpty()){
+                exibicao = token.getPalavra();
+                col += token.getTamanho();
+            } else {
+                exibicao += " " + token.getPalavra();
+                col += token.getTamanho() + 1;
+            }
+            
             switch (token.getFuncaoToken()){
                 case IDENT_NOME_VARIAVEL:
                 case CONST_CARACTER:
@@ -654,75 +694,9 @@ public class FrmGui extends javax.swing.JFrame {
             saida.add(pilha.pop());
         }
         
-        Calculator calculadora;
-        
-        while (!saida.isEmpty()){
-            Token token = saida.pop();
-            Variavel op1, op2;
-            switch (token.getFuncaoToken()){
-                case IDENT_NOME_VARIAVEL:
-                case CONST_CARACTER:
-                case CONST_INTEIRA:
-                case CONST_REAL:
-                    pilha.push(token);
-                    break;
-                case OP_SOMA:
-                case OP_SUBTRACAO:
-                case OP_MULTIPLICACAO:
-                case OP_DIV_INTEIRA:
-                case OP_DIV_REAL:
-                case OP_MOD:
-                    op2 = retornaVariavel(pilha.pop());
-                    op1 = retornaVariavel(pilha.pop());
-                    
-                    calculadora = new Calculator(token);
-                    token = calculadora.executaOperacaoAritmetica(op1, op2);
-                    if (token == null){
-                        return false;
-                    } else {
-                        pilha.push(token);
-                    }
-                    break;
-                case OP_ATRIBUICAO:
-                    op1 = retornaVariavel(pilha.pop());
-                    Token tokVar = pilha.pop();
-                    if (tokVar.getFuncaoToken() != FuncaoToken.IDENT_NOME_VARIAVEL){
-                        System.err.println("Atribuição inválida - Esperava Variável, encontrou Constante");
-                        return false;
-                    }
-                    String nomeVar = tokVar.getPalavra();
-                    Variavel variavel = variaveis.get(nomeVar);
-                    if (variavel == null){
-                        return false;
-                    }
-                    switch (variavel.getTipo()){
-                        case INTEIRO:
-                            if (op1.getTipo() != TipoVariavel.INTEIRO){
-                                System.err.println("Atribuição inválida - Esperava " + variavel.getTipo() + ", encontrou " + op1.getTipo());
-                                return false;
-                            }
-                            variavel.setValor(op1.getValor());
-                            break;
-                        case REAL:
-                            if (op1.getTipo() != TipoVariavel.REAL && op1.getTipo() != TipoVariavel.INTEIRO){
-                                System.err.println("Atribuição inválida - Esperava " + variavel.getTipo() + ", encontrou " + op1.getTipo());
-                                return false;
-                            }
-                            variavel.setValor(op1.getValor());
-                            break;
-                        case CARACTER:
-                            if (op1.getTipo() != TipoVariavel.CARACTER){
-                                System.err.println("Atribuição inválida - Esperava " + variavel.getTipo() + ", encontrou " + op1.getTipo());
-                                return false;
-                            }
-                            variavel.setValor(op1.getValor());
-                            break;
-                    }
-                    variaveis.put(nomeVar, variavel);
-            }
-        }
-        
-        return true;
+        txpProcessamento.setBackground(backgroundEnabled);
+        btnProcContinuar.setEnabled(true);
+        txpProcessamento.setText(exibicao);
     }
     
     private void btnProcContinuarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProcContinuarActionPerformed
