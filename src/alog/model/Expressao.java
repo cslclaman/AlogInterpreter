@@ -90,6 +90,10 @@ public class Expressao {
         tokens.remove(token);
     }
 
+    public ArrayList<Token> listTokens(){
+        return tokens;
+    }
+    
     public TipoExpressao getTipo() {
         return tipo;
     }
