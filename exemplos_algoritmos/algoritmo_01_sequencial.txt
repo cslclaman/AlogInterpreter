@@ -1,7 +1,7 @@
 Inicio
     Caracter: Nome;
     Inteiro: Idade;
-	Real: IdadeDias;
+    Real: IdadeDias;
     
     Leia(Nome, Idade);
     

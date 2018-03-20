@@ -6,7 +6,7 @@ Inicio
     Leia(VelocMedia);
     
     DistPercorrida <- TempoGasto * VelocMedia;
-	Consumo <- DistPercorrida / 12;
+    Consumo <- DistPercorrida / 12;
     
     Escreva(Consumo);
 Fim
