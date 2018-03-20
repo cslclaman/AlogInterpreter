@@ -1,4 +1,4 @@
-Início
+Inicio
     Inteiro: IdFuncionario, NumHoras;
     Real: ValorHora, Salario;
     

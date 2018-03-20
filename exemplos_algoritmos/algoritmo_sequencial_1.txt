@@ -1,6 +1,7 @@
-Início
+Inicio
     Caracter: Nome;
-    Inteiro: Idade, IdadeDias;
+    Inteiro: Idade;
+	Real: IdadeDias;
     
     Leia(Nome, Idade);
     

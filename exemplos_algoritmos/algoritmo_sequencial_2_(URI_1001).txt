@@ -1,4 +1,4 @@
-Início
+Inicio
     Inteiro: A;
     Inteiro: B;
     Inteiro: X;
