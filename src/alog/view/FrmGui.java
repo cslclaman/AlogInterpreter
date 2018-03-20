@@ -9,7 +9,6 @@ import alog.control.Parser;
 import alog.control.Scanner;
 import alog.model.Expressao;
 import alog.model.TipoExpressao;
-import alog.model.TipoToken;
 import alog.model.TipoVariavel;
 import alog.model.Token;
 import alog.model.Variavel;
@@ -17,8 +16,14 @@ import java.util.LinkedList;
 import javax.swing.text.DefaultStyledDocument;
 import alog.view.append.TextLineNumber;
 import java.awt.Color;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import javax.swing.JFormattedTextField;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.Caret;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
@@ -33,13 +38,8 @@ public class FrmGui extends javax.swing.JFrame {
     private final Style stylePlain;
     private final Style stylePerc;
     
-    private final Style styleLit;
-    private final Style styleABC123;
-    private final Style style123;
-    private final Style styleABC;
-    private final Style styleDel;
-    private final Style styleOp;
-    private final Style styleOMG;
+    private final Color backgroundDisabled = javax.swing.UIManager.getDefaults().getColor("FormattedTextField.disabledBackground");
+    private final Color backgroundEnabled = javax.swing.UIManager.getDefaults().getColor("FormattedTextField.background");
     
     /**
      * Creates new form FrmTeste
@@ -55,27 +55,6 @@ public class FrmGui extends javax.swing.JFrame {
         
         stylePerc = sc.addStyle("percurso", null);
         stylePerc.addAttribute(StyleConstants.Background, Color.YELLOW);
-        
-        styleLit = sc.addStyle("literal", null);
-        styleLit.addAttribute(StyleConstants.Foreground, Color.LIGHT_GRAY);
-        
-        styleABC123 = sc.addStyle("alfanum", null);
-        styleABC123.addAttribute(StyleConstants.Foreground, Color.GREEN);
-        
-        style123 = sc.addStyle("num", null);
-        style123.addAttribute(StyleConstants.Foreground, Color.ORANGE);
-        
-        styleABC = sc.addStyle("alfa", null);
-        styleABC.addAttribute(StyleConstants.Foreground, Color.BLUE);
-        
-        styleDel = sc.addStyle("del", null);
-        styleDel.addAttribute(StyleConstants.Foreground, Color.RED);
-        
-        styleOp = sc.addStyle("oper", null);
-        styleOp.addAttribute(StyleConstants.Foreground, Color.DARK_GRAY);
-        
-        styleOMG = sc.addStyle("none", null);
-        styleOMG.addAttribute(StyleConstants.Foreground, Color.BLACK);
         
         initComponents();
         txpIde.setDocument(new DefaultStyledDocument());
@@ -96,23 +75,22 @@ public class FrmGui extends javax.swing.JFrame {
 
         jScrollPane2 = new javax.swing.JScrollPane();
         txpIde = new javax.swing.JTextPane();
-        btnScanner = new javax.swing.JButton();
         btnInicioPerc = new javax.swing.JButton();
         btnProxPerc = new javax.swing.JButton();
-        btnFormat = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jScrollPane3 = new javax.swing.JScrollPane();
-        jTextPane1 = new javax.swing.JTextPane();
+        txpEntrada = new javax.swing.JTextPane();
         jLabel1 = new javax.swing.JLabel();
         jScrollPane6 = new javax.swing.JScrollPane();
-        jTextPane4 = new javax.swing.JTextPane();
+        txpSaida = new javax.swing.JTextPane();
         jScrollPane7 = new javax.swing.JScrollPane();
-        jTextPane5 = new javax.swing.JTextPane();
+        txpProcessamento = new javax.swing.JTextPane();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
-        btnScanner1 = new javax.swing.JButton();
+        btnInputEnter = new javax.swing.JButton();
+        btnVerificar = new javax.swing.JButton();
+        lblVariavelEntrada = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -120,16 +98,14 @@ public class FrmGui extends javax.swing.JFrame {
 
         txpIde.setFont(new java.awt.Font("Consolas", 0, 12)); // NOI18N
         txpIde.setText("Início\n    Caracter: Nome;\n    Inteiro: Idade;\n    Real: Altura, CentPorDia <- 0;\n    \n    Leia(Nome, Idade, Altura);\n    \n    Idade <- Idade * 365.25;\n    CentPorDia <- Altura / Idade;\n    \n    Escreva(Nome,\" tem \",CentPorDia,\" centímetros por dia de vida\");\nFim");
+        txpIde.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                txpIdeKeyReleased(evt);
+            }
+        });
         jScrollPane2.setViewportView(txpIde);
 
         jScrollPane2.setRowHeaderView(new TextLineNumber(txpIde, 2));
-
-        btnScanner.setText("Scanner");
-        btnScanner.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnScannerActionPerformed(evt);
-            }
-        });
 
         btnInicioPerc.setText("|<");
         btnInicioPerc.setEnabled(false);
@@ -144,14 +120,6 @@ public class FrmGui extends javax.swing.JFrame {
         btnProxPerc.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnProxPercActionPerformed(evt);
-            }
-        });
-
-        btnFormat.setText("Format");
-        btnFormat.setEnabled(false);
-        btnFormat.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnFormatActionPerformed(evt);
             }
         });
 
@@ -173,26 +141,53 @@ public class FrmGui extends javax.swing.JFrame {
         });
         jScrollPane1.setViewportView(jTable1);
 
-        jScrollPane3.setViewportView(jTextPane1);
+        jScrollPane3.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        jScrollPane3.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+
+        txpEntrada.setEditable(false);
+        txpEntrada.setBackground(javax.swing.UIManager.getDefaults().getColor("FormattedTextField.disabledBackground"));
+        txpEntrada.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txpEntradaKeyPressed(evt);
+            }
+        });
+        jScrollPane3.setViewportView(txpEntrada);
 
         jLabel1.setText("Entrada");
 
-        jScrollPane6.setViewportView(jTextPane4);
+        jScrollPane6.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        jScrollPane6.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
-        jScrollPane7.setViewportView(jTextPane5);
+        txpSaida.setEditable(false);
+        txpSaida.setBackground(javax.swing.UIManager.getDefaults().getColor("FormattedTextField.disabledBackground"));
+        jScrollPane6.setViewportView(txpSaida);
+
+        jScrollPane7.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        jScrollPane7.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+
+        txpProcessamento.setEditable(false);
+        txpProcessamento.setBackground(javax.swing.UIManager.getDefaults().getColor("FormattedTextField.disabledBackground"));
+        jScrollPane7.setViewportView(txpProcessamento);
 
         jLabel2.setText("Processamento");
 
         jLabel3.setText("Saída");
 
-        jButton1.setText("Confirmar");
-
-        btnScanner1.setText("Parser");
-        btnScanner1.addActionListener(new java.awt.event.ActionListener() {
+        btnInputEnter.setText("Confirmar");
+        btnInputEnter.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnScanner1ActionPerformed(evt);
+                btnInputEnterActionPerformed(evt);
             }
         });
+
+        btnVerificar.setText("Verificar");
+        btnVerificar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnVerificarActionPerformed(evt);
+            }
+        });
+
+        lblVariavelEntrada.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -207,27 +202,26 @@ public class FrmGui extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 443, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(btnInputEnter, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 311, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel1)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lblVariavelEntrada, javax.swing.GroupLayout.PREFERRED_SIZE, 399, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 443, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel2)
                             .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 443, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel3)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnScanner)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnScanner1)
-                                .addGap(80, 80, 80)
+                                .addComponent(btnVerificar, javax.swing.GroupLayout.PREFERRED_SIZE, 102, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(118, 118, 118)
                                 .addComponent(btnInicioPerc)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnProxPerc)
-                                .addGap(114, 114, 114)
-                                .addComponent(btnFormat)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                                .addComponent(btnProxPerc)))
+                        .addGap(0, 433, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -235,20 +229,20 @@ public class FrmGui extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnScanner)
                     .addComponent(btnInicioPerc)
                     .addComponent(btnProxPerc)
-                    .addComponent(btnFormat)
-                    .addComponent(btnScanner1))
+                    .addComponent(btnVerificar))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel1)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(lblVariavelEntrada))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 41, Short.MAX_VALUE)
+                    .addComponent(btnInputEnter, javax.swing.GroupLayout.DEFAULT_SIZE, 41, Short.MAX_VALUE)
                     .addComponent(jScrollPane3))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
@@ -263,24 +257,6 @@ public class FrmGui extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void btnScannerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnScannerActionPerformed
-        scn = new Scanner(txpIde.getText());
-        tokens = new LinkedList<>();
-        while (scn.hasNext()){
-            tokens.add(scn.getNext());
-        }
-        exprIndex = 0;
-
-        btnInicioPerc.setEnabled(true);
-        btnProxPerc.setEnabled(true);
-        btnFormat.setEnabled(true);
-        
-        System.out.println("POS\tLINHA\tCOLUNA\tTIPO\tPALAVRA");
-        for (Token w : tokens){
-            System.out.println((w.getOrdem()+1) + "\t" + (w.getLinha()+1) + "\t" + (w.getColuna()+1) + "\t" + w.getTipoToken().toString().substring(0, 2) + "\t" + w.getPalavra());
-        }
-    }//GEN-LAST:event_btnScannerActionPerformed
     
     private void btnInicioPercActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInicioPercActionPerformed
         exprIndex = 1;
@@ -288,19 +264,12 @@ public class FrmGui extends javax.swing.JFrame {
         btnInicioPerc.setEnabled(false);
         
         if (tokenAnt != null){
-            if (formated){
-                doc.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), tokenStyle(tokenAnt.getTipoToken()), true);
-            } else {
-                doc.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
-            }
+            doc.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
             tokenAnt = null;
         }
         
     }//GEN-LAST:event_btnInicioPercActionPerformed
-
-    private int bloco = 0;
-    private Token tokenAnt = null;
-    
+   
     private void btnProxPercActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProxPercActionPerformed
         btnInicioPerc.setEnabled(true);
         
@@ -314,11 +283,7 @@ public class FrmGui extends javax.swing.JFrame {
         
         Token token = expressao.getNext();
         if (tokenAnt != null){
-            if (formated){
-                doc.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), tokenStyle(tokenAnt.getTipoToken()), true);
-            } else {
-                doc.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
-            }
+            doc.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
         }
         doc.setCharacterAttributes(token.getPosicao(), token.getTamanho(), stylePerc, true);
 
@@ -347,10 +312,12 @@ public class FrmGui extends javax.swing.JFrame {
                         tipoVar = TipoVariavel.CARACTER;
                         break;
                 }
-                Variavel variavel = new Variavel(tipoVar, token.getPalavra());
-                variaveis.add(variavel);
+                nomeVar = token.getPalavra();
+                Variavel variavel = new Variavel(tipoVar, nomeVar);
+                variaveis.put(nomeVar, variavel);
 
-                Collections.sort(variaveis, (v1, v2) -> {
+                ArrayList<Variavel> lista = new ArrayList(variaveis.values());
+                Collections.sort(lista, (v1, v2) -> {
                     int comp = v1.getTipo().toString().compareTo(v2.getTipo().toString());
                     if (comp == 0){
                         return v1.getNome().compareToIgnoreCase(v2.getNome());
@@ -360,27 +327,37 @@ public class FrmGui extends javax.swing.JFrame {
                 });
 
                 tabVariaveis.setRowCount(0);
-                for (Variavel v : variaveis){
+                for (Variavel v : lista){
                     tabVariaveis.addRow(new String[]{v.getTipo().toString(),v.getNome(),v.getValor()});
+                    varOrdem.put(v.getNome(), lista.indexOf(v));
                 }
+                break;
+            case ENTRADA_DE_DADOS:
+                nomeVar = token.getPalavra();
+                execEntradaDados();
+                break;
+            case SAIDA_DE_DADOS:
+                //return execSaidaDados(expressao);
+                break;
+            case OPERACAO_ATRIBUICAO:
+            case OPERACAO_ARITMETICA:
+                //return execOperacao(expressao);
+            case _INVALIDO:
+                System.err.println("Expressão inválida");
+                System.err.println("\t" + expressao.getTexto());
+                //System.err.println("\tERRO - " + expressao.getErro());
+                
+                break;
+            default:
+                System.err.println("Expressão indefinida");
+                System.err.println("\t" + expressao.getTexto());
                 break;
         }
         
         tokenAnt = token;
     }//GEN-LAST:event_btnProxPercActionPerformed
 
-    private void btnFormatActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFormatActionPerformed
-        if (!formated){
-            for (Token t : tokens){
-                doc.setCharacterAttributes(t.getPosicao(), t.getTamanho(), tokenStyle(t.getTipoToken()), true);
-            }
-        }else {
-            doc.setCharacterAttributes(doc.getStartPosition().getOffset(), doc.getLength(), stylePlain, true);
-        }
-        formated = !formated;
-    }//GEN-LAST:event_btnFormatActionPerformed
-
-    private void btnScanner1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnScanner1ActionPerformed
+    private void btnVerificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerificarActionPerformed
         Parser parser = new Parser(txpIde.getText());
         expressoes = new LinkedList<>();
         System.out.println("EXPRESSÕES");
@@ -390,42 +367,100 @@ public class FrmGui extends javax.swing.JFrame {
             if (!parser.getErro().isEmpty()){
                 System.err.println(parser.getErro());
             }
-            if (e.getTipo() == TipoExpressao.CRIACAO_VARIAVEL){
-                e.setIndice(1);
+            switch (e.getTipo()){
+                case CRIACAO_VARIAVEL:
+                case ENTRADA_DE_DADOS:
+                case SAIDA_DE_DADOS:
+                    e.setIndice(1);
+                    break;
+                default:
+                    break;
             }
             expressoes.add(e);
         }
         
-        variaveis = new LinkedList<>();
+        tabVariaveis.setRowCount(0);
+        variaveis = new HashMap<>();
+        varOrdem = new HashMap<>();
         expressao = expressoes.getFirst();
         
+        nomeVar = "";
         exprIndex = 1;
         btnProxPerc.setEnabled(true);
         btnInicioPerc.setEnabled(false);
-    }//GEN-LAST:event_btnScanner1ActionPerformed
+    }//GEN-LAST:event_btnVerificarActionPerformed
 
-    private Style tokenStyle (TipoToken tokenType){
-        if (tokenType == null){
-            return styleOMG;
+    private void txpIdeKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txpIdeKeyReleased
+        switch (evt.getKeyCode()){
+            case KeyEvent.VK_TAB:
+            default:
+                break;
+        }
+    }//GEN-LAST:event_txpIdeKeyReleased
+
+    private void execEntradaDados(){
+        Variavel variavel = variaveis.get(nomeVar);
+        if (variavel == null){
+            JOptionPane.showMessageDialog(this, "Variável " + nomeVar + " não encontrada", "Erro de execução", JOptionPane.ERROR_MESSAGE);
         } else {
-            switch (tokenType){
-                case LITERAL:
-                    return styleLit;
-                case ALFANUMERICO:
-                    return styleABC123;
-                case NUMERICO:
-                    return style123;
-                case ALFABETICO:
-                    return styleABC;
-                case DELIMITADOR:
-                    return styleDel;
-                case OPERADOR:
-                    return styleOp;
-                default:
-                    return styleOMG;
-            }
+            lblVariavelEntrada.setText("Variável " + nomeVar + " (tipo " + variavel.getTipo() + "):");
+            
+            txpEntrada.setBackground(backgroundEnabled);
+            txpEntrada.setEditable(true);
+            txpEntrada.requestFocus();
+            Caret caret = txpEntrada.getCaret();
+            caret.setDot(0);
+            txpEntrada.setCaret(caret);
         }
     }
+    
+    private void btnInputEnterActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInputEnterActionPerformed
+        Variavel variavel = variaveis.get(nomeVar);
+        
+        boolean valorValido;
+        do {
+            valorValido = true;
+            String linha = txpEntrada.getText().replace("\n", "");
+
+            switch(variavel.getTipo()){
+                case CARACTER:
+                    variavel.setValor(linha);
+                    break;
+                case INTEIRO:
+                    try {
+                        int valor = Integer.parseInt(linha);
+                        variavel.setValor(String.valueOf(valor));
+                    } catch (NumberFormatException ex){
+                        JOptionPane.showMessageDialog(this, "Valor \"" + linha + "\" inválido - esperado valor inteiro", "Valor inválido", JOptionPane.WARNING_MESSAGE);
+                        valorValido = false;
+                    }
+                    break;
+                case REAL:
+                    try {
+                        double valor = Double.parseDouble(linha);
+                        variavel.setValor(String.valueOf(valor));
+                    } catch (NumberFormatException ex){
+                        JOptionPane.showMessageDialog(this, "Valor \"" + linha + "\" inválido - esperado valor real", "Valor inválido", JOptionPane.WARNING_MESSAGE);
+                        valorValido = false;
+                    }
+                    break;
+            }
+        } while (!valorValido);
+        
+        variaveis.put(nomeVar, variavel);
+        tabVariaveis.setValueAt(variavel.getValor(), varOrdem.get(nomeVar), 2);
+        
+        txpEntrada.setText("");
+        lblVariavelEntrada.setText("");
+        txpEntrada.setEditable(false);
+        txpEntrada.setBackground(backgroundDisabled);
+    }//GEN-LAST:event_btnInputEnterActionPerformed
+
+    private void txpEntradaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txpEntradaKeyPressed
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER){
+            btnInputEnterActionPerformed(null);
+        }
+    }//GEN-LAST:event_txpEntradaKeyPressed
     
     /**
      * @param args the command line arguments
@@ -464,12 +499,10 @@ public class FrmGui extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton btnFormat;
     private javax.swing.JButton btnInicioPerc;
+    private javax.swing.JButton btnInputEnter;
     private javax.swing.JButton btnProxPerc;
-    private javax.swing.JButton btnScanner;
-    private javax.swing.JButton btnScanner1;
-    private javax.swing.JButton jButton1;
+    private javax.swing.JButton btnVerificar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -479,20 +512,24 @@ public class FrmGui extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JTable jTable1;
-    private javax.swing.JTextPane jTextPane1;
-    private javax.swing.JTextPane jTextPane4;
-    private javax.swing.JTextPane jTextPane5;
+    private javax.swing.JLabel lblVariavelEntrada;
+    private javax.swing.JTextPane txpEntrada;
     private javax.swing.JTextPane txpIde;
+    private javax.swing.JTextPane txpProcessamento;
+    private javax.swing.JTextPane txpSaida;
     // End of variables declaration//GEN-END:variables
-    private LinkedList<Token> tokens;
     private LinkedList<Expressao> expressoes;
-    private LinkedList<Variavel> variaveis;
+    private HashMap<String,Variavel> variaveis;
+    private HashMap<String,Integer> varOrdem;
     private Expressao expressao;
     private int exprIndex;
-    private Scanner scn;
+    private int tabIndex;
     private DefaultStyledDocument doc;
     private boolean formated;
     private String oldText;
     
     private DefaultTableModel tabVariaveis;
+    private int bloco = 0;
+    private Token tokenAnt = null;
+    private String nomeVar;
 }
