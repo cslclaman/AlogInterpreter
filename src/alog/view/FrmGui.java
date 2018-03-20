@@ -19,6 +19,7 @@ import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Locale;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.Caret;
@@ -350,9 +351,39 @@ public class FrmGui extends javax.swing.JFrame {
                 nomeVar = token.getPalavra();
                 execEntradaDados();
                 break;
+                
             case SAIDA_DE_DADOS:
-                //return execSaidaDados(expressao);
+                String saida = "";
+                switch (token.getFuncaoToken()){
+                    case CONST_CARACTER:
+                        saida = token.getPalavra().replace("\"", "");
+                        break;
+                    case CONST_INTEIRA:
+                    case CONST_REAL:
+                        saida = token.getPalavra();
+                        break;
+                    case IDENT_NOME_VARIAVEL:
+                        nomeVar = token.getPalavra();
+                        variavel = variaveis.get(nomeVar);
+                        if (variavel == null){
+                            System.err.println("Variável " + nomeVar + " não encontrada");
+                        } else {
+                            switch (variavel.getTipo()){
+                                case REAL:
+                                    double varReal = Double.parseDouble(variavel.getValor());
+                                    saida = String.format(Locale.ENGLISH, "%.3f", varReal);
+                                    break;
+                                case INTEIRO:
+                                case CARACTER:
+                                    saida = variavel.getValor();
+                                    break;
+                            }
+                        }
+                        break;
+                }
+                txpSaida.setText(txpSaida.getText() + saida);
                 break;
+                
             case OPERACAO_ATRIBUICAO:
             case OPERACAO_ARITMETICA:
                 //return execOperacao(expressao);
