@@ -158,6 +158,7 @@ public class FrmGui extends javax.swing.JFrame {
 
         txpEntrada.setEditable(false);
         txpEntrada.setBackground(javax.swing.UIManager.getDefaults().getColor("FormattedTextField.disabledBackground"));
+        txpEntrada.setFont(new java.awt.Font("Consolas", 0, 12)); // NOI18N
         txpEntrada.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 txpEntradaKeyPressed(evt);
@@ -172,6 +173,7 @@ public class FrmGui extends javax.swing.JFrame {
 
         txpSaida.setEditable(false);
         txpSaida.setBackground(javax.swing.UIManager.getDefaults().getColor("FormattedTextField.disabledBackground"));
+        txpSaida.setFont(new java.awt.Font("Consolas", 0, 12)); // NOI18N
         jScrollPane6.setViewportView(txpSaida);
 
         jScrollPane7.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -179,6 +181,7 @@ public class FrmGui extends javax.swing.JFrame {
 
         txpProcessamento.setEditable(false);
         txpProcessamento.setBackground(javax.swing.UIManager.getDefaults().getColor("FormattedTextField.disabledBackground"));
+        txpProcessamento.setFont(new java.awt.Font("Consolas", 0, 12)); // NOI18N
         jScrollPane7.setViewportView(txpProcessamento);
 
         jLabel2.setText("Processamento");
@@ -762,10 +765,12 @@ public class FrmGui extends javax.swing.JFrame {
                     
                     calculadora = new Calculator(token);
                     token = calculadora.executaOperacaoAritmetica(op1, op2);
+                    
                     if (token == null){
                         System.err.println("Operação não executada");
                         popTokens = false;
                     } else {
+                        System.out.println(token.getPalavra());
                         pilha.push(token);
                         popTokens = false;
                         
