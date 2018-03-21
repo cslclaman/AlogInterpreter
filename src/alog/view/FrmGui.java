@@ -318,7 +318,7 @@ public class FrmGui extends javax.swing.JFrame {
         }
         
         txpSaida.setText("");
-        txpSaida.setForeground(backgroundDisabled);
+        txpSaida.setBackground(backgroundDisabled);
         
         tabVariaveis.setRowCount(0);
         variaveis = new HashMap<>();
@@ -355,7 +355,8 @@ public class FrmGui extends javax.swing.JFrame {
         formatacao = FORMAT_PERC;
         Token token = expressao.getNext();
         docIde.setCharacterAttributes(token.getPosicao(), token.getTamanho(), stylePerc, true);
-
+        jTable1.clearSelection();
+        
         switch(expressao.getTipo()){
             case DELIM_BLOCO:
                 switch (token.getFuncaoToken()){
@@ -368,8 +369,6 @@ public class FrmGui extends javax.swing.JFrame {
                 }
                 break;
             case CRIACAO_VARIAVEL:
-                jTable1.clearSelection();
-                
                 TipoVariavel tipoVar;
                 switch (expressao.getTokenAt(0).getFuncaoToken()){
                     case IDENT_TIPO_INTEIRO:
@@ -413,17 +412,16 @@ public class FrmGui extends javax.swing.JFrame {
                 break;
                 
             case SAIDA_DE_DADOS:
-                jTable1.clearSelection();
-                txpSaida.setForeground(backgroundEnabled);
+                txpSaida.setBackground(backgroundEnabled);
                 
-                String saida = "";
+                String textoSaida = "";
                 switch (token.getFuncaoToken()){
                     case CONST_CARACTER:
-                        saida = token.getPalavra().replace("\"", "");
+                        textoSaida = token.getPalavra().replace("\"", "");
                         break;
                     case CONST_INTEIRA:
                     case CONST_REAL:
-                        saida = token.getPalavra();
+                        textoSaida = token.getPalavra();
                         break;
                     case IDENT_NOME_VARIAVEL:
                         nomeVar = token.getPalavra();
@@ -432,22 +430,29 @@ public class FrmGui extends javax.swing.JFrame {
                         if (variavel == null){
                             System.err.println("Variável " + nomeVar + " não encontrada");
                         } else {
-                            jTable1.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
-                            if (!variavel.isInicializada()){
-                                System.err.println("Variável " + nomeVar + " não inicializada");
-                            } else {
-                                saida = variavel.getValor();
+                            switch (variavel.getTipo()){
+                                case REAL:
+                                    int indicePonto = variavel.getValor().indexOf(".");
+                                    if (indicePonto >= 0 && variavel.getValor().substring(indicePonto + 1).length() > 3){
+                                        textoSaida = variavel.getValor().substring(0, indicePonto + 4);
+                                        break;
+                                    }
+                                case INTEIRO:
+                                case CARACTER:
+                                    textoSaida = variavel.getValor();
+                                    break;
                             }
                         }
                         break;
                 }
-                txpSaida.setText(txpSaida.getText() + saida);
+                if (!expressao.hasNext()){
+                    textoSaida += "\n";
+                }
+                txpSaida.setText(txpSaida.getText() + textoSaida);
                 break;
                 
             case OPERACAO_ATRIBUICAO:
             case OPERACAO_ARITMETICA:
-                jTable1.clearSelection();
-                
                 Token ultimoExpr = expressao.getTokenAt(expressao.getNumTokens() - 1);
                 Token newToken = new Token();
                 int posInicio = token.getPosicao();
@@ -539,7 +544,7 @@ public class FrmGui extends javax.swing.JFrame {
             expressao = expressoes.getFirst();
             
             txpSaida.setText("");
-            txpSaida.setForeground(backgroundDisabled);
+            txpSaida.setBackground(backgroundDisabled);
         
             nomeVar = "";
             exprIndex = 1;
@@ -783,7 +788,6 @@ public class FrmGui extends javax.swing.JFrame {
                         System.err.println("Operação não executada");
                         popTokens = false;
                     } else {
-                        System.out.println(token.getPalavra());
                         pilha.push(token);
                         popTokens = false;
                     }

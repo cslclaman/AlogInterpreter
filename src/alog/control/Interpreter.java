@@ -164,8 +164,12 @@ public class Interpreter {
                     }
                     switch (variavel.getTipo()){
                         case REAL:
-                            double varReal = Double.parseDouble(variavel.getValor());
-                            saida = String.format(Locale.ENGLISH, "%.3f", varReal);
+                            int indicePonto = variavel.getValor().indexOf(".");
+                            if (indicePonto >= 0 && variavel.getValor().substring(indicePonto + 1).length() > 3){
+                                saida = variavel.getValor().substring(0, indicePonto + 4);
+                            } else {
+                                saida = variavel.getValor();
+                            }
                             break;
                         case INTEIRO:
                         case CARACTER:
