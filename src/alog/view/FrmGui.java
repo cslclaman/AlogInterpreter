@@ -40,6 +40,7 @@ public class FrmGui extends javax.swing.JFrame {
     private final int FORMAT_PLAIN = 0;
     
     private final Style stylePerc;
+    private final Style styleOper;
     private final int FORMAT_PERC = 1;
     
     private final Style styleError;
@@ -63,12 +64,16 @@ public class FrmGui extends javax.swing.JFrame {
         stylePerc = sc.addStyle("percurso", null);
         stylePerc.addAttribute(StyleConstants.Background, Color.YELLOW);
         
+        styleOper = sc.addStyle("percursoOperador", null);
+        styleOper.addAttribute(StyleConstants.Background, Color.CYAN);
+        
         styleError = sc.addStyle("tokenErrado", null);
         styleError.addAttribute(StyleConstants.Background, Color.RED);
         
         initComponents();
         txpIde.setDocument(new DefaultStyledDocument());
-        doc = (DefaultStyledDocument)txpIde.getDocument();
+        docIde = (DefaultStyledDocument)txpIde.getDocument();
+        docProc = (DefaultStyledDocument)txpProcessamento.getDocument();
         formatacao = FORMAT_PLAIN;
         
         tabVariaveis = (DefaultTableModel)jTable1.getModel();
@@ -308,9 +313,12 @@ public class FrmGui extends javax.swing.JFrame {
         }
         
         if (tokenAnt != null){
-            doc.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
+            docIde.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
             tokenAnt = null;
         }
+        
+        txpSaida.setText("");
+        txpSaida.setForeground(backgroundDisabled);
         
         tabVariaveis.setRowCount(0);
         variaveis = new HashMap<>();
@@ -323,7 +331,7 @@ public class FrmGui extends javax.swing.JFrame {
         btnInicioPerc.setEnabled(true);
         
         if (tokenAnt != null){
-            doc.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
+            docIde.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
             if (tokenAnt.getFuncaoToken() == FuncaoToken.RES_BLOCO_FIM){
                 btnProxPerc.setEnabled(false);
                 formatacao = FORMAT_PLAIN;
@@ -331,6 +339,10 @@ public class FrmGui extends javax.swing.JFrame {
                 return;
             }
         }
+        
+        docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
+        txpProcessamento.setText("");
+        txpProcessamento.setBackground(backgroundDisabled);
         
         if (!expressao.hasNext()){
             expressao = expressoes.get(exprIndex++);
@@ -342,7 +354,7 @@ public class FrmGui extends javax.swing.JFrame {
         
         formatacao = FORMAT_PERC;
         Token token = expressao.getNext();
-        doc.setCharacterAttributes(token.getPosicao(), token.getTamanho(), stylePerc, true);
+        docIde.setCharacterAttributes(token.getPosicao(), token.getTamanho(), stylePerc, true);
 
         switch(expressao.getTipo()){
             case DELIM_BLOCO:
@@ -402,6 +414,7 @@ public class FrmGui extends javax.swing.JFrame {
                 
             case SAIDA_DE_DADOS:
                 jTable1.clearSelection();
+                txpSaida.setForeground(backgroundEnabled);
                 
                 String saida = "";
                 switch (token.getFuncaoToken()){
@@ -445,15 +458,21 @@ public class FrmGui extends javax.swing.JFrame {
                 jTable1.clearSelection();
                 
                 Token ultimoExpr = expressao.getTokenAt(expressao.getNumTokens() - 1);
+                Token newToken = new Token();
                 int posInicio = token.getPosicao();
                 int offset = (ultimoExpr.getPosicao() + ultimoExpr.getTamanho()) - posInicio;
-                doc.setCharacterAttributes(posInicio, offset, stylePerc, true);
-                token = new Token();
+                docIde.setCharacterAttributes(posInicio, offset, stylePerc, true);
+                
+                newToken.setLinha(token.getLinha());
+                newToken.setColuna(token.getColuna());
+                newToken.setPosicao(token.getPosicao());
+                newToken.setOrdem(token.getOrdem());
                 try {
-                    token.atualizaPalavra(doc.getText(posInicio, offset));
+                    newToken.atualizaPalavra(docIde.getText(posInicio, offset));
                 } catch (BadLocationException ex){
-                    token.atualizaPalavra(txpIde.getText().substring(posInicio, posInicio + offset));
+                    newToken.atualizaPalavra(txpIde.getText().substring(posInicio, posInicio + offset));
                 }
+                token = newToken;
                 
                 expressao.setIndice(0);
                 execOperacao();
@@ -465,7 +484,7 @@ public class FrmGui extends javax.swing.JFrame {
                 System.err.println("\t" + expressao.getTexto());
                 
                 formatacao = FORMAT_ERROR;
-                doc.setCharacterAttributes(token.getPosicao(), token.getTamanho(), styleError, true);
+                docIde.setCharacterAttributes(token.getPosicao(), token.getTamanho(), styleError, true);
                 
                 break;
             default:
@@ -473,7 +492,7 @@ public class FrmGui extends javax.swing.JFrame {
                 System.err.println("\t" + expressao.getTexto());
                 
                 formatacao = FORMAT_ERROR;
-                doc.setCharacterAttributes(token.getPosicao(), token.getTamanho(), styleError, true);
+                docIde.setCharacterAttributes(token.getPosicao(), token.getTamanho(), styleError, true);
                 
                 break;
         }
@@ -500,7 +519,7 @@ public class FrmGui extends javax.swing.JFrame {
                 erros ++;
                 formatacao = FORMAT_ERROR;
                 for (Token t : e.listTokens()){
-                    doc.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
+                    docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
                 }
             }
             switch (e.getTipo()){
@@ -527,7 +546,10 @@ public class FrmGui extends javax.swing.JFrame {
             variaveis = new HashMap<>();
             varOrdem = new HashMap<>();
             expressao = expressoes.getFirst();
-
+            
+            txpSaida.setText("");
+            txpSaida.setForeground(backgroundDisabled);
+        
             nomeVar = "";
             exprIndex = 1;
             btnProxPerc.setEnabled(true);
@@ -541,7 +563,7 @@ public class FrmGui extends javax.swing.JFrame {
             btnVerificar.setEnabled(true);
         }
         if (formatacao != FORMAT_PLAIN){
-            doc.setCharacterAttributes(0, doc.getLength(), stylePlain, true);
+            docIde.setCharacterAttributes(0, docIde.getLength(), stylePlain, true);
         }
         switch (evt.getKeyCode()){
             case KeyEvent.VK_TAB:
@@ -647,15 +669,15 @@ public class FrmGui extends javax.swing.JFrame {
             
             token.setLinha(0);
             token.setColuna(col);
+            token.setPosicao(col);
             token.setOrdem(ordem++);
             
             if (exibicao.isEmpty()){
                 exibicao = token.getPalavra();
-                col += token.getTamanho();
             } else {
                 exibicao += " " + token.getPalavra();
-                col += token.getTamanho() + 1;
             }
+            col += token.getTamanho() + 1;
             
             switch (token.getFuncaoToken()){
                 case IDENT_NOME_VARIAVEL:
@@ -749,17 +771,17 @@ public class FrmGui extends javax.swing.JFrame {
                 case OP_DIV_INTEIRA:
                 case OP_DIV_REAL:
                 case OP_MOD:
+                    docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
+                    imprimeTokens(token);
+                    
                     Token tok2 = pilha.pop();
                     Token tok1 = pilha.pop();
                     op2 = retornaVariavel(tok2);
                     op1 = retornaVariavel(tok1);
                     
-                    DefaultStyledDocument docProc = (DefaultStyledDocument)txpProcessamento.getDocument();
-                    docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
-                    
-                    docProc.setCharacterAttributes(tok1.getColuna(), tok1.getTamanho(), stylePerc, true);
-                    docProc.setCharacterAttributes(token.getColuna(), token.getTamanho(), stylePerc, true);
-                    docProc.setCharacterAttributes(tok2.getColuna(), tok2.getTamanho(), stylePerc, true);
+                    docProc.setCharacterAttributes(tok1.getPosicao(), tok1.getTamanho(), stylePerc, true);
+                    docProc.setCharacterAttributes(token.getPosicao(), token.getTamanho(), styleOper, true);
+                    docProc.setCharacterAttributes(tok2.getPosicao(), tok2.getTamanho(), stylePerc, true);
                     
                     token.setColuna(tok1.getColuna());
                     
@@ -773,26 +795,24 @@ public class FrmGui extends javax.swing.JFrame {
                         System.out.println(token.getPalavra());
                         pilha.push(token);
                         popTokens = false;
-                        
-                        docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
-                        imprimeTokens();
-                        docProc.setCharacterAttributes(token.getColuna(), token.getTamanho(), stylePerc, true);
                     }
                     break;
                 case OP_ATRIBUICAO:
+                    docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
+                    imprimeTokens(token);
+                    
                     Token tokValor = pilha.pop();
                     op1 = retornaVariavel(tokValor);
                     Token tokVar = pilha.pop();
                     
+                    docProc.setCharacterAttributes(tokValor.getPosicao(), tokValor.getTamanho(), stylePerc, true);
+                    docProc.setCharacterAttributes(token.getPosicao(), token.getTamanho(), styleOper, true);
+                    docProc.setCharacterAttributes(tokVar.getPosicao(), tokVar.getTamanho(), stylePerc, true);
+                    
                     if (tokVar.getFuncaoToken() != FuncaoToken.IDENT_NOME_VARIAVEL){
                         System.err.println("Atribuição inválida - Esperava Variável, encontrou Constante");
                     }
-                    docProc = (DefaultStyledDocument)txpProcessamento.getDocument();
                     docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
-                    
-                    docProc.setCharacterAttributes(tokValor.getColuna(), tokValor.getTamanho(), stylePerc, true);
-                    docProc.setCharacterAttributes(token.getColuna(), token.getTamanho(), stylePerc, true);
-                    docProc.setCharacterAttributes(tokVar.getColuna(), tokVar.getTamanho(), stylePerc, true);
                     
                     nomeVar = tokVar.getPalavra();
                     Variavel variavel = variaveis.get(nomeVar);
@@ -820,6 +840,9 @@ public class FrmGui extends javax.swing.JFrame {
                                 break;
                         }
                         variaveis.put(nomeVar, variavel);
+                        tabVariaveis.setValueAt(variavel.getValor(), varOrdem.get(nomeVar), 2);
+                        jTable1.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
+                        
                         popTokens = false;
                     }
             }
@@ -831,14 +854,24 @@ public class FrmGui extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnProcContinuarActionPerformed
     
-    private void imprimeTokens(){
+    private void imprimeTokens(Token op){
+        LinkedList<Token> tokens = new LinkedList<>();
+        tokens.addAll(pilha);
+        tokens.addAll(saida);
+        tokens.add(op);
+        Collections.sort(tokens, (tk1, tk2) -> {
+            return Integer.compare(tk1.getOrdem(), tk2.getOrdem());
+        });
+        
         String exibicao = "";
-        for (Token t : pilha){
-            exibicao += (exibicao.isEmpty() ? " " : "") + t.getPalavra();
+        for (Token t : tokens){
+            if (exibicao.isEmpty()) {
+                exibicao = t.getPalavra();
+            } else {
+                exibicao += " " + t.getPalavra();
+            }
         }
-        for (Token t : saida){
-            exibicao += (exibicao.isEmpty() ? " " : "") + t.getPalavra();
-        }
+        txpProcessamento.setText(exibicao);
     }
     
     /**
@@ -904,7 +937,8 @@ public class FrmGui extends javax.swing.JFrame {
     private Expressao expressao;
     private int exprIndex;
     private int tabIndex;
-    private DefaultStyledDocument doc;
+    private DefaultStyledDocument docIde;
+    private DefaultStyledDocument docProc;
     private int formatacao;
     private String oldText;
     
