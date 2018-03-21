@@ -436,16 +436,7 @@ public class FrmGui extends javax.swing.JFrame {
                             if (!variavel.isInicializada()){
                                 System.err.println("Variável " + nomeVar + " não inicializada");
                             } else {
-                                switch (variavel.getTipo()){
-                                    case REAL:
-                                        double varReal = Double.parseDouble(variavel.getValor());
-                                        saida = String.format(Locale.ENGLISH, "%.3f", varReal);
-                                        break;
-                                    case INTEIRO:
-                                    case CARACTER:
-                                        saida = variavel.getValor();
-                                        break;
-                                }
+                                saida = variavel.getValor();
                             }
                         }
                         break;
