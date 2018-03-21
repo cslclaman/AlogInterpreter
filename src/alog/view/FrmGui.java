@@ -5,6 +5,7 @@
  */
 package alog.view;
 
+import alog.control.Calculator;
 import alog.control.Parser;
 import alog.model.Expressao;
 import alog.model.FuncaoToken;
@@ -699,9 +700,141 @@ public class FrmGui extends javax.swing.JFrame {
         txpProcessamento.setText(exibicao);
     }
     
+    public Variavel retornaVariavel(Token token){
+        Variavel temp;
+        String nomeVar = "temp" + token.getOrdem();
+        switch (token.getFuncaoToken()){
+            case IDENT_NOME_VARIAVEL:
+                temp = variaveis.get(token.getPalavra());
+                break;
+            case CONST_CARACTER:
+                temp = new Variavel(TipoVariavel.CARACTER, nomeVar);
+                temp.setValor(token.getPalavra().replace("\"", ""));
+                break;
+            case CONST_INTEIRA:
+                temp = new Variavel(TipoVariavel.INTEIRO, nomeVar);
+                temp.setValor(token.getPalavra());
+                break;
+            case CONST_REAL:
+                temp = new Variavel(TipoVariavel.REAL, nomeVar);
+                temp.setValor(token.getPalavra());
+                break;
+            default:
+                System.out.println("Tipo de token inválido para efetuar operação: " + token.getFuncaoToken());
+                temp = null;
+        }
+        return temp;
+    }
+    
     private void btnProcContinuarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProcContinuarActionPerformed
-        // TODO add your handling code here:
+        Calculator calculadora;
+        boolean popTokens = true;
+        
+        while (!saida.isEmpty() && popTokens){
+            Token token = saida.pop();
+            Variavel op1, op2;
+            switch (token.getFuncaoToken()){
+                case IDENT_NOME_VARIAVEL:
+                case CONST_CARACTER:
+                case CONST_INTEIRA:
+                case CONST_REAL:
+                    pilha.push(token);
+                    break;
+                case OP_SOMA:
+                case OP_SUBTRACAO:
+                case OP_MULTIPLICACAO:
+                case OP_DIV_INTEIRA:
+                case OP_DIV_REAL:
+                case OP_MOD:
+                    Token tok2 = pilha.pop();
+                    Token tok1 = pilha.pop();
+                    op2 = retornaVariavel(tok2);
+                    op1 = retornaVariavel(tok1);
+                    
+                    DefaultStyledDocument docProc = (DefaultStyledDocument)txpProcessamento.getDocument();
+                    docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
+                    
+                    docProc.setCharacterAttributes(tok1.getColuna(), tok1.getTamanho(), stylePerc, true);
+                    docProc.setCharacterAttributes(token.getColuna(), token.getTamanho(), stylePerc, true);
+                    docProc.setCharacterAttributes(tok2.getColuna(), tok2.getTamanho(), stylePerc, true);
+                    
+                    token.setColuna(tok1.getColuna());
+                    
+                    calculadora = new Calculator(token);
+                    token = calculadora.executaOperacaoAritmetica(op1, op2);
+                    if (token == null){
+                        System.err.println("Operação não executada");
+                        popTokens = false;
+                    } else {
+                        pilha.push(token);
+                        popTokens = false;
+                        
+                        docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
+                        imprimeTokens();
+                        docProc.setCharacterAttributes(token.getColuna(), token.getTamanho(), stylePerc, true);
+                    }
+                    break;
+                case OP_ATRIBUICAO:
+                    Token tokValor = pilha.pop();
+                    op1 = retornaVariavel(tokValor);
+                    Token tokVar = pilha.pop();
+                    
+                    if (tokVar.getFuncaoToken() != FuncaoToken.IDENT_NOME_VARIAVEL){
+                        System.err.println("Atribuição inválida - Esperava Variável, encontrou Constante");
+                    }
+                    docProc = (DefaultStyledDocument)txpProcessamento.getDocument();
+                    docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
+                    
+                    docProc.setCharacterAttributes(tokValor.getColuna(), tokValor.getTamanho(), stylePerc, true);
+                    docProc.setCharacterAttributes(token.getColuna(), token.getTamanho(), stylePerc, true);
+                    docProc.setCharacterAttributes(tokVar.getColuna(), tokVar.getTamanho(), stylePerc, true);
+                    
+                    nomeVar = tokVar.getPalavra();
+                    Variavel variavel = variaveis.get(nomeVar);
+                    if (variavel == null){
+                        JOptionPane.showMessageDialog(this, "Variável " + nomeVar + " não encontrada", "Erro de execução", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        switch (variavel.getTipo()){
+                            case INTEIRO:
+                                if (op1.getTipo() != TipoVariavel.INTEIRO){
+                                    System.err.println("Atribuição inválida - Esperava " + variavel.getTipo() + ", encontrou " + op1.getTipo());
+                                }
+                                variavel.setValor(op1.getValor());
+                                break;
+                            case REAL:
+                                if (op1.getTipo() != TipoVariavel.REAL && op1.getTipo() != TipoVariavel.INTEIRO){
+                                    System.err.println("Atribuição inválida - Esperava " + variavel.getTipo() + ", encontrou " + op1.getTipo());
+                                }
+                                variavel.setValor(op1.getValor());
+                                break;
+                            case CARACTER:
+                                if (op1.getTipo() != TipoVariavel.CARACTER){
+                                    System.err.println("Atribuição inválida - Esperava " + variavel.getTipo() + ", encontrou " + op1.getTipo());
+                                }
+                                variavel.setValor(op1.getValor());
+                                break;
+                        }
+                        variaveis.put(nomeVar, variavel);
+                        popTokens = false;
+                    }
+            }
+        }
+        
+        if (saida.isEmpty()){
+            btnProcContinuar.setEnabled(false);
+            btnProxPerc.setEnabled(true);
+        }
     }//GEN-LAST:event_btnProcContinuarActionPerformed
+    
+    private void imprimeTokens(){
+        String exibicao = "";
+        for (Token t : pilha){
+            exibicao += (exibicao.isEmpty() ? " " : "") + t.getPalavra();
+        }
+        for (Token t : saida){
+            exibicao += (exibicao.isEmpty() ? " " : "") + t.getPalavra();
+        }
+    }
     
     /**
      * @param args the command line arguments
