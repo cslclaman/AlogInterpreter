@@ -36,6 +36,9 @@ public enum FuncaoToken {
     //Funções internas - Entrada/Saída
     LIB_IO_LEIA,
     LIB_IO_ESCREVA,
+    //Funções internas - Potência/Raiz
+    LIB_MATH_POT,
+    LIB_MATH_RAIZ,
     //Operadores - atribuição
     OP_ATRIBUICAO,
     //Operadores matemáticos

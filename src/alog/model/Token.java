@@ -162,6 +162,14 @@ public class Token {
                         funcaoToken = FuncaoToken.OP_MOD;
                         precedencia = PRECEDENCIA_OP_MULTIPLICACAO;
                         break;
+                    case "pot":
+                        funcaoToken = FuncaoToken.LIB_MATH_POT;
+                        precedencia = PRECEDENCIA_FUNCAO;
+                        break;
+                    case "raiz":
+                        funcaoToken = FuncaoToken.LIB_MATH_RAIZ;
+                        precedencia = PRECEDENCIA_FUNCAO;
+                        break;
                     default:
                         funcaoToken = FuncaoToken._INDEF_ALFABETICO;
                         break;
