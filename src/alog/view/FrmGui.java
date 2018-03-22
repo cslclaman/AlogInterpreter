@@ -780,6 +780,7 @@ public class FrmGui extends javax.swing.JFrame {
         
         while (!saida.isEmpty() && popTokens){
             Token token = saida.pop();
+            Token resultToken;
             Variavel op1, op2;
             switch (token.getFuncaoToken()){
                 case IDENT_NOME_VARIAVEL:
@@ -809,13 +810,13 @@ public class FrmGui extends javax.swing.JFrame {
                     token.setColuna(tok1.getColuna());
                     
                     calculadora = new Calculator(token);
-                    token = calculadora.executaOperacaoAritmetica(op1, op2);
+                    resultToken = calculadora.executaOperacaoAritmetica(op1, op2);
                     
-                    if (token == null){
+                    if (resultToken == null){
                         System.err.println("Operação não executada");
                         popTokens = false;
                     } else {
-                        pilha.push(token);
+                        pilha.push(resultToken);
                         popTokens = false;
                     }
                     break;

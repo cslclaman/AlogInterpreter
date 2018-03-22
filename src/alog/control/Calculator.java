@@ -25,9 +25,8 @@ public class Calculator {
     }
     
     public Token executaOperacaoAritmetica(Variavel op1, Variavel op2){
-        if (!defineOperacao(op1, op2)){
-            return null;
-        } else {
+        Token resultToken = null;
+        if (defineOperacao(op1, op2)){
             String result = "";
         
             switch (operador.getFuncaoToken()){
@@ -83,15 +82,19 @@ public class Calculator {
                     result = String.valueOf(op1.getValorReal() / op2.getValorReal());
                     break;
             }
-            if (!result.isEmpty()){
-                operador.setPalavra(result);
-                operador.setFuncaoToken(funcao);
-                return operador;
-            } else {
+            if (result.isEmpty()){
                 System.err.println("Erro ao calcular - sem resultado");
-                return null;
+            } else {
+                resultToken = new Token();
+                resultToken.setLinha(operador.getLinha());
+                resultToken.setColuna(operador.getColuna());
+                resultToken.setOrdem(operador.getOrdem());
+                resultToken.setPosicao(operador.getPosicao());
+                resultToken.setPalavra(result);
+                resultToken.setFuncaoToken(funcao);
             }
         }
+        return resultToken;
     } 
     
     private boolean defineOperacao(Variavel op1, Variavel op2){
