@@ -248,20 +248,17 @@ public class FrmGui extends javax.swing.JFrame {
                         .addComponent(btnProcContinuar, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(317, 317, 317))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel1)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(lblVariavelEntrada, javax.swing.GroupLayout.PREFERRED_SIZE, 399, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jLabel2)
-                            .addComponent(jLabel3)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnVerificar, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(85, 85, 85)
-                                .addComponent(btnInicioPerc)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnProxPerc)))
-                        .addGap(0, 0, 0)))
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblVariavelEntrada, javax.swing.GroupLayout.PREFERRED_SIZE, 399, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel2)
+                    .addComponent(jLabel3)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(btnVerificar, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(85, 85, 85)
+                        .addComponent(btnInicioPerc)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnProxPerc)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -515,6 +512,11 @@ public class FrmGui extends javax.swing.JFrame {
     }//GEN-LAST:event_btnProxPercActionPerformed
 
     private void btnVerificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerificarActionPerformed
+        if (tokenAnt != null){
+            docIde.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
+            tokenAnt = null;
+        }
+        
         oldText = txpIde.getText();
         
         if (oldText.isEmpty()){
@@ -554,12 +556,14 @@ public class FrmGui extends javax.swing.JFrame {
             btnInicioPerc.setEnabled(false);
         } else {
             JOptionPane.showMessageDialog(this, "Nenhum erro encontrado - pronto para execução", "Verificação concluída", JOptionPane.INFORMATION_MESSAGE);
-            btnVerificar.setEnabled(false);
             
-            tabVariaveis.setRowCount(0);
+            exprIndex = 1;
+            nomeVar = "";
+            
             variaveis = new HashMap<>();
             varOrdem = new HashMap<>();
             expressao = expressoes.getFirst();
+            tabVariaveis.setRowCount(0);
             
             txpEntrada.setText("");
             txpEntrada.setEditable(false);
@@ -572,8 +576,7 @@ public class FrmGui extends javax.swing.JFrame {
             txpSaida.setText("");
             txpSaida.setBackground(backgroundDisabled);
         
-            nomeVar = "";
-            exprIndex = 1;
+            btnVerificar.setEnabled(false);
             btnProxPerc.setEnabled(true);
             btnInicioPerc.setEnabled(false);
         }
