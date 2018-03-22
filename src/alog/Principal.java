@@ -10,15 +10,17 @@ import alog.control.Parser;
 import alog.model.Expressao;
 import alog.view.FrmGui;
 import java.io.BufferedReader;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.LinkedList;
 
 /**
  *
  * @author Caique
  */
-public class Interpretador {
+public class Principal {
 
     /**
      * @param args the command line arguments
@@ -26,12 +28,13 @@ public class Interpretador {
     public static void main(String[] args) {
         if (args.length > 1 && args[0].equals("-console")){
             try {
-                StringBuffer codigofonte = new StringBuffer();
-                BufferedReader br = new BufferedReader(new FileReader(args[1]));
-                
+                StringBuilder codigofonte = new StringBuilder();
+                InputStreamReader fr = new InputStreamReader(new FileInputStream(args[1]), "UTF-8");
+                BufferedReader br = new BufferedReader(fr);
                 String texto;
                 while ((texto = br.readLine()) != null){
                     codigofonte.append(texto);
+                    codigofonte.append("\n");
                 }
                 
                 int errosParser = 0;
