@@ -124,6 +124,8 @@ public class Parser {
                     funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
                     funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
                     funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
+                    funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
+                    funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
                     add = true;
                     break;
                     
@@ -139,6 +141,15 @@ public class Parser {
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
                     funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
+                    funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
+                    funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
+                    funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
+                    add = true;
+                    break;
+                
+                case LIB_MATH_POT:
+                case LIB_MATH_RAIZ:
+                    funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
                     add = true;
                     break;
@@ -168,6 +179,9 @@ public class Parser {
                             funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
                             funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
                             funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
+                            funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
+                            funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
+                            funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
                             add = true;
                             break;
                     }
@@ -181,6 +195,8 @@ public class Parser {
                             funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
                             add = false;
                             break;
+                        case CHAMADA_FUNCAO:
+                            //expr.setTipo(TipoExpressao.OPERACAO_ARITMETICA);
                         case OPERACAO_ATRIBUICAO:
                         case OPERACAO_ARITMETICA:
                             balancParenteses --;
@@ -213,6 +229,15 @@ public class Parser {
                             funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
                             funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
                             funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
+                            add = false;
+                            break;
+                        case CHAMADA_FUNCAO:
+                            funcoesEsperadas.clear();
+                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                            funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
+                            funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
+                            funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
                             add = false;
                             break;
                     }
