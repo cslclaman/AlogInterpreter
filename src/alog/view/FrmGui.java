@@ -109,6 +109,9 @@ public class FrmGui extends javax.swing.JFrame {
         btnProcContinuar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Interpreter");
+        setMinimumSize(new java.awt.Dimension(800, 600));
+        setPreferredSize(new java.awt.Dimension(950, 720));
 
         jScrollPane2.setVerifyInputWhenFocusTarget(false);
 
@@ -179,6 +182,8 @@ public class FrmGui extends javax.swing.JFrame {
         txpSaida.setEditable(false);
         txpSaida.setBackground(javax.swing.UIManager.getDefaults().getColor("FormattedTextField.disabledBackground"));
         txpSaida.setFont(new java.awt.Font("Consolas", 0, 12)); // NOI18N
+        txpSaida.setMinimumSize(new java.awt.Dimension(13, 66));
+        txpSaida.setPreferredSize(new java.awt.Dimension(13, 66));
         jScrollPane6.setViewportView(txpSaida);
 
         jScrollPane7.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -226,21 +231,28 @@ public class FrmGui extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jScrollPane2)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 443, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 443, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnEntradaConfirma, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 311, Short.MAX_VALUE))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 443, Short.MAX_VALUE)
+                        .addGap(433, 433, 433))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane7, javax.swing.GroupLayout.DEFAULT_SIZE, 443, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnProcContinuar, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(317, 317, 317))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel1)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(lblVariavelEntrada, javax.swing.GroupLayout.PREFERRED_SIZE, 399, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 443, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel2)
                             .addComponent(jLabel3)
                             .addGroup(layout.createSequentialGroup()
@@ -248,12 +260,8 @@ public class FrmGui extends javax.swing.JFrame {
                                 .addGap(85, 85, 85)
                                 .addComponent(btnInicioPerc)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnProxPerc))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 443, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnProcContinuar, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                                .addComponent(btnProxPerc)))
+                        .addGap(0, 0, 0)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -265,9 +273,9 @@ public class FrmGui extends javax.swing.JFrame {
                     .addComponent(btnInicioPerc, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(btnProxPerc, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 278, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 425, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
@@ -279,17 +287,18 @@ public class FrmGui extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnProcContinuar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(btnProcContinuar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jScrollPane7, javax.swing.GroupLayout.DEFAULT_SIZE, 41, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jScrollPane6)
+                .addContainerGap())
         );
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
     
     private void btnInicioPercActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInicioPercActionPerformed
@@ -317,6 +326,14 @@ public class FrmGui extends javax.swing.JFrame {
             tokenAnt = null;
         }
         
+        txpEntrada.setText("");
+        txpEntrada.setEditable(false);
+        txpEntrada.setBackground(backgroundDisabled);
+        
+        docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
+        txpProcessamento.setText("");
+        txpProcessamento.setBackground(backgroundDisabled);
+        
         txpSaida.setText("");
         txpSaida.setBackground(backgroundDisabled);
         
@@ -324,7 +341,7 @@ public class FrmGui extends javax.swing.JFrame {
         variaveis = new HashMap<>();
         varOrdem = new HashMap<>();
         expressao = expressoes.getFirst();
-        
+       
     }//GEN-LAST:event_btnInicioPercActionPerformed
    
     private void btnProxPercActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProxPercActionPerformed
@@ -430,6 +447,7 @@ public class FrmGui extends javax.swing.JFrame {
                         if (variavel == null){
                             System.err.println("Variável " + nomeVar + " não encontrada");
                         } else {
+                            jTable1.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
                             switch (variavel.getTipo()){
                                 case REAL:
                                     int indicePonto = variavel.getValor().indexOf(".");
@@ -543,6 +561,14 @@ public class FrmGui extends javax.swing.JFrame {
             varOrdem = new HashMap<>();
             expressao = expressoes.getFirst();
             
+            txpEntrada.setText("");
+            txpEntrada.setEditable(false);
+            txpEntrada.setBackground(backgroundDisabled);
+
+            docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
+            txpProcessamento.setText("");
+            txpProcessamento.setBackground(backgroundDisabled);
+
             txpSaida.setText("");
             txpSaida.setBackground(backgroundDisabled);
         
@@ -629,10 +655,10 @@ public class FrmGui extends javax.swing.JFrame {
             jTable1.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
 
             btnProxPerc.setEnabled(true);
-            txpEntrada.setText("");
             lblVariavelEntrada.setText("");
-            txpEntrada.setEditable(false);
             btnEntradaConfirma.setEnabled(false);
+            txpEntrada.setText("");
+            txpEntrada.setEditable(false);
             txpEntrada.setBackground(backgroundDisabled);
         } 
     }//GEN-LAST:event_btnEntradaConfirmaActionPerformed
@@ -649,12 +675,8 @@ public class FrmGui extends javax.swing.JFrame {
     private void execOperacao(){
         btnProxPerc.setEnabled(false);
         
-        if (pilha == null){
-            pilha = new LinkedList<>();
-        }
-        if (saida == null){
-            saida = new LinkedList<>();
-        }
+        pilha = new LinkedList<>();
+        saida = new LinkedList<>();
         
         String exibicao = "";
         int col = 0;
@@ -727,6 +749,7 @@ public class FrmGui extends javax.swing.JFrame {
         switch (token.getFuncaoToken()){
             case IDENT_NOME_VARIAVEL:
                 temp = variaveis.get(token.getPalavra());
+                jTable1.addRowSelectionInterval(varOrdem.get(token.getPalavra()), varOrdem.get(token.getPalavra()));
                 break;
             case CONST_CARACTER:
                 temp = new Variavel(TipoVariavel.CARACTER, nomeVar);
@@ -750,6 +773,7 @@ public class FrmGui extends javax.swing.JFrame {
     private void btnProcContinuarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProcContinuarActionPerformed
         Calculator calculadora;
         boolean popTokens = true;
+        jTable1.clearSelection();
         
         while (!saida.isEmpty() && popTokens){
             Token token = saida.pop();
@@ -846,6 +870,8 @@ public class FrmGui extends javax.swing.JFrame {
         if (saida.isEmpty()){
             btnProcContinuar.setEnabled(false);
             btnProxPerc.setEnabled(true);
+            pilha = new LinkedList<>();
+            saida = new LinkedList<>();
         }
     }//GEN-LAST:event_btnProcContinuarActionPerformed
     
