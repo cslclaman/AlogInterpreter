@@ -676,6 +676,8 @@ public class FrmGui extends javax.swing.JFrame {
     
     private void execOperacao(){
         btnProxPerc.setEnabled(false);
+        int funcParam = 0;
+        int contParam = 0;
         
         pilha = new LinkedList<>();
         saida = new LinkedList<>();
@@ -705,6 +707,12 @@ public class FrmGui extends javax.swing.JFrame {
                 case CONST_INTEIRA:
                 case CONST_REAL:
                     saida.add(token);
+                    if (funcParam > 0){
+                        contParam++;
+                    }
+                    if (contParam > funcParam){
+                        System.err.println("Chamada de função inválida (muitos argumentos) - esperava " + funcParam + " argumentos, encontrou " + contParam);
+                    }
                     break;
 
                 case OP_ATRIBUICAO:
@@ -720,11 +728,35 @@ public class FrmGui extends javax.swing.JFrame {
                     pilha.push(token);
                     break;
                 
+                case LIB_MATH_POT:
+                    while (!pilha.isEmpty() && pilha.peek().getPrecedencia() > token.getPrecedencia()){
+                        saida.add(pilha.pop());
+                    }
+                    pilha.push(token);
+                    contParam = 0;
+                    funcParam = 2;
+                    break;
+                    
+                case LIB_MATH_RAIZ:
+                    while (!pilha.isEmpty() && pilha.peek().getPrecedencia() > token.getPrecedencia()){
+                        saida.add(pilha.pop());
+                    }
+                    pilha.push(token);
+                    contParam = 0;
+                    funcParam = 1;
+                    break;
+                    
                 case DELIM_PARENTESES_ABRE:
                     pilha.push(token);
                     break;
                     
                 case DELIM_PARENTESES_FECHA:
+                    if (contParam < funcParam){
+                        System.err.println("Chamada de função inválida (poucos argumentos) - esperava " + funcParam + " argumentos, encontrou " + contParam);
+                    } else {
+                        funcParam = 0;
+                        contParam = 0;
+                    }
                     while (!pilha.isEmpty()){
                         Token out = pilha.pop();
                         if (out.getFuncaoToken() == FuncaoToken.DELIM_PARENTESES_ABRE){
@@ -819,6 +851,34 @@ public class FrmGui extends javax.swing.JFrame {
                         popTokens = false;
                     }
                     break;
+                    
+                case LIB_MATH_POT:
+                    op2 = retornaVariavel(pilha.pop());
+                    op1 = retornaVariavel(pilha.pop());
+                    calculadora = new Calculator(token);
+                    resultToken = calculadora.executaFuncaoPot(op1, op2);
+                    if (resultToken == null){
+                        System.err.println("Operação não executada");
+                        popTokens = false;
+                    } else {
+                        pilha.push(resultToken);
+                        popTokens = false;
+                    }
+                    break;
+                    
+                case LIB_MATH_RAIZ:
+                    op1 = retornaVariavel(pilha.pop());
+                    calculadora = new Calculator(token);
+                    resultToken = calculadora.executaFuncaoRaiz(op1);
+                    if (resultToken == null){
+                        System.err.println("Operação não executada");
+                        popTokens = false;
+                    } else {
+                        pilha.push(resultToken);
+                        popTokens = false;
+                    }
+                    break;
+                    
                 case OP_ATRIBUICAO:
                     docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
                     imprimeTokens(token);
