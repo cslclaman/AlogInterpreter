@@ -95,8 +95,88 @@ public class Calculator {
             }
         }
         return resultToken;
-    } 
+    }
     
+    public Token executaFuncaoPot(Variavel op1, Variavel op2){
+        Token resultToken = null;
+        if (defineOperacao(op1, op2)){
+            String result = "";
+            String msg = "";
+            
+            try {
+                result = String.valueOf(Math.pow(op1.getValorReal(), op2.getValorReal()));
+                if (Double.parseDouble(result) == Integer.parseInt(result)){
+                    funcao = FuncaoToken.CONST_INTEIRA;
+                    result = String.valueOf(Integer.parseInt(result));
+                }
+            } catch (NumberFormatException ex){
+                msg = "\nExceção: " + ex.toString();
+            }
+            
+            if (result.isEmpty()){
+                System.err.println("Erro ao calcular - sem resultado" + msg);
+            } else {
+                resultToken = new Token();
+                resultToken.setLinha(operador.getLinha());
+                resultToken.setColuna(operador.getColuna());
+                resultToken.setOrdem(operador.getOrdem());
+                resultToken.setPosicao(operador.getPosicao());
+                resultToken.setPalavra(result);
+                resultToken.setFuncaoToken(funcao);
+            }
+        }
+        return resultToken;
+    }
+    
+    public Token executaFuncaoRaiz(Variavel op1){
+        Token resultToken = null;
+        if (defineOperacao(op1)){
+            String result = "";
+            String msg = "";
+            
+            try {
+                result = String.valueOf(Math.sqrt(op1.getValorReal()));
+                if (Double.parseDouble(result) == Integer.parseInt(result)){
+                    funcao = FuncaoToken.CONST_INTEIRA;
+                    result = String.valueOf(Integer.parseInt(result));
+                }
+            } catch (NumberFormatException ex){
+                msg = "\nExceção: " + ex.toString();
+            }
+            
+            if (result.isEmpty()){
+                System.err.println("Erro ao calcular - sem resultado" + msg);
+            } else {
+                resultToken = new Token();
+                resultToken.setLinha(operador.getLinha());
+                resultToken.setColuna(operador.getColuna());
+                resultToken.setOrdem(operador.getOrdem());
+                resultToken.setPosicao(operador.getPosicao());
+                resultToken.setPalavra(result);
+                resultToken.setFuncaoToken(funcao);
+            }
+        }
+        return resultToken;
+    }
+    
+    private boolean defineOperacao(Variavel op1){
+        switch (operador.getFuncaoToken()){
+            case LIB_MATH_RAIZ:
+                if (op1.getTipo() == TipoVariavel.CARACTER){
+                    System.err.println("Operação " + operador.getFuncaoToken()+ " inválida para tipo de dado Caracter");
+                    return false;
+                } else {
+                    funcao = FuncaoToken.CONST_REAL;
+                }
+                break;
+        }
+        if (!op1.isInicializada()){
+            System.err.println("Variável " + op1.getNome() + " não inicializada");
+            return false;
+        } 
+        return true;
+    }
+        
     private boolean defineOperacao(Variavel op1, Variavel op2){
         switch (operador.getFuncaoToken()){
             case OP_SOMA:
@@ -135,6 +215,16 @@ public class Calculator {
                     funcao = FuncaoToken.CONST_REAL;
                 }
                 break;
+                
+            case LIB_MATH_POT:
+                if (op1.getTipo() == TipoVariavel.CARACTER || op2.getTipo() == TipoVariavel.CARACTER){
+                    System.err.println("Operação " + operador.getFuncaoToken()+ " inválida para tipo de dado Caracter");
+                    return false;
+                } else {
+                    funcao = FuncaoToken.CONST_REAL;
+                }
+                break;
+                
         }
         if (!op1.isInicializada()){
             System.err.println("Variável " + op1.getNome() + " não inicializada");
