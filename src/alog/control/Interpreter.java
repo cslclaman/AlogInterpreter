@@ -187,6 +187,8 @@ public class Interpreter {
     public boolean execOperacao(Expressao expressao){
         LinkedList<Token> pilha = new LinkedList<>();
         LinkedList<Token> saida = new LinkedList<>();
+        int funcParam = 0;
+        int contParam = 0;
         
         while (expressao.hasNext()){
             Token token = expressao.getNext();
@@ -196,6 +198,17 @@ public class Interpreter {
                 case CONST_INTEIRA:
                 case CONST_REAL:
                     saida.add(token);
+                    if (funcParam > 0){
+                        contParam++;
+                    }
+                    if (contParam > funcParam){
+                        /*
+                        Essa parte de verificação de número de argumentos da função ficaria melhor no Parser
+                        (Esse tipo de erro não fica bem de ser lançado em tempo de execução)
+                        */
+                        System.err.println("Chamada de função inválida (muitos argumentos) - esperava " + funcParam + " argumentos, encontrou " + contParam);
+                        return false;
+                    }
                     break;
 
                 case OP_ATRIBUICAO:
@@ -211,11 +224,40 @@ public class Interpreter {
                     pilha.push(token);
                     break;
                 
+                case LIB_MATH_POT:
+                    while (!pilha.isEmpty() && pilha.peek().getPrecedencia() > token.getPrecedencia()){
+                        saida.add(pilha.pop());
+                    }
+                    pilha.push(token);
+                    contParam = 0;
+                    funcParam = 2;
+                    break;
+                    
+                case LIB_MATH_RAIZ:
+                    while (!pilha.isEmpty() && pilha.peek().getPrecedencia() > token.getPrecedencia()){
+                        saida.add(pilha.pop());
+                    }
+                    pilha.push(token);
+                    contParam = 0;
+                    funcParam = 1;
+                    break;
+                    
                 case DELIM_PARENTESES_ABRE:
                     pilha.push(token);
                     break;
                     
                 case DELIM_PARENTESES_FECHA:
+                    if (contParam < funcParam){
+                        /*
+                        Essa parte de verificação de número de argumentos da função ficaria melhor no Parser
+                        (Esse tipo de erro não fica bem de ser lançado em tempo de execução)
+                        */
+                        System.err.println("Chamada de função inválida (poucos argumentos) - esperava " + funcParam + " argumentos, encontrou " + contParam);
+                        return false;
+                    } else {
+                        funcParam = 0;
+                        contParam = 0;
+                    }
                     while (!pilha.isEmpty()){
                         Token out = pilha.pop();
                         if (out.getFuncaoToken() == FuncaoToken.DELIM_PARENTESES_ABRE){
@@ -243,6 +285,7 @@ public class Interpreter {
                 case CONST_REAL:
                     pilha.push(token);
                     break;
+                    
                 case OP_SOMA:
                 case OP_SUBTRACAO:
                 case OP_MULTIPLICACAO:
@@ -260,6 +303,30 @@ public class Interpreter {
                         pilha.push(token);
                     }
                     break;
+                    
+                case LIB_MATH_POT:
+                    op2 = retornaVariavel(pilha.pop());
+                    op1 = retornaVariavel(pilha.pop());
+                    calculadora = new Calculator(token);
+                    token = calculadora.executaFuncaoPot(op1, op2);
+                    if (token == null){
+                        return false;
+                    } else {
+                        pilha.push(token);
+                    }
+                    break;
+                    
+                case LIB_MATH_RAIZ:
+                    op1 = retornaVariavel(pilha.pop());
+                    calculadora = new Calculator(token);
+                    token = calculadora.executaFuncaoRaiz(op1);
+                    if (token == null){
+                        return false;
+                    } else {
+                        pilha.push(token);
+                    }
+                    break;
+                    
                 case OP_ATRIBUICAO:
                     op1 = retornaVariavel(pilha.pop());
                     Token tokVar = pilha.pop();
