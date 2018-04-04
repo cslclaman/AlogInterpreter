@@ -44,6 +44,20 @@ public class Expressao {
         return texto;
     }
 
+    /**
+     * Retorna expressão otimizada para execução. Ex.: {@code Escreva "Idade = " VarIdade }
+     * <br>Note que esse retorno representa os tokens contidos na expressão,
+     * com alguns delimitadores e símbolos removidos pelo parser para facilitar a execução.
+     * @return {@code Escreva "Idade = " VarIdade }
+     */
+    public String printTokens() {
+        StringBuilder str = new StringBuilder();
+        for (Token t : tokens){
+            str.append(" ").append(t.getPalavra());
+        }
+        return str.toString().trim();
+    }
+    
     public void setTexto(String texto) {
         this.texto = texto;
     }
@@ -114,11 +128,7 @@ public class Expressao {
      */
     @Override
     public String toString() {
-        String str = tipo + " -";
-        for (Token t : tokens){
-            str += " " + t.getPalavra();
-        }
-        return str;
+        return tipo + " - " + printTokens();
     }
     
     
