@@ -34,6 +34,12 @@ public class Expressao {
         this.linha = linha;
     }
 
+    /**
+     * Retorna expressão completa, aproximadamente como foi escrita. Ex.: {@code "Var <- Op1 + ( Op2 - Op3 ) ;" }
+     * <br>Note que esse retorno não é necessariamente igual aos tokens realmente armazenados - 
+     * o Parser já pode ter removido alguns delimitadores e símbolos para facilitar a execução.
+     * @return {@code "Var <- Op1 + ( Op2 - Op3 ) ;" }
+     */
     public String getTexto() {
         return texto;
     }
@@ -102,6 +108,10 @@ public class Expressao {
         this.tipo = tipo;
     }
 
+    /**
+     * Retorna descrição da expressão e seu conteúdo já tratado (sem ponto e vírgula, sem parênteses em alguns casos. Ex.: {@code "Leia Op1 Op2 Op3" }
+     * @return {@code "ENTRADA DE DADOS - Leia Op1 Op2 Op3" }
+     */
     @Override
     public String toString() {
         String str = tipo + " -";
