@@ -149,6 +149,7 @@ public class Parser {
                 
                 case LIB_MATH_POT:
                 case LIB_MATH_RAIZ:
+                    expr.setTipo(TipoExpressao.CHAMADA_FUNCAO);
                     funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
                     add = true;
@@ -232,11 +233,12 @@ public class Parser {
                             add = false;
                             break;
                         case CHAMADA_FUNCAO:
+                        case OPERACAO_ARITMETICA:
+                        case OPERACAO_ATRIBUICAO:
                             funcoesEsperadas.clear();
                             funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
                             funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
                             funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
-                            funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
                             funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
                             add = false;
                             break;
@@ -296,6 +298,7 @@ public class Parser {
 
                                 funcoesEsperadas.clear();
                                 funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
+                                funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
                                 funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
                                 funcoesEsperadas.add(FuncaoToken.OP_SOMA);
                                 funcoesEsperadas.add(FuncaoToken.OP_SUBTRACAO);
