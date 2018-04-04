@@ -42,3 +42,4 @@ nb-configuration.xml
 
 # Test Files #
 test/alog/test/
+test_*.txt
