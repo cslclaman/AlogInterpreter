@@ -170,6 +170,25 @@ public class Token {
                         funcaoToken = FuncaoToken.LIB_MATH_RAIZ;
                         precedencia = PRECEDENCIA_FUNCAO;
                         break;
+                    case "se":
+                        funcaoToken = FuncaoToken.RES_COND_SE;
+                        break;
+                    case "entao":
+                    case "então":
+                        funcaoToken = FuncaoToken.RES_COND_ENTAO;
+                        break;
+                    case "senao":
+                    case "senão":
+                        funcaoToken = FuncaoToken.RES_COND_SENAO;
+                        break;
+                    case "e":
+                        funcaoToken = FuncaoToken.OP_E;
+                        precedencia = PRECEDENCIA_OP_LOGICO_E;
+                        break;
+                    case "ou":
+                        funcaoToken = FuncaoToken.OP_OU;
+                        precedencia = PRECEDENCIA_OP_LOGICO_OU;
+                        break;
                     default:
                         funcaoToken = FuncaoToken._INDEF_ALFABETICO;
                         break;
