@@ -6,7 +6,6 @@
 package alog.control;
 
 import alog.model.FuncaoToken;
-import alog.model.TipoToken;
 import alog.model.TipoVariavel;
 import alog.model.Token;
 import alog.model.Variavel;
@@ -159,6 +158,70 @@ public class Calculator {
         return resultToken;
     }
     
+    public Token executaOperacaoRelacional(Variavel op1, Variavel op2){
+        Token resultToken = null;
+        if (defineOperacao(op1, op2)){
+            Boolean result = null;
+            
+            switch (operador.getFuncaoToken()){
+                case OP_MAIOR:
+                    if (op1.getTipo() == TipoVariavel.CARACTER){
+                        result = op1.getValor().compareTo(op2.getValor()) > 0;
+                    } else {
+                        result = op1.getValorReal() > op2.getValorReal();
+                    }
+                    break;
+                case OP_MAIOR_IGUAL:
+                    if (op1.getTipo() == TipoVariavel.CARACTER){
+                        result = op1.getValor().compareTo(op2.getValor()) >= 0;
+                    } else {
+                        result = op1.getValorReal() >= op2.getValorReal();
+                    }
+                    break;
+                case OP_MENOR:
+                    if (op1.getTipo() == TipoVariavel.CARACTER){
+                        result = op1.getValor().compareTo(op2.getValor()) < 0;
+                    } else {
+                        result = op1.getValorReal() < op2.getValorReal();
+                    }
+                    break;
+                case OP_MENOR_IGUAL:
+                    if (op1.getTipo() == TipoVariavel.CARACTER){
+                        result = op1.getValor().compareTo(op2.getValor()) <= 0;
+                    } else {
+                        result = op1.getValorReal() <= op2.getValorReal();
+                    }
+                    break;
+                case OP_IGUAL:
+                    if (op1.getTipo() == TipoVariavel.CARACTER){
+                        result = op1.getValor().compareTo(op2.getValor()) == 0;
+                    } else {
+                        result = op1.getValorReal() == op2.getValorReal();
+                    }
+                    break;
+                case OP_DIFERENTE:
+                    if (op1.getTipo() == TipoVariavel.CARACTER){
+                        result = op1.getValor().compareTo(op2.getValor()) != 0;
+                    } else {
+                        result = op1.getValorReal() != op2.getValorReal();
+                    }
+                    break;
+            }
+            if (result == null){
+                System.err.println("Erro ao calcular - sem resultado (operação inválida)");
+            } else {
+                resultToken = new Token();
+                resultToken.setLinha(operador.getLinha());
+                resultToken.setColuna(operador.getColuna());
+                resultToken.setOrdem(operador.getOrdem());
+                resultToken.setPosicao(operador.getPosicao());
+                resultToken.setPalavra(result ? "1" : "0");
+                resultToken.setFuncaoToken(funcao);
+            }
+        }
+        return resultToken;
+    }
+    
     private boolean defineOperacao(Variavel op1){
         switch (operador.getFuncaoToken()){
             case LIB_MATH_RAIZ:
@@ -225,6 +288,22 @@ public class Calculator {
                 }
                 break;
                 
+            case OP_MAIOR:
+            case OP_MAIOR_IGUAL:
+            case OP_MENOR:
+            case OP_MENOR_IGUAL:
+            case OP_IGUAL:
+            case OP_DIFERENTE:
+                if ( (op1.getTipo() == TipoVariavel.CARACTER && op2.getTipo() != TipoVariavel.CARACTER) ||
+                     (op2.getTipo() == TipoVariavel.CARACTER && op1.getTipo() != TipoVariavel.CARACTER)
+                        ){
+                    System.err.println("Operação " + operador.getFuncaoToken()+ " inválida"
+                            + " - não é possível comparar " + op1.getTipo() + " com " + op2.getTipo());
+                    return false;
+                } else {
+                    funcao = FuncaoToken.CONST_INTEIRA;
+                }
+                break;
         }
         if (!op1.isInicializada()){
             System.err.println("Variável " + op1.getNome() + " não inicializada");
