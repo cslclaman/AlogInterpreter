@@ -1,0 +1,16 @@
+Início
+    Real: X1, X2, Y1, Y2;
+    Real: DifX, DifY, PotX, PotY, DifPot, Res;
+    
+    Leia(X1, Y1);
+    Leia(X2, Y2);
+    
+    DifX <- X2 - X1;
+    DifY <- Y2 - Y1;
+    PotX <- Pot(DifX, 2);
+    PotY <- Pot(DifY, 2);
+    DifPot <- PotX + PotY;
+    Res <- Raiz(DifPot);
+    
+    Escreva(Res);
+Fim
