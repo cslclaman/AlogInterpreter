@@ -10,8 +10,8 @@ Confira [Exemplos de Algoritmos](https://github.com/cslclaman/AlogInterpreter/tr
 Referência: FORBELLONE, A. L. V.; EBERSPACHER, H. F. __Lógica de Programação - A construção de algoritmos e estrutura de dados__. 3ª Ed. São Paulo: Makron Books, 2005.
 
 ## Que tipo de algoritmo ele executa (por enquanto)
-* Algoritmos sequenciais básicos [(arquivos de exemplo 01 a 05)](https://github.com/cslclaman/AlogInterpreter/tree/master/exemplos_algoritmos).
-* Algoritmos condicionais [(arquivos de exemplo 06)](https://github.com/cslclaman/AlogInterpreter/tree/master/exemplos_algoritmos).
+* Algoritmos sequenciais básicos [(arquivos de exemplo 01 a 06a)](https://github.com/cslclaman/AlogInterpreter/tree/master/exemplos_algoritmos).
+* Algoritmos condicionais [(arquivos de exemplo 06b a 08)](https://github.com/cslclaman/AlogInterpreter/tree/master/exemplos_algoritmos).
 
 ## O que já foi implementado
 * Sistema interpretador via console/arquivo de texto (rode com argumentos: -console <NOME DO ARQUIVO>)
@@ -29,11 +29,12 @@ Referência: FORBELLONE, A. L. V.; EBERSPACHER, H. F. __Lógica de Programação
     * Executa tudo o que o interpretador executa, só que de maneira interativa.
 
 ## Próximos passos
+* Operador "-" unário
 * Fazer algoritmos de exemplo de uso de funções matemáticas
 * Fazer mais algoritmos de exemplo para estrutura condicional
 * Implementar bloco condicional (SE/SENÃO com mais de uma linha de instruções)
 * Implementar estruturas de repetição (PARA, FAÇA e ENQUANTO)
-* Resolução de expressões aritméticas em funções (ESCREVA/RAIZ/POW) e em expressões lógicas/relacionais
+* Resolução de expressões aritméticas em funções (ESCREVA/RAIZ/POT) e em expressões lógicas/relacionais
 * Melhorar apresentação de erros (principalmente os exibidos pelo parser), evitando mostrar tudo no console
 
 ## Erros e bugs conhecidos
