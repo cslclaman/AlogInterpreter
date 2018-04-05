@@ -1,0 +1,6 @@
+Inicio
+    Real : Nota1, Nota2, Nota3, Nota4, Media;
+    Leia(Nota1, Nota2, Nota3, Nota4);
+    Media <- (Nota1 + Nota2 + Nota3 + Nota4) / 4;
+    Escreva(Media);
+Fim
