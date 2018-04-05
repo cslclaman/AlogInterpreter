@@ -7,12 +7,12 @@ package alog.control;
 
 import alog.model.Expressao;
 import alog.model.FuncaoToken;
+import alog.model.TipoExpressao;
 import alog.model.TipoVariavel;
 import alog.model.Token;
 import alog.model.Variavel;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Locale;
 
 /**
  * Classe que recebe uma expressão e executa.
@@ -21,6 +21,8 @@ import java.util.Locale;
 public class Interpreter {
     private int bloco;
     private HashMap<String,Variavel> variaveis;
+    private boolean condResult = false;
+    private boolean execProx = true;
     
     public Interpreter(){
         bloco = 0;
@@ -33,6 +35,10 @@ public class Interpreter {
     }
     
     public boolean executa(Expressao expressao){
+        if (!execProx){
+            execProx = true;
+            return true;
+        }
         switch(expressao.getTipo()){
             case DELIM_BLOCO:
                 return execDelimBloco(expressao);
@@ -45,6 +51,8 @@ public class Interpreter {
             case OPERACAO_ATRIBUICAO:
             case OPERACAO_ARITMETICA:
                 return execOperacao(expressao);
+            case OPERACAO_LOGICA:
+                return execCondicional(expressao);
             case _INVALIDO:
                 System.err.println("Expressão inválida");
                 System.err.println("\t" + expressao.getTexto());
@@ -366,6 +374,215 @@ public class Interpreter {
             }
         }
         
+        return true;
+    }
+    
+    public boolean execCondicional(Expressao expressao){
+        switch (expressao.getNext().getFuncaoToken()){
+            case RES_COND_SE:
+                LinkedList<Token> pilha = new LinkedList<>();
+                LinkedList<Token> saida = new LinkedList<>();
+                int funcParam = 0;
+                int contParam = 0;
+
+                while (expressao.hasNext()){
+                    Token token = expressao.getNext();
+                    switch (token.getFuncaoToken()){
+                        case IDENT_NOME_VARIAVEL:
+                        case CONST_CARACTER:
+                        case CONST_INTEIRA:
+                        case CONST_REAL:
+                            saida.add(token);
+                            if (funcParam > 0){
+                                contParam++;
+                            }
+                            if (contParam > funcParam){
+                                /*
+                                Essa parte de verificação de número de argumentos da função ficaria melhor no Parser
+                                (Esse tipo de erro não fica bem de ser lançado em tempo de execução)
+                                */
+                                System.err.println("Chamada de função inválida (muitos argumentos) - esperava " + funcParam + " argumentos, encontrou " + contParam);
+                                return false;
+                            }
+                            break;
+
+                        case OP_ATRIBUICAO:
+                        case OP_SOMA:
+                        case OP_SUBTRACAO:
+                        case OP_MULTIPLICACAO:
+                        case OP_DIV_INTEIRA:
+                        case OP_DIV_REAL:
+                        case OP_MOD:
+                        case OP_MAIOR:
+                        case OP_MAIOR_IGUAL:
+                        case OP_MENOR:
+                        case OP_MENOR_IGUAL:
+                        case OP_IGUAL:
+                        case OP_DIFERENTE:
+                        case OP_E:
+                        case OP_OU:
+                            while (!pilha.isEmpty() && pilha.peek().getPrecedencia() > token.getPrecedencia()){
+                                saida.add(pilha.pop());
+                            }
+                            pilha.push(token);
+                            break;
+
+                        case LIB_MATH_POT:
+                            while (!pilha.isEmpty() && pilha.peek().getPrecedencia() > token.getPrecedencia()){
+                                saida.add(pilha.pop());
+                            }
+                            pilha.push(token);
+                            contParam = 0;
+                            funcParam = 2;
+                            break;
+
+                        case LIB_MATH_RAIZ:
+                            while (!pilha.isEmpty() && pilha.peek().getPrecedencia() > token.getPrecedencia()){
+                                saida.add(pilha.pop());
+                            }
+                            pilha.push(token);
+                            contParam = 0;
+                            funcParam = 1;
+                            break;
+
+                        case DELIM_PARENTESES_ABRE:
+                            pilha.push(token);
+                            break;
+
+                        case DELIM_PARENTESES_FECHA:
+                            if (contParam < funcParam){
+                                /*
+                                Essa parte de verificação de número de argumentos da função ficaria melhor no Parser
+                                (Esse tipo de erro não fica bem de ser lançado em tempo de execução)
+                                */
+                                System.err.println("Chamada de função inválida (poucos argumentos) - esperava " + funcParam + " argumentos, encontrou " + contParam);
+                                return false;
+                            } else {
+                                funcParam = 0;
+                                contParam = 0;
+                            }
+                            while (!pilha.isEmpty()){
+                                Token out = pilha.pop();
+                                if (out.getFuncaoToken() == FuncaoToken.DELIM_PARENTESES_ABRE){
+                                    break;
+                                } else {
+                                    saida.add(out);
+                                }
+                            }
+                            break;
+                            
+                        case RES_COND_ENTAO:
+                            break;
+                    }
+                }
+                while (!pilha.isEmpty()){
+                    saida.add(pilha.pop());
+                }
+
+                Calculator calculadora;
+
+                while (!saida.isEmpty()){
+                    Token token = saida.pop();
+                    Variavel op1, op2;
+                    switch (token.getFuncaoToken()){
+                        case IDENT_NOME_VARIAVEL:
+                        case CONST_CARACTER:
+                        case CONST_INTEIRA:
+                        case CONST_REAL:
+                            pilha.push(token);
+                            break;
+
+                        case OP_SOMA:
+                        case OP_SUBTRACAO:
+                        case OP_MULTIPLICACAO:
+                        case OP_DIV_INTEIRA:
+                        case OP_DIV_REAL:
+                        case OP_MOD:
+                            op2 = retornaVariavel(pilha.pop());
+                            op1 = retornaVariavel(pilha.pop());
+
+                            calculadora = new Calculator(token);
+                            token = calculadora.executaOperacaoAritmetica(op1, op2);
+                            if (token == null){
+                                return false;
+                            } else {
+                                pilha.push(token);
+                            }
+                            break;
+
+                        case OP_MAIOR:
+                        case OP_MAIOR_IGUAL:
+                        case OP_MENOR:
+                        case OP_MENOR_IGUAL:
+                        case OP_IGUAL:
+                        case OP_DIFERENTE:
+                            op2 = retornaVariavel(pilha.pop());
+                            op1 = retornaVariavel(pilha.pop());
+
+                            calculadora = new Calculator(token);
+                            token = calculadora.executaOperacaoRelacional(op1, op2);
+                            if (token == null){
+                                return false;
+                            } else {
+                                pilha.push(token);
+                            }
+                            break;
+                            
+                        case OP_E:
+                        case OP_OU:
+                            op2 = retornaVariavel(pilha.pop());
+                            op1 = retornaVariavel(pilha.pop());
+
+                            calculadora = new Calculator(token);
+                            token = calculadora.executaOperacaoLogica(op1, op2);
+                            if (token == null){
+                                return false;
+                            } else {
+                                pilha.push(token);
+                            }
+                            break;
+                        
+                        case LIB_MATH_POT:
+                            op2 = retornaVariavel(pilha.pop());
+                            op1 = retornaVariavel(pilha.pop());
+                            calculadora = new Calculator(token);
+                            token = calculadora.executaFuncaoPot(op1, op2);
+                            if (token == null){
+                                return false;
+                            } else {
+                                pilha.push(token);
+                            }
+                            break;
+
+                        case LIB_MATH_RAIZ:
+                            op1 = retornaVariavel(pilha.pop());
+                            calculadora = new Calculator(token);
+                            token = calculadora.executaFuncaoRaiz(op1);
+                            if (token == null){
+                                return false;
+                            } else {
+                                pilha.push(token);
+                            }
+                            break;
+                    }
+                }
+                if (pilha.isEmpty()){
+                    System.err.println("Erro na execução - pilha vazia");
+                    return false;
+                } 
+                Token t = pilha.pop();
+                Variavel r = retornaVariavel(t);
+                if (r == null || r.getTipo() != TipoVariavel.INTEIRO){
+                    System.err.println("Erro na execução - variável para token " + t + " inválida");
+                    return false;
+                }
+                condResult = r.getValorInteiro() == 1;
+                execProx = condResult;
+                break;
+            case RES_COND_SENAO:
+                execProx = !condResult;
+                break;
+        }
         return true;
     }
     
