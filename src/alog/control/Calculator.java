@@ -222,6 +222,34 @@ public class Calculator {
         return resultToken;
     }
     
+    public Token executaOperacaoLogica(Variavel op1, Variavel op2){
+        Token resultToken = null;
+        if (defineOperacao(op1, op2)){
+            Boolean result = null;
+            
+            switch (operador.getFuncaoToken()){
+                case OP_E:
+                    result = op1.getValorInteiro() + op2.getValorInteiro() == 2;
+                    break;
+                case OP_OU:
+                    result = op1.getValorInteiro() + op2.getValorInteiro() > 0;
+                    break;
+            }
+            if (result == null){
+                System.err.println("Erro ao calcular - sem resultado (operação inválida)");
+            } else {
+                resultToken = new Token();
+                resultToken.setLinha(operador.getLinha());
+                resultToken.setColuna(operador.getColuna());
+                resultToken.setOrdem(operador.getOrdem());
+                resultToken.setPosicao(operador.getPosicao());
+                resultToken.setPalavra(result ? "1" : "0");
+                resultToken.setFuncaoToken(funcao);
+            }
+        }
+        return resultToken;
+    }
+    
     private boolean defineOperacao(Variavel op1){
         switch (operador.getFuncaoToken()){
             case LIB_MATH_RAIZ:
@@ -300,6 +328,16 @@ public class Calculator {
                     System.err.println("Operação " + operador.getFuncaoToken()+ " inválida"
                             + " - não é possível comparar " + op1.getTipo() + " com " + op2.getTipo());
                     return false;
+                } else {
+                    funcao = FuncaoToken.CONST_INTEIRA;
+                }
+                break;
+                
+            case OP_E:
+            case OP_OU:
+                if ( op1.getTipo() != TipoVariavel.INTEIRO || op2.getTipo() != TipoVariavel.INTEIRO ){
+                    System.err.println("Operação " + operador.getFuncaoToken()+ " inválida"
+                            + " - operações lógicas só são possíveis entre variáveis lógicas (inteiros 0 e 1)");
                 } else {
                     funcao = FuncaoToken.CONST_INTEIRA;
                 }
