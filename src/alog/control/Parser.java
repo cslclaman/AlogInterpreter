@@ -319,6 +319,23 @@ public class Parser {
                             funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
                             add = true;
                             break;
+                        case OPERACAO_ATRIBUICAO:
+                            funcoesEsperadas.clear();
+                            funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
+                            add = true;
+                            break;
+                        case OPERACAO_LOGICA:
+                            funcoesEsperadas.clear();
+                            funcoesEsperadas.add(FuncaoToken.OP_MAIOR);
+                            funcoesEsperadas.add(FuncaoToken.OP_MAIOR_IGUAL);
+                            funcoesEsperadas.add(FuncaoToken.OP_MENOR);
+                            funcoesEsperadas.add(FuncaoToken.OP_MENOR_IGUAL);
+                            funcoesEsperadas.add(FuncaoToken.OP_IGUAL);
+                            funcoesEsperadas.add(FuncaoToken.OP_DIFERENTE);
+                            funcoesEsperadas.add(FuncaoToken.OP_E);
+                            funcoesEsperadas.add(FuncaoToken.OP_OU);
+                            funcoesEsperadas.add(FuncaoToken.RES_COND_ENTAO);
+                            add = true;
                     }
                     break;
                     
