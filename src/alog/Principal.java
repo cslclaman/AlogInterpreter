@@ -12,7 +12,6 @@ import alog.model.Expressao;
 import alog.view.FrmGui;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
