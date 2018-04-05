@@ -1,0 +1,17 @@
+Inicio
+    Inteiro: Codigo, Qtd;
+    Real: ValConta, PrecoUnit;
+    Leia(Codigo, Qtd);
+    Se Codigo = 1 Então
+        PrecoUnit <- 4;
+    Se Codigo = 2 Então
+        PrecoUnit <- 4.5;
+    Se Codigo = 3 Então
+        PrecoUnit <- 5;
+    Se Codigo = 4 Então
+        PrecoUnit <- 2;
+    Se Codigo = 5 Então
+        PrecoUnit <- 1.5;
+    ValConta <- PrecoUnit * Qtd;
+    Escreva(ValConta);
+Fim
