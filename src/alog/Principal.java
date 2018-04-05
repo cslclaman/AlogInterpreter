@@ -7,6 +7,7 @@ package alog;
 
 import alog.control.Interpreter;
 import alog.control.Parser;
+import alog.control.Scanner;
 import alog.model.Expressao;
 import alog.view.FrmGui;
 import java.io.BufferedReader;
@@ -38,7 +39,8 @@ public class Principal {
                 }
                 
                 int errosParser = 0;
-                Parser parser = new Parser(codigofonte.toString());
+                Scanner scanner = new Scanner(codigofonte.toString());
+                Parser parser = new Parser(scanner.getAll());
                 LinkedList<Expressao> expressoes = new LinkedList<>();
                 while (parser.hasNext()){
                     Expressao e = parser.parseExpression();

@@ -7,6 +7,7 @@ package alog.view;
 
 import alog.control.Calculator;
 import alog.control.Parser;
+import alog.control.Scanner;
 import alog.model.Expressao;
 import alog.model.FuncaoToken;
 import alog.model.TipoVariavel;
@@ -523,7 +524,8 @@ public class FrmGui extends javax.swing.JFrame {
             return;
         }
         
-        Parser parser = new Parser(oldText);
+        Scanner scanner = new Scanner(oldText);
+        Parser parser = new Parser(scanner.getAll());
         expressoes = new LinkedList<>();
         int erros = 0;
         

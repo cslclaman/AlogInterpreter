@@ -25,9 +25,8 @@ public class Parser {
     private int pos;
     private String erro;
     
-    public Parser (String texto){
-        Scanner scanner = new Scanner(texto);
-        tokens = scanner.getAll();
+    public Parser (ArrayList<Token> tokens){
+        this.tokens = tokens;
         
         variaveis = new ArrayList<>();
         funcoesEsperadas = new ArrayList<>();
