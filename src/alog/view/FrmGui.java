@@ -299,6 +299,7 @@ public class FrmGui extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
     
     private void btnInicioPercActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInicioPercActionPerformed
+        operacaoCondicional = false;
         exprIndex = 1;
         nomeVar = "";
         btnProxPerc.setEnabled(true);
@@ -340,7 +341,7 @@ public class FrmGui extends javax.swing.JFrame {
         expressao = expressoes.getFirst();
        
     }//GEN-LAST:event_btnInicioPercActionPerformed
-   
+    
     private void btnProxPercActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProxPercActionPerformed
         btnInicioPerc.setEnabled(true);
         
@@ -359,7 +360,12 @@ public class FrmGui extends javax.swing.JFrame {
         txpProcessamento.setBackground(backgroundDisabled);
         
         if (!expressao.hasNext()){
+            if (!execProx){
+                execProx = true;
+                exprIndex++;
+            }
             expressao = expressoes.get(exprIndex++);
+            
         }
         
         if (exprIndex - 1 >= expressoes.size()){
@@ -481,13 +487,46 @@ public class FrmGui extends javax.swing.JFrame {
                 try {
                     newToken.atualizaPalavra(docIde.getText(posInicio, offset));
                 } catch (BadLocationException ex){
-                    newToken.atualizaPalavra(txpIde.getText().substring(posInicio, posInicio + offset));
+                    System.err.println(ex.toString());
                 }
                 token = newToken;
                 
                 expressao.setIndice(0);
+                operacaoCondicional = false;
                 execOperacao();
                 
+                break;
+                
+            case OPERACAO_LOGICA:
+                docIde.setCharacterAttributes(token.getPosicao(), token.getTamanho(), stylePlain, true);
+                switch (token.getFuncaoToken()){
+                    case RES_COND_SE:
+                        ultimoExpr = expressao.getTokenAt(expressao.getNumTokens() - 1);
+                        newToken = new Token();
+                        posInicio = token.getPosicao();
+                        offset = (ultimoExpr.getPosicao() + ultimoExpr.getTamanho()) - posInicio;
+                        docIde.setCharacterAttributes(posInicio, offset, stylePerc, true);
+
+                        newToken.setLinha(token.getLinha());
+                        newToken.setColuna(token.getColuna());
+                        newToken.setPosicao(token.getPosicao());
+                        newToken.setOrdem(token.getOrdem());
+                        try {
+                            newToken.atualizaPalavra(docIde.getText(posInicio, offset));
+                        } catch (BadLocationException ex){
+                            System.err.println(ex.toString());
+                        }
+                        token = newToken;
+
+                        expressao.setIndice(1);
+                        operacaoCondicional = true;
+                        execOperacao();
+
+                        break;
+                    case RES_COND_SENAO:
+                        execProx = !condResult;
+                        break;
+                }
                 break;
                 
             case _INVALIDO:
@@ -559,6 +598,7 @@ public class FrmGui extends javax.swing.JFrame {
             JOptionPane.showMessageDialog(this, "Nenhum erro encontrado - pronto para execução", "Verificação concluída", JOptionPane.INFORMATION_MESSAGE);
             
             exprIndex = 1;
+            operacaoCondicional = false;
             nomeVar = "";
             
             variaveis = new HashMap<>();
@@ -724,6 +764,14 @@ public class FrmGui extends javax.swing.JFrame {
                 case OP_DIV_INTEIRA:
                 case OP_DIV_REAL:
                 case OP_MOD:
+                case OP_MAIOR:
+                case OP_MAIOR_IGUAL:
+                case OP_MENOR:
+                case OP_MENOR_IGUAL:
+                case OP_IGUAL:
+                case OP_DIFERENTE:
+                case OP_E:
+                case OP_OU:
                     while (!pilha.isEmpty() && pilha.peek().getPrecedencia() > token.getPrecedencia()){
                         saida.add(pilha.pop());
                     }
@@ -767,6 +815,9 @@ public class FrmGui extends javax.swing.JFrame {
                             saida.add(out);
                         }
                     }
+                    break;
+                    
+                case RES_COND_ENTAO:
                     break;
             }
         }
@@ -844,6 +895,66 @@ public class FrmGui extends javax.swing.JFrame {
                     
                     calculadora = new Calculator(token);
                     resultToken = calculadora.executaOperacaoAritmetica(op1, op2);
+                    
+                    if (resultToken == null){
+                        System.err.println("Operação não executada");
+                        popTokens = false;
+                    } else {
+                        pilha.push(resultToken);
+                        popTokens = false;
+                    }
+                    break;
+                    
+                case OP_MAIOR:
+                case OP_MAIOR_IGUAL:
+                case OP_MENOR:
+                case OP_MENOR_IGUAL:
+                case OP_IGUAL:
+                case OP_DIFERENTE:
+                    docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
+                    imprimeTokens(token);
+                    
+                    tok2 = pilha.pop();
+                    tok1 = pilha.pop();
+                    op2 = retornaVariavel(tok2);
+                    op1 = retornaVariavel(tok1);
+                    
+                    docProc.setCharacterAttributes(tok1.getPosicao(), tok1.getTamanho(), stylePerc, true);
+                    docProc.setCharacterAttributes(token.getPosicao(), token.getTamanho(), styleOper, true);
+                    docProc.setCharacterAttributes(tok2.getPosicao(), tok2.getTamanho(), stylePerc, true);
+                    
+                    token.setColuna(tok1.getColuna());
+                    
+                    calculadora = new Calculator(token);
+                    resultToken = calculadora.executaOperacaoRelacional(op1, op2);
+                    
+                    if (resultToken == null){
+                        System.err.println("Operação não executada");
+                        popTokens = false;
+                    } else {
+                        pilha.push(resultToken);
+                        popTokens = false;
+                    }
+                    break;
+                    
+                case OP_E:
+                case OP_OU:
+                    docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
+                    imprimeTokens(token);
+                    
+                    tok2 = pilha.pop();
+                    tok1 = pilha.pop();
+                    op2 = retornaVariavel(tok2);
+                    op1 = retornaVariavel(tok1);
+                    
+                    docProc.setCharacterAttributes(tok1.getPosicao(), tok1.getTamanho(), stylePerc, true);
+                    docProc.setCharacterAttributes(token.getPosicao(), token.getTamanho(), styleOper, true);
+                    docProc.setCharacterAttributes(tok2.getPosicao(), tok2.getTamanho(), stylePerc, true);
+                    
+                    token.setColuna(tok1.getColuna());
+                    
+                    calculadora = new Calculator(token);
+                    resultToken = calculadora.executaOperacaoLogica(op1, op2);
                     
                     if (resultToken == null){
                         System.err.println("Operação não executada");
@@ -932,11 +1043,24 @@ public class FrmGui extends javax.swing.JFrame {
             }
         }
         
-        if (saida.isEmpty()){
+        if (pilha.isEmpty()){
             btnProcContinuar.setEnabled(false);
             btnProxPerc.setEnabled(true);
             pilha = new LinkedList<>();
             saida = new LinkedList<>();
+        } else {
+            if (pilha.size() == 1 && operacaoCondicional){
+                Token t = pilha.pop();
+                Variavel r = retornaVariavel(t);
+                if (r == null || r.getTipo() != TipoVariavel.INTEIRO){
+                    System.err.println("Erro na execução - variável para token " + t + " inválida");
+                } else {
+                    condResult = r.getValorInteiro() == 1;
+                    docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
+                    imprimeTokens(t);
+                    execProx = condResult;
+                }
+            }
         }
     }//GEN-LAST:event_btnProcContinuarActionPerformed
     
@@ -950,12 +1074,15 @@ public class FrmGui extends javax.swing.JFrame {
         });
         
         String exibicao = "";
+        String palavra = "";
+        
         for (Token t : tokens){
-            if (exibicao.isEmpty()) {
-                exibicao = t.getPalavra();
+            if (t.getPalavra().equals(op.getPalavra()) && operacaoCondicional){
+                palavra = t.getPalavra().equals("0") ? "Falso" :  t.getPalavra().equals("1") ? "Verdadeiro" : t.getPalavra();
             } else {
-                exibicao += " " + t.getPalavra();
+                palavra = t.getPalavra();
             }
+            exibicao += (exibicao.isEmpty() ? "" : " ") + palavra;
         }
         txpProcessamento.setText(exibicao);
     }
@@ -1029,7 +1156,12 @@ public class FrmGui extends javax.swing.JFrame {
     private String oldText;
     
     private DefaultTableModel tabVariaveis;
+    
     private int bloco = 0;
+    private boolean operacaoCondicional = false;
+    private boolean condResult = false;
+    private boolean execProx = true;
+    
     private Token tokenAnt = null;
     private String nomeVar;
 }
