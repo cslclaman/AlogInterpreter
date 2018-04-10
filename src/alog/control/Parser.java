@@ -66,6 +66,12 @@ public class Parser {
                     funcoesEsperadas.add(FuncaoToken.IDENT_TIPO_CARACTER);
                     funcoesEsperadas.add(FuncaoToken.IDENT_TIPO_INTEIRO);
                     funcoesEsperadas.add(FuncaoToken.IDENT_TIPO_REAL);
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                    funcoesEsperadas.add(FuncaoToken.RES_COND_SE);
+                    funcoesEsperadas.add(FuncaoToken.RES_COND_SENAO);
+                    funcoesEsperadas.add(FuncaoToken.LIB_IO_LEIA);
+                    funcoesEsperadas.add(FuncaoToken.LIB_IO_ESCREVA);
                     
                     add = true;
                     go = false;
@@ -158,11 +164,13 @@ public class Parser {
                 case RES_COND_SE:
                     expr.setTipo(TipoExpressao.OPERACAO_LOGICA);
                     funcoesEsperadas.clear();
-                    //funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
+                    funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
                     funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
                     funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
+                    funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
+                    funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
                     add = true;
                     break;
                     
@@ -227,6 +235,8 @@ public class Parser {
                             funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
                             funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
                             funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
+                            funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
+                            funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
                             funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
                             add = false;
                             break;
@@ -253,6 +263,14 @@ public class Parser {
                             add = true;
                             break;
                         case OPERACAO_LOGICA:
+                            balancParenteses ++;
+                            funcoesEsperadas.clear();
+                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                            funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
+                            funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
+                            funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
+                            add = true;
                             break;
                     }
                     break;
@@ -346,7 +364,9 @@ public class Parser {
                             char inicial = token.getPalavra().charAt(0);
                             if (inicial >= '0' && inicial <= '9'){
                                 escreveErro(token, "Identificador de variável não pode começar com número");
+                                funcoesEsperadas.clear();
                                 add = false;
+                                go = false;
                             } else {
                                 variaveis.add(token.getPalavra());
                                 token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
@@ -361,7 +381,9 @@ public class Parser {
                         case SAIDA_DE_DADOS:
                             if (!variaveis.contains(token.getPalavra())){
                                 escreveErro(token, "Variável \"" + token.getPalavra() + "\" não declarada");
+                                funcoesEsperadas.clear();
                                 add = false;
+                                go = false;
                             } else {
                                 token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
 
@@ -375,7 +397,9 @@ public class Parser {
                         case OPERACAO_ARITMETICA:
                             if (!variaveis.contains(token.getPalavra())){
                                 escreveErro(token, "Variável \"" + token.getPalavra() + "\" não declarada");
+                                funcoesEsperadas.clear();
                                 add = false;
+                                go = false;
                             } else {
                                 token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
 
@@ -394,12 +418,21 @@ public class Parser {
                         case CHAMADA_FUNCAO:
                             if (!variaveis.contains(token.getPalavra())){
                                 escreveErro(token, "Variável \"" + token.getPalavra() + "\" não declarada");
+                                funcoesEsperadas.clear();
                                 add = false;
+                                go = false;
                             } else {
                                 token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
 
                                 funcoesEsperadas.clear();
+                                funcoesEsperadas.add(FuncaoToken.OP_SOMA);
+                                funcoesEsperadas.add(FuncaoToken.OP_SUBTRACAO);
+                                funcoesEsperadas.add(FuncaoToken.OP_MULTIPLICACAO);
+                                funcoesEsperadas.add(FuncaoToken.OP_DIV_INTEIRA);
+                                funcoesEsperadas.add(FuncaoToken.OP_DIV_REAL);
+                                funcoesEsperadas.add(FuncaoToken.OP_MOD);
                                 funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
+                                funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
                                 funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
                                 add = true;
                             }
@@ -407,7 +440,9 @@ public class Parser {
                         case OPERACAO_LOGICA:
                             if (!variaveis.contains(token.getPalavra())){
                                 escreveErro(token, "Variável \"" + token.getPalavra() + "\" não declarada");
+                                funcoesEsperadas.clear();
                                 add = false;
+                                go = false;
                             } else {
                                 token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
 
@@ -420,6 +455,12 @@ public class Parser {
                                 funcoesEsperadas.add(FuncaoToken.OP_DIFERENTE);
                                 funcoesEsperadas.add(FuncaoToken.OP_E);
                                 funcoesEsperadas.add(FuncaoToken.OP_OU);
+                                funcoesEsperadas.add(FuncaoToken.OP_SOMA);
+                                funcoesEsperadas.add(FuncaoToken.OP_SUBTRACAO);
+                                funcoesEsperadas.add(FuncaoToken.OP_MULTIPLICACAO);
+                                funcoesEsperadas.add(FuncaoToken.OP_DIV_INTEIRA);
+                                funcoesEsperadas.add(FuncaoToken.OP_DIV_REAL);
+                                funcoesEsperadas.add(FuncaoToken.OP_MOD);
                                 funcoesEsperadas.add(FuncaoToken.RES_COND_ENTAO);
                                 add = true;
                             }
@@ -429,7 +470,10 @@ public class Parser {
                         default:
                             if (!variaveis.contains(token.getPalavra())){
                                 escreveErro(token, "Comando, variável ou função não identificada: " + token.getPalavra());
+                                
+                                funcoesEsperadas.clear();
                                 add = false;
+                                go = false;
                             } else {
                                 token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
 
