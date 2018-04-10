@@ -80,6 +80,13 @@ public class Parser {
                     expr.setTipo(TipoExpressao.DELIM_BLOCO);
                     
                     funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                    funcoesEsperadas.add(FuncaoToken.RES_COND_SE);
+                    funcoesEsperadas.add(FuncaoToken.RES_COND_SENAO);
+                    funcoesEsperadas.add(FuncaoToken.LIB_IO_LEIA);
+                    funcoesEsperadas.add(FuncaoToken.LIB_IO_ESCREVA);
+                    funcoesEsperadas.add(FuncaoToken.RES_BLOCO_FIM);
                     
                     add = true;
                     go = false;
@@ -141,7 +148,9 @@ public class Parser {
                 case OP_DIV_INTEIRA:
                 case OP_DIV_REAL:
                 case OP_MOD:
-                    expr.setTipo(TipoExpressao.OPERACAO_ARITMETICA);
+                    if (expr.getTipo() == TipoExpressao.OPERACAO_ATRIBUICAO){
+                        expr.setTipo(TipoExpressao.OPERACAO_ARITMETICA);
+                    }
                     funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
