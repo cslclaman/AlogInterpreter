@@ -367,12 +367,12 @@ public class FrmGui extends javax.swing.JFrame {
         
         if (tokenAnt != null){
             docIde.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
-            if (tokenAnt.getFuncaoToken() == FuncaoToken.RES_BLOCO_FIM){
+            /*if (tokenAnt.getFuncaoToken() == FuncaoToken.RES_BLOCO_FIM){
                 btnProxPerc.setEnabled(false);
                 formatacao = FORMAT_PLAIN;
                 JOptionPane.showMessageDialog(this, "Execução concluída", "Execução concluída", JOptionPane.INFORMATION_MESSAGE);
                 return;
-            }
+            }*/
         }
         
         docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
