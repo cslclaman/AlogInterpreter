@@ -231,15 +231,6 @@ public class FrmGui extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jScrollPane2)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 443, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnEntradaConfirma, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
                         .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 443, Short.MAX_VALUE)
                         .addGap(433, 433, 433))
                     .addGroup(layout.createSequentialGroup()
@@ -258,7 +249,16 @@ public class FrmGui extends javax.swing.JFrame {
                         .addGap(85, 85, 85)
                         .addComponent(btnInicioPerc)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnProxPerc)))
+                        .addComponent(btnProxPerc))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jScrollPane2)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 443, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnEntradaConfirma, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -271,7 +271,7 @@ public class FrmGui extends javax.swing.JFrame {
                     .addComponent(btnProxPerc, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 425, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
                     .addComponent(jScrollPane2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -290,7 +290,7 @@ public class FrmGui extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane6)
+                .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 73, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -384,13 +384,18 @@ public class FrmGui extends javax.swing.JFrame {
                 execProx = true;
                 exprIndex++;
             }
-            expressao = expressoes.get(exprIndex++);
+            if (exprIndex < expressoes.size()){
+                expressao = expressoes.get(exprIndex++);
+            } else {
+                btnProxPerc.setEnabled(false);
+                formatacao = FORMAT_PLAIN;
+                JOptionPane.showMessageDialog(this, "Execução concluída", "Execução concluída", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
             
         }
         
-        if (exprIndex - 1 >= expressoes.size()){
-            btnProxPerc.setEnabled(false);
-        } 
+        btnProxPerc.setEnabled(expressao.hasNext() || exprIndex < expressoes.size());
         
         formatacao = FORMAT_PERC;
         Token token = expressao.getNext();
@@ -718,7 +723,7 @@ public class FrmGui extends javax.swing.JFrame {
             jTable1.clearSelection();
             jTable1.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
 
-            btnProxPerc.setEnabled(true);
+            btnProxPerc.setEnabled(expressao.hasNext() || exprIndex < expressoes.size());
             lblVariavelEntrada.setText("");
             btnEntradaConfirma.setEnabled(false);
             txpEntrada.setText("");
@@ -1038,6 +1043,7 @@ public class FrmGui extends javax.swing.JFrame {
                             case INTEIRO:
                                 if (op1.getTipo() != TipoVariavel.INTEIRO){
                                     System.err.println("Atribuição inválida - Esperava " + variavel.getTipo() + ", encontrou " + op1.getTipo());
+                                    break;
                                 }
                                 variavel.setValor(op1.getValor());
                                 break;
@@ -1081,7 +1087,7 @@ public class FrmGui extends javax.swing.JFrame {
                     imprimeTokens(pilha.pop());
                 }
                 btnProcContinuar.setEnabled(false);
-                btnProxPerc.setEnabled(true);
+                btnProxPerc.setEnabled(expressao.hasNext() || exprIndex < expressoes.size());
                 pilha = new LinkedList<>();
                 saida = new LinkedList<>();
             }
@@ -1140,10 +1146,8 @@ public class FrmGui extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new FrmGui().setVisible(true);
-            }
+        java.awt.EventQueue.invokeLater(() -> {
+            new FrmGui().setVisible(true);
         });
     }
 
