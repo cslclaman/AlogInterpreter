@@ -21,17 +21,19 @@ import java.util.LinkedList;
 public class Interpreter {
     private int bloco;
     private HashMap<String,Variavel> variaveis;
-    private boolean condResult = false;
+    private LinkedList<Boolean> condicionais;
     private boolean execProx = true;
     
     public Interpreter(){
         bloco = 0;
         variaveis = new HashMap<>();
+        condicionais = new LinkedList<>();
     }
     
     public void reseta(){
         bloco = 0;
         variaveis = new HashMap<>();
+        condicionais = new LinkedList<>();
     }
     
     public boolean executa(Expressao expressao){
@@ -576,11 +578,11 @@ public class Interpreter {
                     System.err.println("Erro na execução - variável para token " + t + " inválida");
                     return false;
                 }
-                condResult = r.getValorInteiro() == 1;
-                execProx = condResult;
+                condicionais.add(r.getValorInteiro() == 1);
+                execProx = condicionais.peek();
                 break;
             case RES_COND_SENAO:
-                execProx = !condResult;
+                execProx = !condicionais.pop();
                 break;
         }
         return true;
