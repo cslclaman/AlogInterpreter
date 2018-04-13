@@ -5,9 +5,9 @@
  */
 package alog.control;
 
+import alog.model.Bloco;
 import alog.model.Expressao;
 import alog.model.FuncaoToken;
-import alog.model.TipoExpressao;
 import alog.model.TipoVariavel;
 import alog.model.Token;
 import alog.model.Variavel;
@@ -19,29 +19,58 @@ import java.util.LinkedList;
  * @author Caique
  */
 public class Interpreter {
-    private int bloco;
+    private int blocoAtual;
     private HashMap<String,Variavel> variaveis;
-    private LinkedList<Boolean> condicionais;
+    private LinkedList<Boolean> condicionaisResult;
+    private LinkedList<Integer> condicionaisNiveis;
     private boolean execProx = true;
+    private boolean isBloco = false;
     
     public Interpreter(){
-        bloco = 0;
+        blocoAtual = 0;
         variaveis = new HashMap<>();
-        condicionais = new LinkedList<>();
+        condicionaisResult = new LinkedList<>();
+        condicionaisNiveis = new LinkedList<>();
     }
     
     public void reseta(){
-        bloco = 0;
+        blocoAtual = 0;
         variaveis = new HashMap<>();
-        condicionais = new LinkedList<>();
+        condicionaisResult = new LinkedList<>();
+        condicionaisNiveis = new LinkedList<>();
     }
     
     public boolean executa(Expressao expressao){
         if (!execProx){
-            execProx = true;
+            switch(expressao.getTipo()){
+                case DELIM_BLOCO:
+                    return execDelimBloco(expressao);
+                case OPERACAO_LOGICA:
+                    boolean r = execCondicional(expressao);
+                    execProx = false;
+                    condicionaisResult.pop();
+                    condicionaisResult.push(true);
+                    return r;
+                default:
+                    if (!isBloco){
+                        execProx = true;
+                    }
+                    break;
+            }
             return true;
         }
         switch(expressao.getTipo()){
+            case _BLOCO:
+                Bloco bloco = (Bloco)expressao;
+                boolean res = true;
+                Interpreter innerInterpr = new Interpreter();
+                while (bloco.hasNextExpressao()){
+                    res = innerInterpr.executa(bloco.getNextExpressao());
+                    if (!res){
+                        break;
+                    }
+                }
+                return res;
             case DELIM_BLOCO:
                 return execDelimBloco(expressao);
             case CRIACAO_VARIAVEL:
@@ -71,10 +100,20 @@ public class Interpreter {
     public boolean execDelimBloco(Expressao expressao){
         switch (expressao.getNextToken().getFuncaoToken()){
             case RES_BLOCO_INICIO:
-                bloco ++;
+                blocoAtual ++;
+                if (!execProx){
+                    condicionaisNiveis.push(blocoAtual - 1);
+                    isBloco = true;
+                } 
                 break;
             case RES_BLOCO_FIM:
-                bloco --;
+                blocoAtual --;
+                if (!execProx){
+                    if (blocoAtual == condicionaisNiveis.pop()){
+                        isBloco = false;
+                        execProx = true;
+                    }
+                } 
                 break;
         }
         return true;
@@ -578,11 +617,11 @@ public class Interpreter {
                     System.err.println("Erro na execução - variável para token " + t + " inválida");
                     return false;
                 }
-                condicionais.add(r.getValorInteiro() == 1);
-                execProx = condicionais.peek();
+                condicionaisResult.push(r.getValorInteiro() == 1);
+                execProx = condicionaisResult.peek();
                 break;
             case RES_COND_SENAO:
-                execProx = !condicionais.pop();
+                execProx = !condicionaisResult.pop();
                 break;
         }
         return true;
