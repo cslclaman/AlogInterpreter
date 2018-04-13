@@ -67,7 +67,7 @@ public class Interpreter {
     }
     
     public boolean execDelimBloco(Expressao expressao){
-        switch (expressao.getNext().getFuncaoToken()){
+        switch (expressao.getNextToken().getFuncaoToken()){
             case RES_BLOCO_INICIO:
                 bloco ++;
                 break;
@@ -80,7 +80,7 @@ public class Interpreter {
     
     public boolean execCriacaoVariavel(Expressao expressao){
         TipoVariavel tipoVar;
-        switch (expressao.getNext().getFuncaoToken()){
+        switch (expressao.getNextToken().getFuncaoToken()){
             case IDENT_TIPO_INTEIRO:
                 tipoVar = TipoVariavel.INTEIRO;
                 break;
@@ -93,8 +93,8 @@ public class Interpreter {
             default:
                 return false;
         }
-        while (expressao.hasNext()){
-            String nomeVar = expressao.getNext().getPalavra();
+        while (expressao.hasNextToken()){
+            String nomeVar = expressao.getNextToken().getPalavra();
             Variavel variavel = new Variavel(tipoVar, nomeVar);
             variaveis.put(nomeVar, variavel);
         }
@@ -104,8 +104,8 @@ public class Interpreter {
     
     public boolean execEntradaDados(Expressao expressao){
         expressao.setIndice(1);
-        while (expressao.hasNext()){
-            String nomeVar = expressao.getNext().getPalavra();
+        while (expressao.hasNextToken()){
+            String nomeVar = expressao.getNextToken().getPalavra();
             Variavel variavel = variaveis.get(nomeVar);
             if (variavel == null){
                 return false;
@@ -152,8 +152,8 @@ public class Interpreter {
         expressao.setIndice(1);
         int pos = 1;
         int qtd = expressao.getNumTokens() - 1;
-        while (expressao.hasNext()){
-            Token token = expressao.getNext();
+        while (expressao.hasNextToken()){
+            Token token = expressao.getNextToken();
             String saida = "";
             
             switch (token.getFuncaoToken()){
@@ -198,8 +198,8 @@ public class Interpreter {
         int funcParam = 0;
         int contParam = 0;
         
-        while (expressao.hasNext()){
-            Token token = expressao.getNext();
+        while (expressao.hasNextToken()){
+            Token token = expressao.getNextToken();
             switch (token.getFuncaoToken()){
                 case IDENT_NOME_VARIAVEL:
                 case CONST_CARACTER:
@@ -378,15 +378,15 @@ public class Interpreter {
     }
     
     public boolean execCondicional(Expressao expressao){
-        switch (expressao.getNext().getFuncaoToken()){
+        switch (expressao.getNextToken().getFuncaoToken()){
             case RES_COND_SE:
                 LinkedList<Token> pilha = new LinkedList<>();
                 LinkedList<Token> saida = new LinkedList<>();
                 int funcParam = 0;
                 int contParam = 0;
 
-                while (expressao.hasNext()){
-                    Token token = expressao.getNext();
+                while (expressao.hasNextToken()){
+                    Token token = expressao.getNextToken();
                     switch (token.getFuncaoToken()){
                         case IDENT_NOME_VARIAVEL:
                         case CONST_CARACTER:

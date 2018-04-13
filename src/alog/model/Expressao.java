@@ -70,12 +70,12 @@ public class Expressao {
         }
     }
     
-    public boolean hasNext(){
+    public boolean hasNextToken(){
         return indice < tokens.size();
     }
     
-    public Token getNext(){
-        if (hasNext()){
+    public Token getNextToken(){
+        if (hasNextToken()){
             return tokens.get(indice++);
         } else {
             return null;

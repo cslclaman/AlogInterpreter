@@ -379,7 +379,7 @@ public class FrmGui extends javax.swing.JFrame {
         txpProcessamento.setText("");
         txpProcessamento.setBackground(backgroundDisabled);
         
-        if (!expressao.hasNext()){
+        if (!expressao.hasNextToken()){
             if (!execProx){
                 execProx = true;
                 exprIndex++;
@@ -395,10 +395,10 @@ public class FrmGui extends javax.swing.JFrame {
             
         }
         
-        btnProxPerc.setEnabled(expressao.hasNext() || exprIndex < expressoes.size());
+        btnProxPerc.setEnabled(expressao.hasNextToken() || exprIndex < expressoes.size());
         
         formatacao = FORMAT_PERC;
-        Token token = expressao.getNext();
+        Token token = expressao.getNextToken();
         docIde.setCharacterAttributes(token.getPosicao(), token.getTamanho(), stylePerc, true);
         jTable1.clearSelection();
         
@@ -491,7 +491,7 @@ public class FrmGui extends javax.swing.JFrame {
                         }
                         break;
                 }
-                if (!expressao.hasNext()){
+                if (!expressao.hasNextToken()){
                     textoSaida += "\n";
                 }
                 txpSaida.setText(txpSaida.getText() + textoSaida);
@@ -723,7 +723,7 @@ public class FrmGui extends javax.swing.JFrame {
             jTable1.clearSelection();
             jTable1.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
 
-            btnProxPerc.setEnabled(expressao.hasNext() || exprIndex < expressoes.size());
+            btnProxPerc.setEnabled(expressao.hasNextToken() || exprIndex < expressoes.size());
             lblVariavelEntrada.setText("");
             btnEntradaConfirma.setEnabled(false);
             txpEntrada.setText("");
@@ -753,8 +753,8 @@ public class FrmGui extends javax.swing.JFrame {
         int col = 0;
         int ordem = 0;
         
-        while (expressao.hasNext()){
-            Token token = expressao.getNext();
+        while (expressao.hasNextToken()){
+            Token token = expressao.getNextToken();
             
             token.setLinha(0);
             token.setColuna(col);
@@ -1087,7 +1087,7 @@ public class FrmGui extends javax.swing.JFrame {
                     imprimeTokens(pilha.pop());
                 }
                 btnProcContinuar.setEnabled(false);
-                btnProxPerc.setEnabled(expressao.hasNext() || exprIndex < expressoes.size());
+                btnProxPerc.setEnabled(expressao.hasNextToken() || exprIndex < expressoes.size());
                 pilha = new LinkedList<>();
                 saida = new LinkedList<>();
             }
