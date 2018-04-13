@@ -376,14 +376,15 @@ public class FrmGui extends javax.swing.JFrame {
         }
         
         docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
+        txpEntrada.setText("");
+        
         txpProcessamento.setText("");
         txpProcessamento.setBackground(backgroundDisabled);
         
         if (!expressao.hasNextToken()){
             if (!execProx){
-                execProx = true;
-                exprIndex++;
-            }
+                            execProx = true;
+                        }
             if (exprIndex < expressoes.size()){
                 expressao = expressoes.get(exprIndex++);
             } else {
@@ -573,6 +574,10 @@ public class FrmGui extends javax.swing.JFrame {
         }
         
         tokenAnt = token;
+        
+        if (!execProx && token.getFuncaoToken() == FuncaoToken.RES_COND_SENAO){
+            btnProxPercActionPerformed(evt);
+        }
     }//GEN-LAST:event_btnProxPercActionPerformed
 
     private void btnVerificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerificarActionPerformed
@@ -615,6 +620,12 @@ public class FrmGui extends javax.swing.JFrame {
             expressoes.add(e);
         }
         
+        if (parser.balanceamentoBlocos() != 0){
+            int bl = parser.balanceamentoBlocos();
+            System.err.println("Blocos INÍCIO-FIM desbalanceados - " + 
+                (bl > 0 ? "Necessário fechamento de " + bl + " INÍCIO" : (-bl) + " fechamentos FIM desnecessários"));
+            erros ++;
+        }
         if (erros > 0){
             JOptionPane.showMessageDialog(this, erros + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
             btnProxPerc.setEnabled(false);
@@ -677,6 +688,7 @@ public class FrmGui extends javax.swing.JFrame {
             
             txpEntrada.setBackground(backgroundEnabled);
             txpEntrada.setEditable(true);
+            txpEntrada.setText("");
             btnEntradaConfirma.setEnabled(true);
             txpEntrada.requestFocus();
             Caret caret = txpEntrada.getCaret();
@@ -723,16 +735,23 @@ public class FrmGui extends javax.swing.JFrame {
             jTable1.clearSelection();
             jTable1.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
 
-            btnProxPerc.setEnabled(expressao.hasNextToken() || exprIndex < expressoes.size());
+            boolean proxHabilita = expressao.hasNextToken() || exprIndex < expressoes.size();
+            btnProxPerc.setEnabled(proxHabilita);
+            
             lblVariavelEntrada.setText("");
             btnEntradaConfirma.setEnabled(false);
             txpEntrada.setText("");
             txpEntrada.setEditable(false);
             txpEntrada.setBackground(backgroundDisabled);
+            btnProxPerc.requestFocus();
+            if (expressao.hasNextToken()){
+                btnProxPercActionPerformed(evt);
+            }
         } 
     }//GEN-LAST:event_btnEntradaConfirmaActionPerformed
 
     private void txpEntradaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txpEntradaKeyPressed
+        evt.consume();
         if (evt.getKeyCode() == KeyEvent.VK_ENTER){
             btnEntradaConfirmaActionPerformed(null);
         }
@@ -1104,9 +1123,9 @@ public class FrmGui extends javax.swing.JFrame {
         });
         
         String exibicao = "";
-        String palavra = "";
         
         for (Token t : tokens){
+            String palavra;
             if (t.getPalavra().equals(op.getPalavra()) && operacaoCondicional){
                 palavra = t.getPalavra().equals("0") ? "Falso" :  t.getPalavra().equals("1") ? "Verdadeiro" : t.getPalavra();
             } else {
