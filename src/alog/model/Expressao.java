@@ -12,11 +12,11 @@ import java.util.ArrayList;
  * @author Caique
  */
 public class Expressao {
-    private String texto;
-    private TipoExpressao tipo;
-    private ArrayList<Token> tokens;
-    private int indice;
-    private int linha;
+    protected String texto;
+    protected TipoExpressao tipo;
+    protected ArrayList<Token> tokens;
+    protected int indice;
+    protected int linha;
     
     public Expressao(){
         tokens = new ArrayList<>();
