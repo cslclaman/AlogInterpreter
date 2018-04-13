@@ -12,6 +12,7 @@ package alog.model;
 public enum TipoExpressao {
     _INDEFINIDO,
     _INVALIDO,
+    _BLOCO,
     DELIM_BLOCO,
     CRIACAO_VARIAVEL,
     ENTRADA_DE_DADOS,

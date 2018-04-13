@@ -7,11 +7,12 @@ import java.util.ArrayList;
  * @author Caique Souza
  */
 public class Bloco extends Expressao {
-    protected ArrayList<Expressao> expressoes;
+    private ArrayList<Expressao> expressoes;
     protected int linhaFinal;
     
     public Bloco() {
         super();
+        setTipo(TipoExpressao._BLOCO);
         expressoes = new ArrayList<>();
         linhaFinal = 0;
     }
@@ -31,6 +32,10 @@ public class Bloco extends Expressao {
         linhaFinal = expressoes.size() + linha;
     }
 
+    public Expressao getExpressaoAt(int pos){
+        return expressoes.get(pos);
+    }
+    
     public int getNumExpressoes(){
         return expressoes.size();
     }
