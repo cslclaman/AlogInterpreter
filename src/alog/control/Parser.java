@@ -5,6 +5,7 @@
  */
 package alog.control;
 
+import alog.model.Bloco;
 import alog.model.Expressao;
 import alog.model.FuncaoToken;
 import alog.model.TipoExpressao;
@@ -23,6 +24,7 @@ public class Parser {
     private ArrayList<FuncaoToken> funcoesEsperadas;
     
     private int pos;
+    private int blocoAtual;
     private String erro;
     
     public Parser (ArrayList<Token> tokens){
@@ -31,8 +33,18 @@ public class Parser {
         variaveis = new ArrayList<>();
         funcoesEsperadas = new ArrayList<>();
         funcoesEsperadas.add(FuncaoToken.RES_BLOCO_INICIO);
+        funcoesEsperadas.add(FuncaoToken.IDENT_TIPO_CARACTER);
+        funcoesEsperadas.add(FuncaoToken.IDENT_TIPO_INTEIRO);
+        funcoesEsperadas.add(FuncaoToken.IDENT_TIPO_REAL);
+        funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+        funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+        funcoesEsperadas.add(FuncaoToken.RES_COND_SE);
+        funcoesEsperadas.add(FuncaoToken.RES_COND_SENAO);
+        funcoesEsperadas.add(FuncaoToken.LIB_IO_LEIA);
+        funcoesEsperadas.add(FuncaoToken.LIB_IO_ESCREVA);
         
         pos = 0;
+        blocoAtual = 0;
     }
     
     public boolean hasNext(){
@@ -61,6 +73,7 @@ public class Parser {
                 //MODO: INÍCIO/FIM DE BLOCO
                 case RES_BLOCO_INICIO:
                     expr.setTipo(TipoExpressao.DELIM_BLOCO);
+                    blocoAtual ++;
                     
                     funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken.IDENT_TIPO_CARACTER);
@@ -78,6 +91,7 @@ public class Parser {
                     break;
                 case RES_BLOCO_FIM:
                     expr.setTipo(TipoExpressao.DELIM_BLOCO);
+                    blocoAtual --;
                     
                     funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
@@ -605,6 +619,10 @@ public class Parser {
         }
         
         return expr;
+    }
+    
+    public int balanceamentoBlocos(){
+        return blocoAtual;
     }
     
     public LinkedList<Expressao> getAllExpressions(){

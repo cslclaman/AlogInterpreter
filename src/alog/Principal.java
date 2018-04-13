@@ -49,6 +49,12 @@ public class Principal {
                     }
                     expressoes.add(e);
                 }
+                if (parser.balanceamentoBlocos() != 0){
+                    int bl = parser.balanceamentoBlocos();
+                    System.err.println("Blocos INÍCIO-FIM desbalanceados - " + 
+                            (bl > 0 ? "Necessário fechamento de " + bl + " INÍCIO" : (-bl) + " fechamentos FIM desnecessários"));
+                    errosParser ++;
+                }
                 
                 if (errosParser > 0){
                     System.out.println(errosParser + " erros encontrados no processo de análise sintática.");
