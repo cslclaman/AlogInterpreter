@@ -18,6 +18,17 @@ import java.util.LinkedList;
  * @author Caique
  */
 public class Parser {
+    private class ErroSintatico {
+        Token token;
+        String erro;
+
+        public ErroSintatico(Token token, String erro) {
+            this.token = token;
+            this.erro = erro;
+        }
+        
+    }
+    
     private ArrayList<Token> tokens;
     private ArrayList<String> variaveis;
     
@@ -25,12 +36,14 @@ public class Parser {
     
     private int pos;
     private int blocoAtual;
-    private String erro;
+    private ArrayList<ErroSintatico> erros;
     
     public Parser (ArrayList<Token> tokens){
         this.tokens = tokens;
         
         variaveis = new ArrayList<>();
+        erros = new ArrayList<>();
+        
         funcoesEsperadas = new ArrayList<>();
         funcoesEsperadas.add(FuncaoToken.RES_BLOCO_INICIO);
         funcoesEsperadas.add(FuncaoToken.IDENT_TIPO_CARACTER);
@@ -53,12 +66,12 @@ public class Parser {
     
     public Expressao parseExpression(){
         Expressao expr = new Expressao();
-        
-        int balancParenteses = 0;
+        LinkedList<Token> parentesesAbre = new LinkedList<>();
+        LinkedList<Token> parentesesFecha = new LinkedList<>();
         
         boolean go = true;
         boolean add = false;
-        erro = "";
+        boolean erro = false;
         
         while (go && pos < tokens.size()){
             Token token = tokens.get(pos++);
@@ -246,6 +259,7 @@ public class Parser {
                     
                 //DIVERSOS MODOS
                 case DELIM_PARENTESES_ABRE:
+                    parentesesAbre.push(token);
                     switch (expr.getTipo()){
                         case ENTRADA_DE_DADOS:
                             funcoesEsperadas.clear();
@@ -265,7 +279,6 @@ public class Parser {
                             break;
                         case OPERACAO_ATRIBUICAO:
                         case OPERACAO_ARITMETICA:
-                            balancParenteses ++;
                             funcoesEsperadas.clear();
                             funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
                             funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
@@ -277,7 +290,6 @@ public class Parser {
                             add = true;
                             break;
                         case CHAMADA_FUNCAO:
-                            balancParenteses ++;
                             funcoesEsperadas.clear();
                             funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
                             funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
@@ -286,7 +298,6 @@ public class Parser {
                             add = true;
                             break;
                         case OPERACAO_LOGICA:
-                            balancParenteses ++;
                             funcoesEsperadas.clear();
                             funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
                             funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
@@ -299,6 +310,7 @@ public class Parser {
                     break;
                     
                 case DELIM_PARENTESES_FECHA:
+                    parentesesFecha.offer(token);
                     switch (expr.getTipo()){
                         case ENTRADA_DE_DADOS:
                         case SAIDA_DE_DADOS:
@@ -310,7 +322,6 @@ public class Parser {
                             expr.setTipo(TipoExpressao.OPERACAO_ARITMETICA);
                         case OPERACAO_ATRIBUICAO:
                         case OPERACAO_ARITMETICA:
-                            balancParenteses --;
                             funcoesEsperadas.clear();
                             funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
                             funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
@@ -386,8 +397,8 @@ public class Parser {
                         case CRIACAO_VARIAVEL:
                             char inicial = token.getPalavra().charAt(0);
                             if (inicial >= '0' && inicial <= '9'){
-                                escreveErro(token, "Identificador de variável não pode começar com número");
-                                funcoesEsperadas.clear();
+                                erros.add(new ErroSintatico(token, "Identificador de variável não pode começar com número"));
+                                erro = true;
                                 add = false;
                                 go = false;
                             } else {
@@ -403,8 +414,8 @@ public class Parser {
                         case ENTRADA_DE_DADOS:
                         case SAIDA_DE_DADOS:
                             if (!variaveis.contains(token.getPalavra())){
-                                escreveErro(token, "Variável \"" + token.getPalavra() + "\" não declarada");
-                                funcoesEsperadas.clear();
+                                erros.add(new ErroSintatico(token, "Variável \"" + token.getPalavra() + "\" não declarada"));
+                                erro = true;
                                 add = false;
                                 go = false;
                             } else {
@@ -419,8 +430,8 @@ public class Parser {
                         case OPERACAO_ATRIBUICAO:
                         case OPERACAO_ARITMETICA:
                             if (!variaveis.contains(token.getPalavra())){
-                                escreveErro(token, "Variável \"" + token.getPalavra() + "\" não declarada");
-                                funcoesEsperadas.clear();
+                                erros.add(new ErroSintatico(token, "Variável \"" + token.getPalavra() + "\" não declarada"));
+                                erro = true;
                                 add = false;
                                 go = false;
                             } else {
@@ -440,8 +451,8 @@ public class Parser {
                             break;
                         case CHAMADA_FUNCAO:
                             if (!variaveis.contains(token.getPalavra())){
-                                escreveErro(token, "Variável \"" + token.getPalavra() + "\" não declarada");
-                                funcoesEsperadas.clear();
+                                erros.add(new ErroSintatico(token, "Variável \"" + token.getPalavra() + "\" não declarada"));
+                                erro = true;
                                 add = false;
                                 go = false;
                             } else {
@@ -462,8 +473,8 @@ public class Parser {
                             break;
                         case OPERACAO_LOGICA:
                             if (!variaveis.contains(token.getPalavra())){
-                                escreveErro(token, "Variável \"" + token.getPalavra() + "\" não declarada");
-                                funcoesEsperadas.clear();
+                                erros.add(new ErroSintatico(token, "Variável \"" + token.getPalavra() + "\" não declarada"));
+                                erro = true;
                                 add = false;
                                 go = false;
                             } else {
@@ -492,9 +503,9 @@ public class Parser {
                         case _INDEFINIDO:
                         default:
                             if (!variaveis.contains(token.getPalavra())){
-                                escreveErro(token, "Comando, variável ou função não identificada: " + token.getPalavra());
+                                erros.add(new ErroSintatico(token, "Comando, variável ou função não identificada: " + token.getPalavra()));
                                 
-                                funcoesEsperadas.clear();
+                                erro = true;
                                 add = false;
                                 go = false;
                             } else {
@@ -596,25 +607,28 @@ public class Parser {
                     break;
             }
             
-            
-            
             expr.atualizaTexto(token.getPalavra());
             if (add){
                 expr.addToken(token);
             }
         }
         
-        if (balancParenteses != 0){
-            String msg = "Parênteses não balanceados: ";
-            if (balancParenteses > 0){
-                msg += "Esperado fechamento de " + balancParenteses + " parenteses abertos";
-            } else {
-                msg += -balancParenteses + " parenteses fechados sem necessidade";
-            }
-            escreveErro(expr.getTokenAt(0), msg);
-        } 
+        while (!parentesesAbre.isEmpty() && !parentesesFecha.isEmpty()){
+            parentesesAbre.pop();
+            parentesesFecha.pop();
+        }
         
-        if (!erro.isEmpty()){
+        while (!parentesesAbre.isEmpty()){
+            erros.add(new ErroSintatico(parentesesAbre.pop(), "Parêntese não fechado"));
+            erro = true;
+        }
+        
+        while (!parentesesFecha.isEmpty()){
+            erros.add(new ErroSintatico(parentesesFecha.pop(), "Parêntese fechado sem necessidade"));
+            erro = true;
+        }
+        
+        if (erro){
             expr.setTipo(TipoExpressao._INVALIDO);
         }
         
@@ -627,23 +641,34 @@ public class Parser {
     
     public LinkedList<Expressao> getAllExpressions(){
         LinkedList<Expressao> lista = new LinkedList<>();
-        String erros = "";
         while (hasNext()){
             lista.add(parseExpression());
-            if (!erro.isEmpty()){
-                erros += erro + "\n";
-            }
         }
-        erro = erros;
         return lista;
     }
     
-    public String getErro(){
-        return erro;
+    public int getNumErros(){
+        return erros.size();
     }
     
-    private void escreveErro(Token token, String msg){
-        erro = "Linha " + (token.getLinha() + 1) + ", coluna " + (token.getColuna() + 1) + " - " + msg;
+    public String getStringErros(){
+        StringBuilder msg = new StringBuilder();
+        for (ErroSintatico err : erros){
+            if (msg.length() > 0){
+                msg.append("\n");
+            }
+            String ln = "Linha " + (err.token.getLinha() + 1) + ", coluna " + (err.token.getColuna() + 1) + " - " + err.erro;
+            msg.append(ln);
+        }
+        return msg.toString();
+    }
+    
+    public ArrayList<Token> getTokensErros(){
+        ArrayList<Token> errToken = new ArrayList<>();
+        for (ErroSintatico err : erros){
+            errToken.add(err.token);
+        }
+        return errToken;
     }
     
     private boolean estadoValido(Token token){
@@ -652,7 +677,7 @@ public class Parser {
             for (FuncaoToken ft: funcoesEsperadas){
                 msgErro += "\n - " + ft;
             }
-            escreveErro(token, msgErro);
+            erros.add(new ErroSintatico(token, msgErro));
             return false;
         } else {
             return true;

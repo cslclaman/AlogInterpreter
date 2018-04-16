@@ -311,14 +311,6 @@ public class FrmGui extends javax.swing.JFrame {
         
         while (parser.hasNext()){
             Expressao e = parser.parseExpression();
-            if (!parser.getErro().isEmpty()){
-                System.err.println(parser.getErro());
-                erros ++;
-                formatacao = FORMAT_ERROR;
-                for (Token t : e.listTokens()){
-                    docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
-                }
-            }
             switch (e.getTipo()){
                 case CRIACAO_VARIAVEL:
                 case ENTRADA_DE_DADOS:
@@ -331,8 +323,21 @@ public class FrmGui extends javax.swing.JFrame {
             expressoes.add(e);
         }
         
-        if (erros > 0){
+        System.err.println(parser.getStringErros());
+        if (parser.balanceamentoBlocos() != 0){
+            int bl = parser.balanceamentoBlocos();
+            System.err.println("Blocos INÍCIO-FIM desbalanceados - " + 
+                    (bl > 0 ? "Necessário fechamento de " + bl + " INÍCIO" : (-bl) + " fechamentos FIM desnecessários"));
+            erros ++;
+        }
+        
+        if (erros + parser.getNumErros() > 0){
             JOptionPane.showMessageDialog(this, erros + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
+            formatacao = FORMAT_ERROR;
+            for (Token t : parser.getTokensErros()){
+                docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
+            }
+            
             btnProxPerc.setEnabled(false);
             btnInicioPerc.setEnabled(false);
         } else {
@@ -595,14 +600,6 @@ public class FrmGui extends javax.swing.JFrame {
         
         while (parser.hasNext()){
             Expressao e = parser.parseExpression();
-            if (!parser.getErro().isEmpty()){
-                System.err.println(parser.getErro());
-                erros ++;
-                formatacao = FORMAT_ERROR;
-                for (Token t : e.listTokens()){
-                    docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
-                }
-            }
             switch (e.getTipo()){
                 case CRIACAO_VARIAVEL:
                 case ENTRADA_DE_DADOS:
@@ -615,14 +612,20 @@ public class FrmGui extends javax.swing.JFrame {
             expressoes.add(e);
         }
         
+        System.err.println(parser.getStringErros());
         if (parser.balanceamentoBlocos() != 0){
             int bl = parser.balanceamentoBlocos();
             System.err.println("Blocos INÍCIO-FIM desbalanceados - " + 
-                (bl > 0 ? "Necessário fechamento de " + bl + " INÍCIO" : (-bl) + " fechamentos FIM desnecessários"));
+                    (bl > 0 ? "Necessário fechamento de " + bl + " INÍCIO" : (-bl) + " fechamentos FIM desnecessários"));
             erros ++;
         }
-        if (erros > 0){
+        
+        if ((erros = erros + parser.getNumErros()) > 0){
             JOptionPane.showMessageDialog(this, erros + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
+            formatacao = FORMAT_ERROR;
+            for (Token t : parser.getTokensErros()){
+                docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
+            }
             btnProxPerc.setEnabled(false);
             btnInicioPerc.setEnabled(false);
         } else {
