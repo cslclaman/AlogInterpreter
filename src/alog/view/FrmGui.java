@@ -307,7 +307,6 @@ public class FrmGui extends javax.swing.JFrame {
         Scanner scanner = new Scanner(oldText);
         Parser parser = new Parser(scanner.getAll());
         expressoes = new LinkedList<>();
-        int erros = 0;
         
         while (parser.hasNext()){
             Expressao e = parser.parseExpression();
@@ -324,15 +323,9 @@ public class FrmGui extends javax.swing.JFrame {
         }
         
         System.err.println(parser.getStringErros());
-        if (parser.balanceamentoBlocos() != 0){
-            int bl = parser.balanceamentoBlocos();
-            System.err.println("Blocos INÍCIO-FIM desbalanceados - " + 
-                    (bl > 0 ? "Necessário fechamento de " + bl + " INÍCIO" : (-bl) + " fechamentos FIM desnecessários"));
-            erros ++;
-        }
-        
-        if (erros + parser.getNumErros() > 0){
-            JOptionPane.showMessageDialog(this, erros + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
+
+        if (parser.getNumErros() > 0){
+            JOptionPane.showMessageDialog(this, parser.getNumErros() + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
             formatacao = FORMAT_ERROR;
             for (Token t : parser.getTokensErros()){
                 docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
@@ -596,7 +589,6 @@ public class FrmGui extends javax.swing.JFrame {
         Scanner scanner = new Scanner(oldText);
         Parser parser = new Parser(scanner.getAll());
         expressoes = new LinkedList<>();
-        int erros = 0;
         
         while (parser.hasNext()){
             Expressao e = parser.parseExpression();
@@ -613,15 +605,9 @@ public class FrmGui extends javax.swing.JFrame {
         }
         
         System.err.println(parser.getStringErros());
-        if (parser.balanceamentoBlocos() != 0){
-            int bl = parser.balanceamentoBlocos();
-            System.err.println("Blocos INÍCIO-FIM desbalanceados - " + 
-                    (bl > 0 ? "Necessário fechamento de " + bl + " INÍCIO" : (-bl) + " fechamentos FIM desnecessários"));
-            erros ++;
-        }
         
-        if ((erros = erros + parser.getNumErros()) > 0){
-            JOptionPane.showMessageDialog(this, erros + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
+        if (parser.getNumErros() > 0){
+            JOptionPane.showMessageDialog(this, parser.getNumErros() + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
             formatacao = FORMAT_ERROR;
             for (Token t : parser.getTokensErros()){
                 docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
