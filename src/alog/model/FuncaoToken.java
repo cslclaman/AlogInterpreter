@@ -10,10 +10,18 @@ package alog.model;
  * @author Caique
  */
 public enum FuncaoToken {
-    _INDEFINIDO,
-    _INDEF_ALFABETICO,
-    _INDEF_ALFANUMERICO,
-    _INDEF_NUMERICO,
+    
+    //CATEGORIA: INDEFINIDOS (Tokens a serem categorizados ou inválidos)
+
+    //Token não reconhecido
+    _INVALIDO,
+    //Tokens com mais de uma função (Parser classifica)
+    _INDEF_ALFABETICO,          //Pode ser identificador de variável, função ou rotina
+    _INDEF_ALFANUMERICO,        //Pode ser identificador de variável, função ou rotina
+    _INDEF_NUMERICO,            //Pode ser constante inteira ou real
+    
+    //CATEGORIA: PALAVRAS RESERVADAS (Funções e identificadores exclusivos)
+    
     //Palavras reservadas - início e fim de bloco
     RES_BLOCO_INICIO,           //"início" ou "inicio"
     RES_BLOCO_FIM,              //"fim"
@@ -21,11 +29,34 @@ public enum FuncaoToken {
     RES_COND_SE,                //"se"
     RES_COND_ENTAO,             //"então" ou "entao"
     RES_COND_SENAO,             //"senão" ou "senao"
-    //Identificadores de variável
-    IDENT_TIPO_INTEIRO,         //"inteiro"
-    IDENT_TIPO_REAL,            //"real"
-    IDENT_TIPO_CARACTER,        //"caracter"
-    IDENT_NOME_VARIAVEL,        //Sequência de caracteres iniciada em [A-Z], contendo letras, números, underlines
+    //Palavras reservadas - Identificadores de tipo de variável
+    RES_TIPO_INTEIRO,           //"inteiro"
+    RES_TIPO_REAL,              //"real"
+    RES_TIPO_CARACTER,          //"caracter"
+    
+    //CATEGORIA: CONSTANTES E LITERAIS
+    
+    //Constantes
+    CONST_CARACTER,             //Sequências de caracteres delimitadas por aspas duplas (String literal)
+    CONST_INTEIRA,              //Sequências de números [0-9] sem ponto decimal
+    CONST_REAL,                 //Sequências de números [0-9] com ponto decimal
+    
+    //CATEGORIA: IDENTIFICADORES (Nomes de variáveis e funções declaradas pelo usuário)
+    
+    //Identificadores de nome
+    IDENT_NOME_VARIAVEL,        //Sequência de caracteres iniciada em [a-zA-Z], contendo letras, números, underlines
+    
+    //CATEGORIA: FUNÇÕES INTERNAS (bibliotecas internas padrão)
+
+    //Funções internas - Entrada/Saída
+    LIB_IO_LEIA,                //"leia"
+    LIB_IO_ESCREVA,             //"escreva"
+    //Funções internas - Potência/Raiz
+    LIB_MATH_POT,               //"pot"
+    LIB_MATH_RAIZ,              //"raiz"
+    
+    //CATEGORIA: DELIMITADORES (símbolos de separação de tokens)
+    
     //Delimitadores
     DELIM_DOIS_PONTOS,          //":"
     DELIM_PONTO_VIRGULA,        //";"
@@ -33,17 +64,10 @@ public enum FuncaoToken {
     DELIM_VIRGULA,              //","
     DELIM_PARENTESES_ABRE,      //"("
     DELIM_PARENTESES_FECHA,     //")"
-    //Constantes
-    CONST_CARACTER,             //Sequências de caracteres delimitadas por aspas duplas
-    CONST_INTEIRA,              //Sequências de números [0-9] sem ponto decimal
-    CONST_REAL,                 //Sequências de números [0-9] com ponto decimal
-    //Funções internas - Entrada/Saída
-    LIB_IO_LEIA,                //"leia"
-    LIB_IO_ESCREVA,             //"escreva"
-    //Funções internas - Potência/Raiz
-    LIB_MATH_POT,               //"pot"
-    LIB_MATH_RAIZ,              //"raiz"
-    //Operadores - atribuição
+    
+    //CATEGORIA: OPERADORES
+    
+    //Operador de atribuição
     OP_ATRIBUICAO,              //"<-"
     //Operadores matemáticos
     OP_SOMA,                    //"+"

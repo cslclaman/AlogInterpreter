@@ -8,8 +8,10 @@ package alog.view;
 import alog.control.Calculator;
 import alog.control.Parser;
 import alog.control.Scanner;
+import alog.model.Bloco;
 import alog.model.Expressao;
 import alog.model.FuncaoToken;
+import alog.model.TipoExpressao;
 import alog.model.TipoVariavel;
 import alog.model.Token;
 import alog.model.Variavel;
@@ -307,7 +309,6 @@ public class FrmGui extends javax.swing.JFrame {
         Scanner scanner = new Scanner(oldText);
         Parser parser = new Parser(scanner.getAll());
         expressoes = new LinkedList<>();
-        int erros = 0;
         
         while (parser.hasNext()){
             Expressao e = parser.parseExpression();
@@ -324,15 +325,9 @@ public class FrmGui extends javax.swing.JFrame {
         }
         
         System.err.println(parser.getStringErros());
-        if (parser.balanceamentoBlocos() != 0){
-            int bl = parser.balanceamentoBlocos();
-            System.err.println("Blocos INÍCIO-FIM desbalanceados - " + 
-                    (bl > 0 ? "Necessário fechamento de " + bl + " INÍCIO" : (-bl) + " fechamentos FIM desnecessários"));
-            erros ++;
-        }
-        
-        if (erros + parser.getNumErros() > 0){
-            JOptionPane.showMessageDialog(this, erros + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
+
+        if (parser.getNumErros() > 0){
+            JOptionPane.showMessageDialog(this, parser.getNumErros() + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
             formatacao = FORMAT_ERROR;
             for (Token t : parser.getTokensErros()){
                 docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
@@ -343,6 +338,8 @@ public class FrmGui extends javax.swing.JFrame {
         } else {
             exprIndex = 1;
             operacaoCondicional = false;
+            condicionaisResult = new LinkedList<>();
+            execProx = true;
             nomeVar = "";
             
             variaveis = new HashMap<>();
@@ -380,6 +377,26 @@ public class FrmGui extends javax.swing.JFrame {
         txpProcessamento.setText("");
         txpProcessamento.setBackground(backgroundDisabled);
         
+        if (expressao.getTipo() == TipoExpressao._BLOCO){
+            Bloco bloco = (Bloco)expressao;
+            expressoes.remove(expressao);
+            int indice = --exprIndex;
+            while (bloco.hasNextExpressao()){
+                Expressao e = bloco.getNextExpressao();
+                switch (e.getTipo()){
+                    case CRIACAO_VARIAVEL:
+                    case ENTRADA_DE_DADOS:
+                    case SAIDA_DE_DADOS:
+                        e.setIndice(1);
+                        break;
+                    default:
+                        break;
+                }
+                expressoes.add(indice++, e);
+            }
+            expressao = expressoes.get(exprIndex);
+        }
+            
         if (!expressao.hasNextToken()){
             if (!execProx){
                 execProx = true;
@@ -393,37 +410,36 @@ public class FrmGui extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "Execução concluída", "Execução concluída", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
-            
         }
-        
+            
         btnProxPerc.setEnabled(expressao.hasNextToken() || exprIndex < expressoes.size());
-        
+
         formatacao = FORMAT_PERC;
         Token token = expressao.getNextToken();
         docIde.setCharacterAttributes(token.getPosicao(), token.getTamanho(), stylePerc, true);
         jTable1.clearSelection();
-        
+
         switch(expressao.getTipo()){
             case DELIM_BLOCO:
                 switch (token.getFuncaoToken()){
                     case RES_BLOCO_INICIO:
-                        bloco ++;
+                        blocoAtual ++;
                         break;
                     case RES_BLOCO_FIM:
-                        bloco --;
+                        blocoAtual --;
                         break;
                 }
                 break;
             case CRIACAO_VARIAVEL:
                 TipoVariavel tipoVar;
                 switch (expressao.getTokenAt(0).getFuncaoToken()){
-                    case IDENT_TIPO_INTEIRO:
+                    case RES_TIPO_INTEIRO:
                         tipoVar = TipoVariavel.INTEIRO;
                         break;
-                    case IDENT_TIPO_REAL:
+                    case RES_TIPO_REAL:
                         tipoVar = TipoVariavel.REAL;
                         break;
-                    case IDENT_TIPO_CARACTER:
+                    case RES_TIPO_CARACTER:
                     default:
                         tipoVar = TipoVariavel.CARACTER;
                         break;
@@ -550,7 +566,7 @@ public class FrmGui extends javax.swing.JFrame {
 
                         break;
                     case RES_COND_SENAO:
-                        execProx = !condResult;
+                        execProx = !condicionaisResult.pop();
                         break;
                 }
                 break;
@@ -596,7 +612,6 @@ public class FrmGui extends javax.swing.JFrame {
         Scanner scanner = new Scanner(oldText);
         Parser parser = new Parser(scanner.getAll());
         expressoes = new LinkedList<>();
-        int erros = 0;
         
         while (parser.hasNext()){
             Expressao e = parser.parseExpression();
@@ -613,15 +628,9 @@ public class FrmGui extends javax.swing.JFrame {
         }
         
         System.err.println(parser.getStringErros());
-        if (parser.balanceamentoBlocos() != 0){
-            int bl = parser.balanceamentoBlocos();
-            System.err.println("Blocos INÍCIO-FIM desbalanceados - " + 
-                    (bl > 0 ? "Necessário fechamento de " + bl + " INÍCIO" : (-bl) + " fechamentos FIM desnecessários"));
-            erros ++;
-        }
         
-        if ((erros = erros + parser.getNumErros()) > 0){
-            JOptionPane.showMessageDialog(this, erros + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
+        if (parser.getNumErros() > 0){
+            JOptionPane.showMessageDialog(this, parser.getNumErros() + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
             formatacao = FORMAT_ERROR;
             for (Token t : parser.getTokensErros()){
                 docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
@@ -633,6 +642,8 @@ public class FrmGui extends javax.swing.JFrame {
             
             exprIndex = 1;
             operacaoCondicional = false;
+            condicionaisResult = new LinkedList<>();
+            execProx = true;
             nomeVar = "";
             
             variaveis = new HashMap<>();
@@ -1093,9 +1104,9 @@ public class FrmGui extends javax.swing.JFrame {
                 if (r == null || r.getTipo() != TipoVariavel.INTEIRO){
                     System.err.println("Erro na execução - variável para token " + t + " inválida");
                 } else {
-                    condResult = r.getValorInteiro() == 1;
                     docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
-                    execProx = condResult;
+                    condicionaisResult.push(r.getValorInteiro() == 1);
+                    execProx = condicionaisResult.peek();
                     operacaoCondicional = false;
                 }
             } else {
@@ -1202,10 +1213,10 @@ public class FrmGui extends javax.swing.JFrame {
     
     private DefaultTableModel tabVariaveis;
     
-    private int bloco = 0;
+    private int blocoAtual = 0;
     private boolean operacaoCondicional = false;
-    private boolean condResult = false;
-    private boolean execProx = true;
+    private LinkedList<Boolean> condicionaisResult;
+    private boolean execProx;
     
     private Token tokenAnt = null;
     private String nomeVar;

@@ -20,7 +20,7 @@ public class Calculator {
     
     public Calculator(Token operador){
         this.operador = operador;
-        funcao = FuncaoToken._INDEFINIDO;
+        funcao = FuncaoToken._INVALIDO;
     }
     
     public Token executaOperacaoAritmetica(Variavel op1, Variavel op2){

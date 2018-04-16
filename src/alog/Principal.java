@@ -37,7 +37,6 @@ public class Principal {
                     codigofonte.append("\n");
                 }
                 
-                int erros = 0;
                 Scanner scanner = new Scanner(codigofonte.toString());
                 Parser parser = new Parser(scanner.getAll());
                 LinkedList<Expressao> expressoes = new LinkedList<>();
@@ -45,15 +44,9 @@ public class Principal {
                     expressoes.add(parser.parseExpression());
                 }
                 System.err.println(parser.getStringErros());
-                if (parser.balanceamentoBlocos() != 0){
-                    int bl = parser.balanceamentoBlocos();
-                    System.err.println("Blocos INÍCIO-FIM desbalanceados - " + 
-                            (bl > 0 ? "Necessário fechamento de " + bl + " INÍCIO" : (-bl) + " fechamentos FIM desnecessários"));
-                    erros ++;
-                }
                 
-                if ((erros = erros + parser.getNumErros()) > 0){
-                    System.out.println(erros + " erros encontrados no processo de análise sintática.");
+                if (parser.getNumErros() > 0){
+                    System.out.println(parser.getNumErros() + " erros encontrados no processo de análise sintática.");
                     if (args.length > 2 && args[3].equals("-ignore")){
                         System.out.println("Prosseguindo com execução/interpretação\n");
                     } else {
