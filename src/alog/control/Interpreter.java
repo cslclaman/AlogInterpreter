@@ -22,18 +22,20 @@ public class Interpreter {
     private int blocoAtual;
     private HashMap<String,Variavel> variaveis;
     private LinkedList<Boolean> condicionaisResult;
-    private boolean execProx = true;
+    private boolean execProx;
     
     public Interpreter(){
         blocoAtual = 0;
         variaveis = new HashMap<>();
         condicionaisResult = new LinkedList<>();
+        execProx = true;
     }
     
     public void reseta(){
         blocoAtual = 0;
         variaveis = new HashMap<>();
         condicionaisResult = new LinkedList<>();
+        execProx = true;
     }
     
     public boolean executa(Expressao expressao){
