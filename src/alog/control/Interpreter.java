@@ -22,50 +22,31 @@ public class Interpreter {
     private int blocoAtual;
     private HashMap<String,Variavel> variaveis;
     private LinkedList<Boolean> condicionaisResult;
-    private LinkedList<Integer> condicionaisNiveis;
     private boolean execProx = true;
-    private boolean isBloco = false;
     
     public Interpreter(){
         blocoAtual = 0;
         variaveis = new HashMap<>();
         condicionaisResult = new LinkedList<>();
-        condicionaisNiveis = new LinkedList<>();
     }
     
     public void reseta(){
         blocoAtual = 0;
         variaveis = new HashMap<>();
         condicionaisResult = new LinkedList<>();
-        condicionaisNiveis = new LinkedList<>();
     }
     
     public boolean executa(Expressao expressao){
         if (!execProx){
-            switch(expressao.getTipo()){
-                case DELIM_BLOCO:
-                    return execDelimBloco(expressao);
-                case OPERACAO_LOGICA:
-                    boolean r = execCondicional(expressao);
-                    execProx = false;
-                    condicionaisResult.pop();
-                    condicionaisResult.push(true);
-                    return r;
-                default:
-                    if (!isBloco){
-                        execProx = true;
-                    }
-                    break;
-            }
+            execProx = true;
             return true;
         }
         switch(expressao.getTipo()){
             case _BLOCO:
                 Bloco bloco = (Bloco)expressao;
                 boolean res = true;
-                Interpreter innerInterpr = new Interpreter();
                 while (bloco.hasNextExpressao()){
-                    res = innerInterpr.executa(bloco.getNextExpressao());
+                    res = executa(bloco.getNextExpressao());
                     if (!res){
                         break;
                     }
@@ -101,19 +82,9 @@ public class Interpreter {
         switch (expressao.getNextToken().getFuncaoToken()){
             case RES_BLOCO_INICIO:
                 blocoAtual ++;
-                if (!execProx){
-                    condicionaisNiveis.push(blocoAtual - 1);
-                    isBloco = true;
-                } 
                 break;
             case RES_BLOCO_FIM:
                 blocoAtual --;
-                if (!execProx){
-                    if (blocoAtual == condicionaisNiveis.pop()){
-                        isBloco = false;
-                        execProx = true;
-                    }
-                } 
                 break;
         }
         return true;
