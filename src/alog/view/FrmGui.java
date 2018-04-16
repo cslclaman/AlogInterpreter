@@ -8,8 +8,10 @@ package alog.view;
 import alog.control.Calculator;
 import alog.control.Parser;
 import alog.control.Scanner;
+import alog.model.Bloco;
 import alog.model.Expressao;
 import alog.model.FuncaoToken;
+import alog.model.TipoExpressao;
 import alog.model.TipoVariavel;
 import alog.model.Token;
 import alog.model.Variavel;
@@ -336,6 +338,8 @@ public class FrmGui extends javax.swing.JFrame {
         } else {
             exprIndex = 1;
             operacaoCondicional = false;
+            condicionaisResult = new LinkedList<>();
+            execProx = true;
             nomeVar = "";
             
             variaveis = new HashMap<>();
@@ -373,6 +377,26 @@ public class FrmGui extends javax.swing.JFrame {
         txpProcessamento.setText("");
         txpProcessamento.setBackground(backgroundDisabled);
         
+        if (expressao.getTipo() == TipoExpressao._BLOCO){
+            Bloco bloco = (Bloco)expressao;
+            expressoes.remove(expressao);
+            int indice = --exprIndex;
+            while (bloco.hasNextExpressao()){
+                Expressao e = bloco.getNextExpressao();
+                switch (e.getTipo()){
+                    case CRIACAO_VARIAVEL:
+                    case ENTRADA_DE_DADOS:
+                    case SAIDA_DE_DADOS:
+                        e.setIndice(1);
+                        break;
+                    default:
+                        break;
+                }
+                expressoes.add(indice++, e);
+            }
+            expressao = expressoes.get(exprIndex);
+        }
+            
         if (!expressao.hasNextToken()){
             if (!execProx){
                 execProx = true;
@@ -386,24 +410,23 @@ public class FrmGui extends javax.swing.JFrame {
                 JOptionPane.showMessageDialog(this, "Execução concluída", "Execução concluída", JOptionPane.INFORMATION_MESSAGE);
                 return;
             }
-            
         }
-        
+            
         btnProxPerc.setEnabled(expressao.hasNextToken() || exprIndex < expressoes.size());
-        
+
         formatacao = FORMAT_PERC;
         Token token = expressao.getNextToken();
         docIde.setCharacterAttributes(token.getPosicao(), token.getTamanho(), stylePerc, true);
         jTable1.clearSelection();
-        
+
         switch(expressao.getTipo()){
             case DELIM_BLOCO:
                 switch (token.getFuncaoToken()){
                     case RES_BLOCO_INICIO:
-                        bloco ++;
+                        blocoAtual ++;
                         break;
                     case RES_BLOCO_FIM:
-                        bloco --;
+                        blocoAtual --;
                         break;
                 }
                 break;
@@ -543,7 +566,7 @@ public class FrmGui extends javax.swing.JFrame {
 
                         break;
                     case RES_COND_SENAO:
-                        execProx = !condResult;
+                        execProx = !condicionaisResult.pop();
                         break;
                 }
                 break;
@@ -619,6 +642,8 @@ public class FrmGui extends javax.swing.JFrame {
             
             exprIndex = 1;
             operacaoCondicional = false;
+            condicionaisResult = new LinkedList<>();
+            execProx = true;
             nomeVar = "";
             
             variaveis = new HashMap<>();
@@ -1079,9 +1104,9 @@ public class FrmGui extends javax.swing.JFrame {
                 if (r == null || r.getTipo() != TipoVariavel.INTEIRO){
                     System.err.println("Erro na execução - variável para token " + t + " inválida");
                 } else {
-                    condResult = r.getValorInteiro() == 1;
                     docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
-                    execProx = condResult;
+                    condicionaisResult.push(r.getValorInteiro() == 1);
+                    execProx = condicionaisResult.peek();
                     operacaoCondicional = false;
                 }
             } else {
@@ -1188,10 +1213,10 @@ public class FrmGui extends javax.swing.JFrame {
     
     private DefaultTableModel tabVariaveis;
     
-    private int bloco = 0;
+    private int blocoAtual = 0;
     private boolean operacaoCondicional = false;
-    private boolean condResult = false;
-    private boolean execProx = true;
+    private LinkedList<Boolean> condicionaisResult;
+    private boolean execProx;
     
     private Token tokenAnt = null;
     private String nomeVar;
