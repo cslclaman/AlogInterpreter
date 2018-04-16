@@ -27,6 +27,10 @@ public class Parser {
             this.erro = erro;
         }
         
+        @Override
+        public String toString(){
+            return "Linha " + (token.getLinha() + 1) + ", coluna " + (token.getColuna() + 1) + " - " + erro;
+        }
     }
     
     private ArrayList<Token> tokens;
@@ -657,8 +661,7 @@ public class Parser {
             if (msg.length() > 0){
                 msg.append("\n");
             }
-            String ln = "Linha " + (err.token.getLinha() + 1) + ", coluna " + (err.token.getColuna() + 1) + " - " + err.erro;
-            msg.append(ln);
+            msg.append(err.toString());
         }
         return msg.toString();
     }
