@@ -138,13 +138,13 @@ public class Token {
                         funcaoToken = FuncaoToken.RES_BLOCO_FIM;
                         break;
                     case "caracter":
-                        funcaoToken = FuncaoToken.IDENT_TIPO_CARACTER;
+                        funcaoToken = FuncaoToken.RES_TIPO_CARACTER;
                         break;
                     case "inteiro":
-                        funcaoToken = FuncaoToken.IDENT_TIPO_INTEIRO;
+                        funcaoToken = FuncaoToken.RES_TIPO_INTEIRO;
                         break;
                     case "real":
-                        funcaoToken = FuncaoToken.IDENT_TIPO_REAL;
+                        funcaoToken = FuncaoToken.RES_TIPO_REAL;
                         break;
                     case "leia":
                         funcaoToken = FuncaoToken.LIB_IO_LEIA;
@@ -241,7 +241,7 @@ public class Token {
                         precedencia = PRECEDENCIA_OP_RELACIONAL_IGUALDADE;
                         break;
                     default:
-                        funcaoToken = FuncaoToken._INDEFINIDO;
+                        funcaoToken = FuncaoToken._INVALIDO;
                         break;
                 }
                 break;
@@ -266,7 +266,7 @@ public class Token {
                         funcaoToken = FuncaoToken.DELIM_PONTO;
                         break;
                     default:
-                        funcaoToken = FuncaoToken._INDEFINIDO;
+                        funcaoToken = FuncaoToken._INVALIDO;
                         break;
                 }
                 break;
@@ -280,7 +280,7 @@ public class Token {
                 funcaoToken = FuncaoToken._INDEF_NUMERICO;
                 break;
             default:
-                funcaoToken = FuncaoToken._INDEFINIDO;
+                funcaoToken = FuncaoToken._INVALIDO;
                 break;
         }
     }

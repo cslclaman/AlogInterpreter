@@ -93,13 +93,13 @@ public class Interpreter {
     public boolean execCriacaoVariavel(Expressao expressao){
         TipoVariavel tipoVar;
         switch (expressao.getNextToken().getFuncaoToken()){
-            case IDENT_TIPO_INTEIRO:
+            case RES_TIPO_INTEIRO:
                 tipoVar = TipoVariavel.INTEIRO;
                 break;
-            case IDENT_TIPO_REAL:
+            case RES_TIPO_REAL:
                 tipoVar = TipoVariavel.REAL;
                 break;
-            case IDENT_TIPO_CARACTER:
+            case RES_TIPO_CARACTER:
                 tipoVar = TipoVariavel.CARACTER;
                 break;
             default:

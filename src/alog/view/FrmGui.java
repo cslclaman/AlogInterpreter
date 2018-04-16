@@ -410,13 +410,13 @@ public class FrmGui extends javax.swing.JFrame {
             case CRIACAO_VARIAVEL:
                 TipoVariavel tipoVar;
                 switch (expressao.getTokenAt(0).getFuncaoToken()){
-                    case IDENT_TIPO_INTEIRO:
+                    case RES_TIPO_INTEIRO:
                         tipoVar = TipoVariavel.INTEIRO;
                         break;
-                    case IDENT_TIPO_REAL:
+                    case RES_TIPO_REAL:
                         tipoVar = TipoVariavel.REAL;
                         break;
-                    case IDENT_TIPO_CARACTER:
+                    case RES_TIPO_CARACTER:
                     default:
                         tipoVar = TipoVariavel.CARACTER;
                         break;

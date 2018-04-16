@@ -51,9 +51,9 @@ public class Parser {
         
         funcoesEsperadas = new ArrayList<>();
         funcoesEsperadas.add(FuncaoToken.RES_BLOCO_INICIO);
-        funcoesEsperadas.add(FuncaoToken.IDENT_TIPO_CARACTER);
-        funcoesEsperadas.add(FuncaoToken.IDENT_TIPO_INTEIRO);
-        funcoesEsperadas.add(FuncaoToken.IDENT_TIPO_REAL);
+        funcoesEsperadas.add(FuncaoToken.RES_TIPO_CARACTER);
+        funcoesEsperadas.add(FuncaoToken.RES_TIPO_INTEIRO);
+        funcoesEsperadas.add(FuncaoToken.RES_TIPO_REAL);
         funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
         funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
         funcoesEsperadas.add(FuncaoToken.RES_COND_SE);
@@ -126,9 +126,9 @@ public class Parser {
                     pos = innerParser.getPos();
                     
                     funcoesEsperadas.clear();
-                    funcoesEsperadas.add(FuncaoToken.IDENT_TIPO_CARACTER);
-                    funcoesEsperadas.add(FuncaoToken.IDENT_TIPO_INTEIRO);
-                    funcoesEsperadas.add(FuncaoToken.IDENT_TIPO_REAL);
+                    funcoesEsperadas.add(FuncaoToken.RES_TIPO_CARACTER);
+                    funcoesEsperadas.add(FuncaoToken.RES_TIPO_INTEIRO);
+                    funcoesEsperadas.add(FuncaoToken.RES_TIPO_REAL);
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
                     funcoesEsperadas.add(FuncaoToken.RES_COND_SE);
@@ -150,9 +150,9 @@ public class Parser {
                     break;
                     
                 //MODO: CRIAÇÃO DE VARIÁVEIS
-                case IDENT_TIPO_CARACTER:
-                case IDENT_TIPO_INTEIRO:
-                case IDENT_TIPO_REAL:
+                case RES_TIPO_CARACTER:
+                case RES_TIPO_INTEIRO:
+                case RES_TIPO_REAL:
                     expr.setTipo(TipoExpressao.CRIACAO_VARIAVEL);
                     funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken.DELIM_DOIS_PONTOS);
@@ -614,9 +614,9 @@ public class Parser {
                 
                 case DELIM_PONTO_VIRGULA:
                     funcoesEsperadas.clear();
-                    funcoesEsperadas.add(FuncaoToken.IDENT_TIPO_CARACTER);
-                    funcoesEsperadas.add(FuncaoToken.IDENT_TIPO_INTEIRO);
-                    funcoesEsperadas.add(FuncaoToken.IDENT_TIPO_REAL);
+                    funcoesEsperadas.add(FuncaoToken.RES_TIPO_CARACTER);
+                    funcoesEsperadas.add(FuncaoToken.RES_TIPO_INTEIRO);
+                    funcoesEsperadas.add(FuncaoToken.RES_TIPO_REAL);
                     funcoesEsperadas.add(FuncaoToken.IDENT_NOME_VARIAVEL);
                     funcoesEsperadas.add(FuncaoToken.RES_BLOCO_FIM);
                     funcoesEsperadas.add(FuncaoToken.LIB_IO_LEIA);
@@ -630,7 +630,7 @@ public class Parser {
                     go = false;
                     break;
                     
-                case _INDEFINIDO:
+                case _INVALIDO:
                 default:
                     add = false;
                     go = false;
