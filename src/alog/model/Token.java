@@ -14,16 +14,49 @@ package alog.model;
  * @author Caique
  */
 public class Token {
+    /**
+     * Precedência de operação para quando o Token é um identificador de nome de função (construída ou interna do sistema)
+     */
     public static final int PRECEDENCIA_FUNCAO = 10;
+    /**
+     * Precedência de operação para quando o Token identifica acesso a Array (não implementado ainda)
+     */
     public static final int PRECEDENCIA_ARRAY = 10;
+    /**
+     * Precedência de operação para quando o Token é um operador unário, como - ou + (não implementado ainda)
+     */
     public static final int PRECEDENCIA_OP_UNARIO = 9;
+    /**
+     * Precedência de operação para quando o Token é um operador aritmético de multiplicação (* / div mod)
+     */
     public static final int PRECEDENCIA_OP_MULTIPLICACAO = 8;
+    /**
+     * Precedência de operação para quando o Token é um operador aritmético de soma (+ -)
+     */
     public static final int PRECEDENCIA_OP_SOMA = 7;
+    /**
+     * Precedência de operação para quando o Token é um operador relacional de grandeza ({@code > >= < <=})
+     */
     public static final int PRECEDENCIA_OP_RELACIONAL_GRANDEZA = 6;
+    /**
+     * Precedência de operação para quando o Token é um operador relacional de igualdade ({@code =  <>})
+     */
     public static final int PRECEDENCIA_OP_RELACIONAL_IGUALDADE = 5;
+    /**
+     * Precedência de operação para quando o Token é o operador lógico E
+     */
     public static final int PRECEDENCIA_OP_LOGICO_E = 4;
+    /**
+     * Precedência de operação para quando o Token é o operador lógico OU
+     */
     public static final int PRECEDENCIA_OP_LOGICO_OU = 3;
+    /**
+     * Precedência de operação para quando o Token é o operador de atribuição ({@code <-})
+     */
     public static final int PRECEDENCIA_OP_ATRIBUICAO = 2;
+    /**
+     * Precedência para Tokens que não são operadores ou não tem precedência calculada (variáveis, por exemplo)
+     */
     public static final int PRECEDENCIA_INDEFINIDA = 0;
     
     private String palavra;
@@ -43,6 +76,7 @@ public class Token {
         palavra = "";
         tamanho = 0;
         precedencia = PRECEDENCIA_INDEFINIDA;
+        funcaoToken = FuncaoToken._INVALIDO;
     }
 
     /**
@@ -54,6 +88,10 @@ public class Token {
         tamanho ++;
     }
     
+    /**
+     * Concatena uma string à palavra do token e aumenta seu tamanho.
+     * @param sub String a concatenar
+     */
     public void atualizaPalavra(String sub){
         palavra += sub;
         tamanho += sub.length();
@@ -68,7 +106,7 @@ public class Token {
     }
 
     /**
-     * 
+     * Redefine a palavra do Token e seu tamanho. O tamanho é obtido pelo método {@link java.lang.String#length() }.
      * @param palavra 
      */
     public void setPalavra(String palavra) {
@@ -76,54 +114,130 @@ public class Token {
         tamanho = palavra.length();
     }
 
+    /**
+     * Retorna a ordem em que o Token está na lista de tokens do programa, iniciada em 0 (zero).
+     * Exemplo: Num programa {@code Leia(X); } a ordem é a seguinte:
+     *  <table>
+     *  <tr>
+     *      <th>Token</th><th>Tipo</th><th>Ordem</th>
+     *  </tr>
+     *  <tr><td>Leia</td><td>LIB_IO_LEIA</td><td>0</td></tr>
+     *  <tr><td>(</td><td>DELIM_PARENTESES_ABRE</td><td>1</td></tr>
+     *  <tr><td>X</td><td>IDENT_NOME_VARIAVEL</td><td>2</td></tr>
+     *  <tr><td>)</td><td>DELIM_PARENTESES_FECHA</td><td>3</td></tr>
+     *  <tr><td>;</td><td>DELIM_PONTO_VIRGULA</td><td>4</td></tr>
+     *  </table> 
+     * @return ordem
+     */
     public int getOrdem() {
         return ordem;
     }
 
+    /**
+     * Define a ordem do token num determinado programa. 
+     * Em geral, esse método só é (ou deveria ser somente) usado pelo {@link alog.control.Parser }.
+     * @param ordem 
+     */
     public void setOrdem(int ordem) {
         this.ordem = ordem;
     }
 
+    /**
+     * Retorna a linha do programa em que o token está.
+     * @return linha
+     */
     public int getLinha() {
         return lin;
     }
 
+    /**
+     * Define a linha em que o token está no programa. 
+     * Em geral, esse método só é (ou deveria ser somente) usado pelo {@link alog.control.Parser }.
+     * @param lin
+     */
     public void setLinha(int lin) {
         this.lin = lin;
     }
 
+    /**
+     * Retorna a coluna (tabulação/espaçamento) do programa onde a palavra do token começa.
+     * @return coluna
+     */
     public int getColuna() {
         return col;
     }
 
+    /**
+     * Define a coluna do programa onde a palavra do token começa. 
+     * Em geral, esse método só é (ou deveria ser somente) usado pelo {@link alog.control.Parser }.
+     * @param col
+     */
     public void setColuna(int col) {
         this.col = col;
     }
 
+    /**
+     * Retorna a posição (índice de caracter) no programa (como array de char) onde a palavra do token começa.
+     * Por exemplo, no programa {@code "Leia (Var);" }, o token "Var" inicia no índice 6.
+     * Em geral, esse método só é (ou deveria ser somente) usado pelo {@link alog.control.Parser }.
+     * @return Posição.
+     */
     public int getPosicao() {
         return posicao;
     }
 
+    /**
+     * Define a posição (índice de caracter) no programa (como array de char) onde a palavra do token começa.
+     * Em geral, esse método só é (ou deveria ser somente) usado pelo {@link alog.control.Parser }.
+     * @param posicao
+     */
     public void setPosicao(int posicao) {
         this.posicao = posicao;
     }
 
+    /**
+     * Retorna o tamanho da palavra do token (em nº de caracteres)
+     * @return 
+     */
     public int getTamanho() {
         return tamanho;
     }
 
-    public void setTamanho(int tamanho) {
-        this.tamanho = tamanho;
-    }
-
+    /**
+     * Retorna a precedência de operação do Token (ou {@link #PRECEDENCIA_INDEFINIDA} caso não seja necessário).
+     * <table border="1">
+     * <tr><th>Tipo</th><th>Precedência</th><th>Tokens</th><th>Observações</th></tr>
+     * <tr><td>{@link #PRECEDENCIA_FUNCAO}</td><td>10</td><td>Leia Escreva Pot Raiz</td><td>Também usado para identificadores de funções/rotinas declaradas</td></tr>
+     * <tr><td>{@link #PRECEDENCIA_ARRAY}</td><td>10</td><td>[]</td><td>Acesso a um item de um array</td></tr>
+     * <tr><td>{@link #PRECEDENCIA_OP_UNARIO}</td><td>9</td><td>- +</td><td></td></tr>
+     * <tr><td>{@link #PRECEDENCIA_OP_MULTIPLICACAO}</td><td>8</td><td>* / div mod</td><td></td></tr>
+     * <tr><td>{@link #PRECEDENCIA_OP_SOMA}</td><td>7</td><td>+ -</td><td></td></tr>
+     * <tr><td>{@link #PRECEDENCIA_OP_RELACIONAL_GRANDEZA}</td><td>6</td><td>{@code > >= < <= }</td><td></td></tr>
+     * <tr><td>{@link #PRECEDENCIA_OP_RELACIONAL_IGUALDADE}</td><td>5</td><td>{@code = <>}</td><td></td></tr>
+     * <tr><td>{@link #PRECEDENCIA_OP_LOGICO_E}</td><td>4</td><td>E</td><td></td></tr>
+     * <tr><td>{@link #PRECEDENCIA_OP_LOGICO_OU}</td><td>3</td><td>OU</td><td></td></tr>
+     * <tr><td>{@link #PRECEDENCIA_OP_ATRIBUICAO}</td><td>2</td><td>{@code <-}</td><td></td></tr>
+     * <tr><td>{@link #PRECEDENCIA_INDEFINIDA}</td><td>0</td><td></td><td>Outros identificadores que não são operadores</td></tr>
+     * </table> 
+     * @return precedência
+     */
     public int getPrecedencia(){
         return precedencia;
     }
     
+    /**
+     * Retorna o {@link TipoToken} desse Token.
+     * @return 
+     */
     public TipoToken getTipoToken() {
         return tipoToken;
     }
     
+    /**
+     * Define o tipo do token.
+     * Também define a {@link FuncaoToken} ao verificar se a palavra do Token é uma palavra reservada ou operador.
+     * @param tipoToken 
+     */
     public void setTipoToken(TipoToken tipoToken) {
         this.tipoToken = tipoToken;
         
@@ -285,17 +399,36 @@ public class Token {
         }
     }
 
+    /**
+     * Retorna a função do Token.
+     * @return função
+     */
     public FuncaoToken getFuncaoToken(){
         return funcaoToken;
     }
     
+    /**
+     * Define manualmente a função do token. 
+     * @param func 
+     */
     public void setFuncaoToken(FuncaoToken func){
         this.funcaoToken = func;
     }
     
+    /**
+     * Imprime a função do token seguida da palavra
+     * @return "DELIM_BLOCO_INICIO: Início"
+     */
     @Override
     public String toString(){
-        return palavra + " (pos " + (ordem + 1) + " na linha " + (lin + 1) + ", coluna " + (col + 1) + " - carac. no. " + posicao + ")";
+        return funcaoToken + ": " + palavra;
     }
     
+    /**
+     * Descreve o token e sua posição.
+     * @return "Leia (pos 7 na linha 3, coluna 5 - carac. no. 20)"
+     */
+    public String getDescricao(){
+        return palavra + " (pos " + (ordem + 1) + " na linha " + (lin + 1) + ", coluna " + (col + 1) + " - carac. no. " + posicao + ")";
+    }
 }
