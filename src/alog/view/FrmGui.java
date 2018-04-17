@@ -394,7 +394,7 @@ public class FrmGui extends javax.swing.JFrame {
                 }
                 expressoes.add(indice++, e);
             }
-            expressao = expressoes.get(exprIndex);
+            expressao = expressoes.get(exprIndex++);
         }
             
         if (!expressao.hasNextToken()){
