@@ -718,6 +718,7 @@ public class Parser {
                 msgErro += "\n - " + ft;
             }
             erros.add(new ErroSintatico(token, msgErro));
+            erro = true;
             return false;
         } else {
             return true;
