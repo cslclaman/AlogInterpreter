@@ -47,6 +47,21 @@ public class Bloco extends Expressao {
     public boolean hasNextExpressao(){
         return indice < expressoes.size();
     }
+
+    @Override
+    public boolean hasNextToken() {
+        return hasNextExpressao();
+    }
+
+    @Override
+    public Token getNextToken() {
+        if (hasNextExpressao()){
+            if (expressoes.get(indice).getNumTokens() > 0){
+                return expressoes.get(indice).getTokenAt(0);
+            }
+        } 
+        return null;
+    }
     
     public Expressao getNextExpressao(){
         if (hasNextExpressao()){

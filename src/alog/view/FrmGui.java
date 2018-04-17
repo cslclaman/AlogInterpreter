@@ -377,6 +377,21 @@ public class FrmGui extends javax.swing.JFrame {
         txpProcessamento.setText("");
         txpProcessamento.setBackground(backgroundDisabled);
         
+        if (!expressao.hasNextToken()){
+            if (!execProx){
+                execProx = true;
+                exprIndex++;
+            }
+            if (exprIndex < expressoes.size()){
+                expressao = expressoes.get(exprIndex++);
+            } else {
+                btnProxPerc.setEnabled(false);
+                formatacao = FORMAT_PLAIN;
+                JOptionPane.showMessageDialog(this, "Execução concluída", "Execução concluída", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+        }
+        
         if (expressao.getTipo() == TipoExpressao._BLOCO){
             Bloco bloco = (Bloco)expressao;
             expressoes.remove(expressao);
@@ -395,21 +410,6 @@ public class FrmGui extends javax.swing.JFrame {
                 expressoes.add(indice++, e);
             }
             expressao = expressoes.get(exprIndex++);
-        }
-            
-        if (!expressao.hasNextToken()){
-            if (!execProx){
-                execProx = true;
-                exprIndex++;
-            }
-            if (exprIndex < expressoes.size()){
-                expressao = expressoes.get(exprIndex++);
-            } else {
-                btnProxPerc.setEnabled(false);
-                formatacao = FORMAT_PLAIN;
-                JOptionPane.showMessageDialog(this, "Execução concluída", "Execução concluída", JOptionPane.INFORMATION_MESSAGE);
-                return;
-            }
         }
             
         btnProxPerc.setEnabled(expressao.hasNextToken() || exprIndex < expressoes.size());
