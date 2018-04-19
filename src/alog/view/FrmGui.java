@@ -1225,7 +1225,7 @@ public class FrmGui extends javax.swing.JFrame {
                 {
                     int pos = txpIde.getCaretPosition();
                     String txta = txpIde.getText().substring(0, pos);
-                    String txtb = txpIde.getText().substring(pos + 1);
+                    String txtb = txpIde.getText().substring(pos);
                     txpIde.setText(txta + "    " + txtb);
                     txpIde.setCaretPosition(pos + 4);
                 }
@@ -1235,7 +1235,7 @@ public class FrmGui extends javax.swing.JFrame {
                 {
                     int pos = txpIde.getCaretPosition();
                     String txta = txpIde.getText().substring(0, pos);
-                    String txtb = txpIde.getText().substring(pos + 1);
+                    String txtb = txpIde.getText().substring(pos);
                     txpIde.setText(txta + "\n" + txtb);
                     txpIde.setCaretPosition(pos + 1);
                 }
