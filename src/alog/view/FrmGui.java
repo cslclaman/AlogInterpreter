@@ -127,9 +127,6 @@ public class FrmGui extends javax.swing.JFrame {
         mitSalvarComo = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
         mitSair = new javax.swing.JMenuItem();
-        mnuExecutar = new javax.swing.JMenu();
-        mitVerificar = new javax.swing.JMenuItem();
-        mitProxPerc = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Interpreter");
@@ -308,28 +305,6 @@ public class FrmGui extends javax.swing.JFrame {
         mnuArquivo.add(mitSair);
 
         jMenuBar1.add(mnuArquivo);
-
-        mnuExecutar.setText("Executar");
-
-        mitVerificar.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F2, 0));
-        mitVerificar.setText("Verificar algoritmo");
-        mitVerificar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mitVerificarActionPerformed(evt);
-            }
-        });
-        mnuExecutar.add(mitVerificar);
-
-        mitProxPerc.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ENTER, java.awt.event.InputEvent.CTRL_MASK));
-        mitProxPerc.setText("Próximo passo");
-        mitProxPerc.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mitProxPercActionPerformed(evt);
-            }
-        });
-        mnuExecutar.add(mitProxPerc);
-
-        jMenuBar1.add(mnuExecutar);
 
         setJMenuBar(jMenuBar1);
 
@@ -1253,7 +1228,7 @@ public class FrmGui extends javax.swing.JFrame {
                 break;
             case KeyEvent.VK_ENTER:
                 evt.consume();
-                if (!evt.isControlDown()){
+                {
                     int pos = txpIde.getCaretPosition();
                     String txta = txpIde.getText().substring(0, pos);
                     String txtb = txpIde.getText().substring(pos);
@@ -1351,14 +1326,6 @@ public class FrmGui extends javax.swing.JFrame {
             mitSalvarActionPerformed(evt);
         }
     }//GEN-LAST:event_mitSalvarComoActionPerformed
-
-    private void mitVerificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitVerificarActionPerformed
-        btnVerificarActionPerformed(evt);
-    }//GEN-LAST:event_mitVerificarActionPerformed
-
-    private void mitProxPercActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitProxPercActionPerformed
-        btnProxPercActionPerformed(evt);
-    }//GEN-LAST:event_mitProxPercActionPerformed
     
     private void imprimeTokens(Token op){
         LinkedList<Token> tokens = new LinkedList<>();
@@ -1437,13 +1404,10 @@ public class FrmGui extends javax.swing.JFrame {
     private javax.swing.JLabel lblPosCaret;
     private javax.swing.JLabel lblVariavelEntrada;
     private javax.swing.JMenuItem mitAbrir;
-    private javax.swing.JMenuItem mitProxPerc;
     private javax.swing.JMenuItem mitSair;
     private javax.swing.JMenuItem mitSalvar;
     private javax.swing.JMenuItem mitSalvarComo;
-    private javax.swing.JMenuItem mitVerificar;
     private javax.swing.JMenu mnuArquivo;
-    private javax.swing.JMenu mnuExecutar;
     private javax.swing.JTable tblVariaveis;
     private javax.swing.JTextPane txpEntrada;
     private javax.swing.JTextPane txpIde;
