@@ -23,14 +23,15 @@ import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.BadLocationException;
@@ -144,10 +145,10 @@ public class FrmGui extends javax.swing.JFrame {
             }
         });
         txpIde.addInputMethodListener(new java.awt.event.InputMethodListener() {
+            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
+            }
             public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
                 txpIdeCaretPositionChanged(evt);
-            }
-            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
             }
         });
         txpIde.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -281,10 +282,20 @@ public class FrmGui extends javax.swing.JFrame {
 
         mitSalvar.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
         mitSalvar.setText("Salvar");
+        mitSalvar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mitSalvarActionPerformed(evt);
+            }
+        });
         mnuArquivo.add(mitSalvar);
 
         mitSalvarComo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
         mitSalvarComo.setText("Salvar como");
+        mitSalvarComo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mitSalvarComoActionPerformed(evt);
+            }
+        });
         mnuArquivo.add(mitSalvarComo);
         mnuArquivo.add(jSeparator1);
 
@@ -302,10 +313,20 @@ public class FrmGui extends javax.swing.JFrame {
 
         mitVerificar.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F2, 0));
         mitVerificar.setText("Verificar algoritmo");
+        mitVerificar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mitVerificarActionPerformed(evt);
+            }
+        });
         mnuExecutar.add(mitVerificar);
 
         mitProxPerc.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ENTER, java.awt.event.InputEvent.CTRL_MASK));
         mitProxPerc.setText("Próximo passo");
+        mitProxPerc.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mitProxPercActionPerformed(evt);
+            }
+        });
         mnuExecutar.add(mitProxPerc);
 
         jMenuBar1.add(mnuExecutar);
@@ -1232,7 +1253,7 @@ public class FrmGui extends javax.swing.JFrame {
                 break;
             case KeyEvent.VK_ENTER:
                 evt.consume();
-                {
+                if (!evt.isControlDown()){
                     int pos = txpIde.getCaretPosition();
                     String txta = txpIde.getText().substring(0, pos);
                     String txtb = txpIde.getText().substring(pos);
@@ -1290,12 +1311,54 @@ public class FrmGui extends javax.swing.JFrame {
                     codigofonte.append("\n");
                 }
                 txpIde.setText(codigofonte.toString());
+                br.close();
             } catch (IOException ex){
                 JOptionPane.showMessageDialog(this, "Não foi possível carregar o arquivo especificado", "Erro ao abrir arquivo", JOptionPane.ERROR_MESSAGE);
                 System.err.println(ex.toString()); 
             }
         }
     }//GEN-LAST:event_mitAbrirActionPerformed
+
+    private void mitSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitSalvarActionPerformed
+        if (arquivo == null){
+            String caminho = System.getProperty("user.home") + File.separator + "algoritmo.alg";
+            arquivo = new File(caminho);
+            
+            mitSalvarComoActionPerformed(evt);
+        } else {
+            try {
+                FileOutputStream fos = new FileOutputStream(arquivo, false);
+                OutputStreamWriter wr = new OutputStreamWriter(fos,"UTF-8");
+                wr.write(txpIde.getText());
+                wr.close();
+                fos.close();
+            } catch (IOException ex){
+                JOptionPane.showMessageDialog(this, "Não foi possível carregar o arquivo especificado", "Erro ao abrir arquivo", JOptionPane.ERROR_MESSAGE);
+                System.err.println(ex.toString()); 
+            }
+        }
+    }//GEN-LAST:event_mitSalvarActionPerformed
+
+    private void mitSalvarComoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitSalvarComoActionPerformed
+        JFileChooser fileChooser = new JFileChooser(arquivo);
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Arquivos de texto", "txt", "alg"));
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setMultiSelectionEnabled(false);
+        fileChooser.setSelectedFile(arquivo);
+        
+        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION){
+            arquivo = fileChooser.getSelectedFile();
+            mitSalvarActionPerformed(evt);
+        }
+    }//GEN-LAST:event_mitSalvarComoActionPerformed
+
+    private void mitVerificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitVerificarActionPerformed
+        btnVerificarActionPerformed(evt);
+    }//GEN-LAST:event_mitVerificarActionPerformed
+
+    private void mitProxPercActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitProxPercActionPerformed
+        btnProxPercActionPerformed(evt);
+    }//GEN-LAST:event_mitProxPercActionPerformed
     
     private void imprimeTokens(Token op){
         LinkedList<Token> tokens = new LinkedList<>();
