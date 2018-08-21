@@ -1,0 +1,16 @@
+Inicio
+    Inteiro: IdPassagem;
+    Real: ValorPassagem;
+    Caracter: TipoPassagem;
+    
+    Leia(IdPassagem);
+    Leia(ValorPassagem);
+    Leia(TipoPassagem);
+    
+    Se TipoPassagem = "e" OU TipoPassagem = "E" então
+        ValorPassagem <- ValorPassagem * 0.75;
+    Se TipoPassagem = "i" OU TipoPassagem = "I" então
+        ValorPassagem <- ValorPassagem * 0.65;
+        
+    Escreva(ValorPassagem);
+Fim

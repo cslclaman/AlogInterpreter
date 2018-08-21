@@ -20,10 +20,19 @@ import javax.swing.text.DefaultStyledDocument;
 import alog.view.append.TextLineNumber;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
@@ -78,7 +87,7 @@ public class FrmGui extends javax.swing.JFrame {
         docProc = (DefaultStyledDocument)txpProcessamento.getDocument();
         formatacao = FORMAT_PLAIN;
         
-        tabVariaveis = (DefaultTableModel)jTable1.getModel();
+        tabVariaveis = (DefaultTableModel)tblVariaveis.getModel();
     }
 
     /**
@@ -95,20 +104,29 @@ public class FrmGui extends javax.swing.JFrame {
         btnInicioPerc = new javax.swing.JButton();
         btnProxPerc = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        tblVariaveis = new javax.swing.JTable();
+        jLabel1 = new javax.swing.JLabel();
         jScrollPane3 = new javax.swing.JScrollPane();
         txpEntrada = new javax.swing.JTextPane();
-        jLabel1 = new javax.swing.JLabel();
-        jScrollPane6 = new javax.swing.JScrollPane();
-        txpSaida = new javax.swing.JTextPane();
+        jLabel2 = new javax.swing.JLabel();
         jScrollPane7 = new javax.swing.JScrollPane();
         txpProcessamento = new javax.swing.JTextPane();
-        jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
+        jScrollPane6 = new javax.swing.JScrollPane();
+        txpSaida = new javax.swing.JTextPane();
         btnEntradaConfirma = new javax.swing.JButton();
         btnVerificar = new javax.swing.JButton();
         lblVariavelEntrada = new javax.swing.JLabel();
         btnProcContinuar = new javax.swing.JButton();
+        lblPosCaret = new javax.swing.JLabel();
+        jLabel5 = new javax.swing.JLabel();
+        jMenuBar1 = new javax.swing.JMenuBar();
+        mnuArquivo = new javax.swing.JMenu();
+        mitAbrir = new javax.swing.JMenuItem();
+        mitSalvar = new javax.swing.JMenuItem();
+        mitSalvarComo = new javax.swing.JMenuItem();
+        jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        mitSair = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Interpreter");
@@ -118,7 +136,22 @@ public class FrmGui extends javax.swing.JFrame {
         jScrollPane2.setVerifyInputWhenFocusTarget(false);
 
         txpIde.setFont(new java.awt.Font("Consolas", 0, 12)); // NOI18N
+        txpIde.addCaretListener(new javax.swing.event.CaretListener() {
+            public void caretUpdate(javax.swing.event.CaretEvent evt) {
+                txpIdeCaretUpdate(evt);
+            }
+        });
+        txpIde.addInputMethodListener(new java.awt.event.InputMethodListener() {
+            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
+            }
+            public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
+                txpIdeCaretPositionChanged(evt);
+            }
+        });
         txpIde.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyPressed(java.awt.event.KeyEvent evt) {
+                txpIdeKeyPressed(evt);
+            }
             public void keyReleased(java.awt.event.KeyEvent evt) {
                 txpIdeKeyReleased(evt);
             }
@@ -143,7 +176,7 @@ public class FrmGui extends javax.swing.JFrame {
             }
         });
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
+        tblVariaveis.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
             },
@@ -159,9 +192,11 @@ public class FrmGui extends javax.swing.JFrame {
                 return canEdit [columnIndex];
             }
         });
-        jTable1.setSelectionBackground(java.awt.Color.green);
-        jTable1.setSelectionForeground(java.awt.Color.black);
-        jScrollPane1.setViewportView(jTable1);
+        tblVariaveis.setSelectionBackground(java.awt.Color.green);
+        tblVariaveis.setSelectionForeground(java.awt.Color.black);
+        jScrollPane1.setViewportView(tblVariaveis);
+
+        jLabel1.setText("Entrada");
 
         jScrollPane3.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         jScrollPane3.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
@@ -176,17 +211,7 @@ public class FrmGui extends javax.swing.JFrame {
         });
         jScrollPane3.setViewportView(txpEntrada);
 
-        jLabel1.setText("Entrada");
-
-        jScrollPane6.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        jScrollPane6.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-
-        txpSaida.setEditable(false);
-        txpSaida.setBackground(javax.swing.UIManager.getDefaults().getColor("FormattedTextField.disabledBackground"));
-        txpSaida.setFont(new java.awt.Font("Consolas", 0, 12)); // NOI18N
-        txpSaida.setMinimumSize(new java.awt.Dimension(13, 66));
-        txpSaida.setPreferredSize(new java.awt.Dimension(13, 66));
-        jScrollPane6.setViewportView(txpSaida);
+        jLabel2.setText("Processamento");
 
         jScrollPane7.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         jScrollPane7.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
@@ -196,9 +221,18 @@ public class FrmGui extends javax.swing.JFrame {
         txpProcessamento.setFont(new java.awt.Font("Consolas", 0, 12)); // NOI18N
         jScrollPane7.setViewportView(txpProcessamento);
 
-        jLabel2.setText("Processamento");
-
         jLabel3.setText("Saída");
+
+        jScrollPane6.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        jScrollPane6.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+
+        txpSaida.setEditable(false);
+        txpSaida.setBackground(javax.swing.UIManager.getDefaults().getColor("FormattedTextField.disabledBackground"));
+        txpSaida.setFont(new java.awt.Font("Consolas", 0, 12)); // NOI18N
+        txpSaida.setMinimumSize(new java.awt.Dimension(13, 66));
+        txpSaida.setName(""); // NOI18N
+        txpSaida.setPreferredSize(new java.awt.Dimension(13, 66));
+        jScrollPane6.setViewportView(txpSaida);
 
         btnEntradaConfirma.setText("Confirmar");
         btnEntradaConfirma.setEnabled(false);
@@ -225,6 +259,55 @@ public class FrmGui extends javax.swing.JFrame {
             }
         });
 
+        lblPosCaret.setFont(new java.awt.Font("Consolas", 0, 11)); // NOI18N
+        lblPosCaret.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        lblPosCaret.setText("Linha 1, Coluna 1");
+        lblPosCaret.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        jLabel5.setText("Lista de variáveis");
+
+        mnuArquivo.setText("Arquivo");
+
+        mitAbrir.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
+        mitAbrir.setText("Abrir");
+        mitAbrir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mitAbrirActionPerformed(evt);
+            }
+        });
+        mnuArquivo.add(mitAbrir);
+
+        mitSalvar.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
+        mitSalvar.setText("Salvar");
+        mitSalvar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mitSalvarActionPerformed(evt);
+            }
+        });
+        mnuArquivo.add(mitSalvar);
+
+        mitSalvarComo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
+        mitSalvarComo.setText("Salvar como");
+        mitSalvarComo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mitSalvarComoActionPerformed(evt);
+            }
+        });
+        mnuArquivo.add(mitSalvarComo);
+        mnuArquivo.add(jSeparator1);
+
+        mitSair.setText("Sair");
+        mitSair.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mitSairActionPerformed(evt);
+            }
+        });
+        mnuArquivo.add(mitSair);
+
+        jMenuBar1.add(mnuArquivo);
+
+        setJMenuBar(jMenuBar1);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -232,67 +315,77 @@ public class FrmGui extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 443, Short.MAX_VALUE)
-                        .addGap(433, 433, 433))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane7, javax.swing.GroupLayout.DEFAULT_SIZE, 443, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnProcContinuar, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(317, 317, 317))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblVariavelEntrada, javax.swing.GroupLayout.PREFERRED_SIZE, 399, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel3)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(btnVerificar, javax.swing.GroupLayout.PREFERRED_SIZE, 160, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(85, 85, 85)
-                        .addComponent(btnInicioPerc)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnProxPerc))
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(lblPosCaret, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jScrollPane2)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jScrollPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 443, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnEntradaConfirma, javax.swing.GroupLayout.PREFERRED_SIZE, 110, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jScrollPane7)
+                            .addComponent(jScrollPane3)
+                            .addComponent(jScrollPane6))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(btnEntradaConfirma, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(btnProcContinuar, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lblVariavelEntrada, javax.swing.GroupLayout.PREFERRED_SIZE, 399, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel3))
+                        .addGap(0, 107, Short.MAX_VALUE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnVerificar, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(btnInicioPerc)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnProxPerc))))
+                    .addComponent(jLabel5))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnVerificar, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
-                    .addComponent(btnInicioPerc, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(btnProxPerc, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jLabel5)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 420, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 403, Short.MAX_VALUE)
                     .addComponent(jScrollPane2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(lblVariavelEntrada))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnEntradaConfirma, javax.swing.GroupLayout.DEFAULT_SIZE, 41, Short.MAX_VALUE)
-                    .addComponent(jScrollPane3))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnProcContinuar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane7, javax.swing.GroupLayout.DEFAULT_SIZE, 41, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 73, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(lblPosCaret)
+                        .addGap(7, 7, 7)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel1)
+                            .addComponent(lblVariavelEntrada))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(btnEntradaConfirma, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jScrollPane3))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jScrollPane7, javax.swing.GroupLayout.DEFAULT_SIZE, 41, Short.MAX_VALUE)
+                            .addComponent(btnProcContinuar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane6))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(btnVerificar, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(btnInicioPerc, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 41, Short.MAX_VALUE)
+                            .addComponent(btnProxPerc, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
 
@@ -341,6 +434,8 @@ public class FrmGui extends javax.swing.JFrame {
             condicionaisResult = new LinkedList<>();
             execProx = true;
             nomeVar = "";
+            
+            lblPosCaret.setText("Em execução");
             
             variaveis = new HashMap<>();
             varOrdem = new HashMap<>();
@@ -417,7 +512,7 @@ public class FrmGui extends javax.swing.JFrame {
         formatacao = FORMAT_PERC;
         Token token = expressao.getNextToken();
         docIde.setCharacterAttributes(token.getPosicao(), token.getTamanho(), stylePerc, true);
-        jTable1.clearSelection();
+        tblVariaveis.clearSelection();
 
         switch(expressao.getTipo()){
             case DELIM_BLOCO:
@@ -464,10 +559,10 @@ public class FrmGui extends javax.swing.JFrame {
                     varOrdem.put(v.getNome(), lista.indexOf(v));
                 }
                 
-                jTable1.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
+                tblVariaveis.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
                 break;
             case ENTRADA_DE_DADOS:
-                jTable1.clearSelection();
+                tblVariaveis.clearSelection();
                 
                 nomeVar = token.getPalavra();
                 execEntradaDados();
@@ -492,7 +587,7 @@ public class FrmGui extends javax.swing.JFrame {
                         if (variavel == null){
                             System.err.println("Variável " + nomeVar + " não encontrada");
                         } else {
-                            jTable1.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
+                            tblVariaveis.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
                             switch (variavel.getTipo()){
                                 case REAL:
                                     int indicePonto = variavel.getValor().indexOf(".");
@@ -646,6 +741,8 @@ public class FrmGui extends javax.swing.JFrame {
             execProx = true;
             nomeVar = "";
             
+            lblPosCaret.setText("Em execução");
+            
             variaveis = new HashMap<>();
             varOrdem = new HashMap<>();
             expressao = expressoes.getFirst();
@@ -676,11 +773,6 @@ public class FrmGui extends javax.swing.JFrame {
         if (formatacao != FORMAT_PLAIN){
             docIde.setCharacterAttributes(0, docIde.getLength(), stylePlain, true);
         }
-        switch (evt.getKeyCode()){
-            case KeyEvent.VK_TAB:
-            default:
-                break;
-        }
     }//GEN-LAST:event_txpIdeKeyReleased
 
     private void execEntradaDados(){
@@ -688,9 +780,9 @@ public class FrmGui extends javax.swing.JFrame {
         if (variavel == null){
             JOptionPane.showMessageDialog(this, "Variável " + nomeVar + " não encontrada", "Erro de execução", JOptionPane.ERROR_MESSAGE);
         } else {
-            jTable1.clearSelection();
-            jTable1.setSelectionBackground(Color.YELLOW);
-            jTable1.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
+            tblVariaveis.clearSelection();
+            tblVariaveis.setSelectionBackground(Color.YELLOW);
+            tblVariaveis.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
             
             lblVariavelEntrada.setText("Variável " + nomeVar + " (tipo " + variavel.getTipo() + "):");
             btnProxPerc.setEnabled(false);
@@ -738,11 +830,11 @@ public class FrmGui extends javax.swing.JFrame {
         
         if (valorValido){
             variaveis.put(nomeVar, variavel);
-            jTable1.setSelectionBackground(Color.GREEN);
+            tblVariaveis.setSelectionBackground(Color.GREEN);
             tabVariaveis.setValueAt(variavel.getValor(), varOrdem.get(nomeVar), 2);
             
-            jTable1.clearSelection();
-            jTable1.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
+            tblVariaveis.clearSelection();
+            tblVariaveis.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
 
             boolean proxHabilita = expressao.hasNextToken() || exprIndex < expressoes.size();
             btnProxPerc.setEnabled(proxHabilita);
@@ -760,8 +852,8 @@ public class FrmGui extends javax.swing.JFrame {
     }//GEN-LAST:event_btnEntradaConfirmaActionPerformed
 
     private void txpEntradaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txpEntradaKeyPressed
-        evt.consume();
         if (evt.getKeyCode() == KeyEvent.VK_ENTER){
+            evt.consume();
             btnEntradaConfirmaActionPerformed(null);
         }
     }//GEN-LAST:event_txpEntradaKeyPressed
@@ -889,7 +981,7 @@ public class FrmGui extends javax.swing.JFrame {
         switch (token.getFuncaoToken()){
             case IDENT_NOME_VARIAVEL:
                 temp = variaveis.get(token.getPalavra());
-                jTable1.addRowSelectionInterval(varOrdem.get(token.getPalavra()), varOrdem.get(token.getPalavra()));
+                tblVariaveis.addRowSelectionInterval(varOrdem.get(token.getPalavra()), varOrdem.get(token.getPalavra()));
                 break;
             case CONST_CARACTER:
                 temp = new Variavel(TipoVariavel.CARACTER, nomeVar);
@@ -913,7 +1005,7 @@ public class FrmGui extends javax.swing.JFrame {
     private void btnProcContinuarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProcContinuarActionPerformed
         Calculator calculadora;
         boolean popTokens = true;
-        jTable1.clearSelection();
+        tblVariaveis.clearSelection();
         
         while (!saida.isEmpty() && popTokens){
             Token token = saida.pop();
@@ -1090,7 +1182,7 @@ public class FrmGui extends javax.swing.JFrame {
                         }
                         variaveis.put(nomeVar, variavel);
                         tabVariaveis.setValueAt(variavel.getValor(), varOrdem.get(nomeVar), 2);
-                        jTable1.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
+                        tblVariaveis.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
                         
                         popTokens = false;
                     }
@@ -1121,6 +1213,119 @@ public class FrmGui extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_btnProcContinuarActionPerformed
+
+    private void txpIdeKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txpIdeKeyPressed
+        switch (evt.getKeyCode()){
+            case KeyEvent.VK_TAB:
+                evt.consume();
+                {
+                    int pos = txpIde.getCaretPosition();
+                    String txta = txpIde.getText().substring(0, pos);
+                    String txtb = txpIde.getText().substring(pos);
+                    txpIde.setText(txta + "    " + txtb);
+                    txpIde.setCaretPosition(pos + 4);
+                }
+                break;
+            case KeyEvent.VK_ENTER:
+                evt.consume();
+                {
+                    int pos = txpIde.getCaretPosition();
+                    String txta = txpIde.getText().substring(0, pos);
+                    String txtb = txpIde.getText().substring(pos);
+                    txpIde.setText(txta + "\n" + txtb);
+                    txpIde.setCaretPosition(pos + 1);
+                }
+                break;
+            default:
+                break;
+        }
+    }//GEN-LAST:event_txpIdeKeyPressed
+
+    private void txpIdeCaretPositionChanged(java.awt.event.InputMethodEvent evt) {//GEN-FIRST:event_txpIdeCaretPositionChanged
+        
+    }//GEN-LAST:event_txpIdeCaretPositionChanged
+
+    private void txpIdeCaretUpdate(javax.swing.event.CaretEvent evt) {//GEN-FIRST:event_txpIdeCaretUpdate
+        int lin = 1, col = 1;
+        for (char ch : txpIde.getText().substring(0, evt.getDot()).toCharArray()){
+            if (ch == '\n'){
+                lin ++;
+                col = 1;
+            } else {
+                col ++;
+            }
+        }
+        lblPosCaret.setText("Linha " + lin + ", Coluna " + col);
+    }//GEN-LAST:event_txpIdeCaretUpdate
+
+    private void mitSairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitSairActionPerformed
+        System.exit(0);
+    }//GEN-LAST:event_mitSairActionPerformed
+
+    private void mitAbrirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitAbrirActionPerformed
+        JFileChooser fileChooser = new JFileChooser(arquivo);
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Arquivos de texto", "txt", "alg"));
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setMultiSelectionEnabled(false);
+        fileChooser.setSelectedFile(arquivo);
+        
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION){
+            arquivo = fileChooser.getSelectedFile();
+            try {
+                StringBuilder codigofonte = new StringBuilder();
+                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(arquivo), "UTF-8"));
+                String texto;
+                while ((texto = br.readLine()) != null){
+                    for (char ch : texto.toCharArray()){
+                        if (ch == '\t'){
+                            codigofonte.append("    ");
+                        } else {
+                            codigofonte.append(ch);
+                        }
+                    }
+                    codigofonte.append("\n");
+                }
+                txpIde.setText(codigofonte.toString());
+                br.close();
+            } catch (IOException ex){
+                JOptionPane.showMessageDialog(this, "Não foi possível carregar o arquivo especificado", "Erro ao abrir arquivo", JOptionPane.ERROR_MESSAGE);
+                System.err.println(ex.toString()); 
+            }
+        }
+    }//GEN-LAST:event_mitAbrirActionPerformed
+
+    private void mitSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitSalvarActionPerformed
+        if (arquivo == null){
+            String caminho = System.getProperty("user.home") + File.separator + "algoritmo.alg";
+            arquivo = new File(caminho);
+            
+            mitSalvarComoActionPerformed(evt);
+        } else {
+            try {
+                FileOutputStream fos = new FileOutputStream(arquivo, false);
+                OutputStreamWriter wr = new OutputStreamWriter(fos,"UTF-8");
+                wr.write(txpIde.getText());
+                wr.close();
+                fos.close();
+            } catch (IOException ex){
+                JOptionPane.showMessageDialog(this, "Não foi possível carregar o arquivo especificado", "Erro ao abrir arquivo", JOptionPane.ERROR_MESSAGE);
+                System.err.println(ex.toString()); 
+            }
+        }
+    }//GEN-LAST:event_mitSalvarActionPerformed
+
+    private void mitSalvarComoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitSalvarComoActionPerformed
+        JFileChooser fileChooser = new JFileChooser(arquivo);
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Arquivos de texto", "txt", "alg"));
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        fileChooser.setMultiSelectionEnabled(false);
+        fileChooser.setSelectedFile(arquivo);
+        
+        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION){
+            arquivo = fileChooser.getSelectedFile();
+            mitSalvarActionPerformed(evt);
+        }
+    }//GEN-LAST:event_mitSalvarComoActionPerformed
     
     private void imprimeTokens(Token op){
         LinkedList<Token> tokens = new LinkedList<>();
@@ -1188,13 +1393,22 @@ public class FrmGui extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JScrollPane jScrollPane7;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JPopupMenu.Separator jSeparator1;
+    private javax.swing.JLabel lblPosCaret;
     private javax.swing.JLabel lblVariavelEntrada;
+    private javax.swing.JMenuItem mitAbrir;
+    private javax.swing.JMenuItem mitSair;
+    private javax.swing.JMenuItem mitSalvar;
+    private javax.swing.JMenuItem mitSalvarComo;
+    private javax.swing.JMenu mnuArquivo;
+    private javax.swing.JTable tblVariaveis;
     private javax.swing.JTextPane txpEntrada;
     private javax.swing.JTextPane txpIde;
     private javax.swing.JTextPane txpProcessamento;
@@ -1220,4 +1434,6 @@ public class FrmGui extends javax.swing.JFrame {
     
     private Token tokenAnt = null;
     private String nomeVar;
+    
+    private File arquivo;
 }
