@@ -44,11 +44,11 @@ public class Variavel {
         return valor;
     }
     
-    public int getValorInteiro() {
+    public long getValorInteiro() {
         if (!inicializada || tipo != TipoVariavel.INTEIRO){
             return 0;
         } else {
-            return Integer.parseInt(valor);
+            return Long.parseLong(valor);
         }
     }
     
