@@ -78,6 +78,25 @@ public class Token {
         precedencia = PRECEDENCIA_INDEFINIDA;
         funcaoToken = FuncaoToken._INVALIDO;
     }
+    
+    /**
+     * Constrói um novo Token vazio (ou seja, cujo atributo Word é vazio).
+     * @param linha Número da linha onde o Token começa
+     * @param coluna Número da coluna (caracter) da linha onde o Token começa
+     * @param posicao Número da posição no código em que o Token começa
+     * @param ordem Número sequencial do Token no código
+     */
+    public Token(int linha, int coluna, int posicao, int ordem) {
+        this.lin = linha;
+        this.col = coluna;
+        this.posicao = posicao;
+        this.ordem = ordem;
+        
+        palavra = "";
+        tamanho = 0;
+        precedencia = PRECEDENCIA_INDEFINIDA;
+        funcaoToken = FuncaoToken._INVALIDO;
+    }
 
     /**
      * Adiciona um novo caracter à palavra do token e aumenta seu tamanho.
@@ -244,6 +263,23 @@ public class Token {
         switch(tipoToken){
             case ALFABETICO:
                 switch (palavra.toLowerCase()){
+                    case "algoritmo":
+                        funcaoToken = FuncaoToken.RES_ALGORITMO;
+                        break;
+                    case "função":
+                    case "funçao":
+                    case "funcão":
+                    case "funcao":
+                        funcaoToken = FuncaoToken.RES_MOD_FUNCAO;
+                        precedencia = PRECEDENCIA_FUNCAO;
+                        break;
+                    case "rotina":
+                        funcaoToken = FuncaoToken.RES_MOD_ROTINA;
+                        precedencia = PRECEDENCIA_FUNCAO;
+                        break;
+                    case "retorna":
+                        funcaoToken = FuncaoToken.RES_MOD_RETORNA;
+                        break;
                     case "inicio":
                     case "início":
                         funcaoToken = FuncaoToken.RES_BLOCO_INICIO;
@@ -260,6 +296,10 @@ public class Token {
                     case "real":
                         funcaoToken = FuncaoToken.RES_TIPO_REAL;
                         break;
+                    case "logico":
+                    case "lógico":
+                        funcaoToken = FuncaoToken.RES_TIPO_LOGICO;
+                        break;
                     case "leia":
                         funcaoToken = FuncaoToken.LIB_IO_LEIA;
                         precedencia = PRECEDENCIA_FUNCAO;
@@ -269,11 +309,11 @@ public class Token {
                         precedencia = PRECEDENCIA_FUNCAO;
                         break;
                     case "div":
-                        funcaoToken = FuncaoToken.OP_DIV_INTEIRA;
+                        funcaoToken = FuncaoToken.OP_MAT_DIV_INTEIRA;
                         precedencia = PRECEDENCIA_OP_MULTIPLICACAO;
                         break;
                     case "mod":
-                        funcaoToken = FuncaoToken.OP_MOD;
+                        funcaoToken = FuncaoToken.OP_MAT_MOD;
                         precedencia = PRECEDENCIA_OP_MULTIPLICACAO;
                         break;
                     case "pot":
@@ -295,13 +335,33 @@ public class Token {
                     case "senão":
                         funcaoToken = FuncaoToken.RES_COND_SENAO;
                         break;
+                    case "para":
+                        funcaoToken = FuncaoToken.RES_REP_PARA;
+                        break;
+                    case "de":
+                        funcaoToken = FuncaoToken.RES_REP_DE;
+                        break;
+                    case "ate":
+                        funcaoToken = FuncaoToken.RES_REP_ATE;
+                        break;
+                    case "faca":
+                    case "faça":
+                        funcaoToken = FuncaoToken.RES_REP_FACA;
+                        break;
+                    case "enquanto":
+                        funcaoToken = FuncaoToken.RES_REP_ENQUANTO;
+                        break;
                     case "e":
-                        funcaoToken = FuncaoToken.OP_E;
+                        funcaoToken = FuncaoToken.OP_LOG_E;
                         precedencia = PRECEDENCIA_OP_LOGICO_E;
                         break;
                     case "ou":
-                        funcaoToken = FuncaoToken.OP_OU;
+                        funcaoToken = FuncaoToken.OP_LOG_OU;
                         precedencia = PRECEDENCIA_OP_LOGICO_OU;
+                        break;
+                    case "verdadeiro":
+                    case "falso":
+                        funcaoToken = FuncaoToken.CONST_LOGICA;
                         break;
                     default:
                         funcaoToken = FuncaoToken._INDEF_ALFABETICO;
@@ -315,43 +375,43 @@ public class Token {
                         precedencia = PRECEDENCIA_OP_ATRIBUICAO;
                         break;
                     case "+":
-                        funcaoToken = FuncaoToken.OP_SOMA;
+                        funcaoToken = FuncaoToken.OP_MAT_SOMA;
                         precedencia = PRECEDENCIA_OP_SOMA;
                         break;
                     case "-":
-                        funcaoToken = FuncaoToken.OP_SUBTRACAO;
+                        funcaoToken = FuncaoToken.OP_MAT_SUBTRACAO;
                         precedencia = PRECEDENCIA_OP_SOMA;
                         break;
                     case "*":
-                        funcaoToken = FuncaoToken.OP_MULTIPLICACAO;
+                        funcaoToken = FuncaoToken.OP_MAT_MULTIPLICACAO;
                         precedencia = PRECEDENCIA_OP_MULTIPLICACAO;
                         break;
                     case "/":
-                        funcaoToken = FuncaoToken.OP_DIV_REAL;
+                        funcaoToken = FuncaoToken.OP_MAT_DIV_REAL;
                         precedencia = PRECEDENCIA_OP_MULTIPLICACAO;
                         break;
                     case ">":
-                        funcaoToken = FuncaoToken.OP_MAIOR;
+                        funcaoToken = FuncaoToken.OP_REL_MAIOR;
                         precedencia = PRECEDENCIA_OP_RELACIONAL_GRANDEZA;
                         break;
                     case "<":
-                        funcaoToken = FuncaoToken.OP_MENOR;
+                        funcaoToken = FuncaoToken.OP_REL_MENOR;
                         precedencia = PRECEDENCIA_OP_RELACIONAL_GRANDEZA;
                         break;
                     case ">=":
-                        funcaoToken = FuncaoToken.OP_MAIOR_IGUAL;
+                        funcaoToken = FuncaoToken.OP_REL_MAIOR_IGUAL;
                         precedencia = PRECEDENCIA_OP_RELACIONAL_GRANDEZA;
                         break;
                     case "<=":
-                        funcaoToken = FuncaoToken.OP_MENOR_IGUAL;
+                        funcaoToken = FuncaoToken.OP_REL_MENOR_IGUAL;
                         precedencia = PRECEDENCIA_OP_RELACIONAL_GRANDEZA;
                         break;
-                    case "<>":
-                        funcaoToken = FuncaoToken.OP_DIFERENTE;
+                    case "=":
+                        funcaoToken = FuncaoToken.OP_REL_IGUAL;
                         precedencia = PRECEDENCIA_OP_RELACIONAL_IGUALDADE;
                         break;
-                    case "=":
-                        funcaoToken = FuncaoToken.OP_IGUAL;
+                    case "<>":
+                        funcaoToken = FuncaoToken.OP_REL_DIFERENTE;
                         precedencia = PRECEDENCIA_OP_RELACIONAL_IGUALDADE;
                         break;
                     default:
@@ -364,11 +424,14 @@ public class Token {
                     case ":":
                         funcaoToken = FuncaoToken.DELIM_DOIS_PONTOS;
                         break;
-                    case ",":
-                        funcaoToken = FuncaoToken.DELIM_VIRGULA;
-                        break;
                     case ";":
                         funcaoToken = FuncaoToken.DELIM_PONTO_VIRGULA;
+                        break;
+                    case ".":
+                        funcaoToken = FuncaoToken.DELIM_PONTO;
+                        break;
+                    case ",":
+                        funcaoToken = FuncaoToken.DELIM_VIRGULA;
                         break;
                     case "(":
                         funcaoToken = FuncaoToken.DELIM_PARENTESES_ABRE;
@@ -376,8 +439,11 @@ public class Token {
                     case ")":
                         funcaoToken = FuncaoToken.DELIM_PARENTESES_FECHA;
                         break;
-                    case ".":
-                        funcaoToken = FuncaoToken.DELIM_PONTO;
+                    case "[":
+                        funcaoToken = FuncaoToken.DELIM_COLCHETES_ABRE;
+                        break;
+                    case "]":
+                        funcaoToken = FuncaoToken.DELIM_COLCHETES_FECHA;
                         break;
                     default:
                         funcaoToken = FuncaoToken._INVALIDO;

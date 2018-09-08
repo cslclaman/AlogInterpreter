@@ -199,12 +199,12 @@ public class Parser {
                     break;
                     
                 //MODO: OPERAÇÃO ARITMÉTICA
-                case OP_SOMA:
-                case OP_SUBTRACAO:
-                case OP_MULTIPLICACAO:
-                case OP_DIV_INTEIRA:
-                case OP_DIV_REAL:
-                case OP_MOD:
+                case OP_MAT_SOMA:
+                case OP_MAT_SUBTRACAO:
+                case OP_MAT_MULTIPLICACAO:
+                case OP_MAT_DIV_INTEIRA:
+                case OP_MAT_DIV_REAL:
+                case OP_MAT_MOD:
                     if (expr.getTipo() == TipoExpressao.OPERACAO_ATRIBUICAO){
                         expr.setTipo(TipoExpressao.OPERACAO_ARITMETICA);
                     }
@@ -240,14 +240,14 @@ public class Parser {
                     add = true;
                     break;
                     
-                case OP_MAIOR:
-                case OP_MAIOR_IGUAL:
-                case OP_MENOR:
-                case OP_MENOR_IGUAL:
-                case OP_IGUAL:
-                case OP_DIFERENTE:
-                case OP_E:
-                case OP_OU:
+                case OP_REL_MAIOR:
+                case OP_REL_MAIOR_IGUAL:
+                case OP_REL_MENOR:
+                case OP_REL_MENOR_IGUAL:
+                case OP_REL_IGUAL:
+                case OP_REL_DIFERENTE:
+                case OP_LOG_E:
+                case OP_LOG_OU:
                     funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
@@ -355,12 +355,12 @@ public class Parser {
                             funcoesEsperadas.clear();
                             funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
                             funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
-                            funcoesEsperadas.add(FuncaoToken.OP_SOMA);
-                            funcoesEsperadas.add(FuncaoToken.OP_SUBTRACAO);
-                            funcoesEsperadas.add(FuncaoToken.OP_MULTIPLICACAO);
-                            funcoesEsperadas.add(FuncaoToken.OP_DIV_INTEIRA);
-                            funcoesEsperadas.add(FuncaoToken.OP_DIV_REAL);
-                            funcoesEsperadas.add(FuncaoToken.OP_MOD);
+                            funcoesEsperadas.add(FuncaoToken.OP_MAT_SOMA);
+                            funcoesEsperadas.add(FuncaoToken.OP_MAT_SUBTRACAO);
+                            funcoesEsperadas.add(FuncaoToken.OP_MAT_MULTIPLICACAO);
+                            funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_INTEIRA);
+                            funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_REAL);
+                            funcoesEsperadas.add(FuncaoToken.OP_MAT_MOD);
                             add = true;
                             break;
                     }
@@ -408,14 +408,14 @@ public class Parser {
                             break;
                         case OPERACAO_LOGICA:
                             funcoesEsperadas.clear();
-                            funcoesEsperadas.add(FuncaoToken.OP_MAIOR);
-                            funcoesEsperadas.add(FuncaoToken.OP_MAIOR_IGUAL);
-                            funcoesEsperadas.add(FuncaoToken.OP_MENOR);
-                            funcoesEsperadas.add(FuncaoToken.OP_MENOR_IGUAL);
-                            funcoesEsperadas.add(FuncaoToken.OP_IGUAL);
-                            funcoesEsperadas.add(FuncaoToken.OP_DIFERENTE);
-                            funcoesEsperadas.add(FuncaoToken.OP_E);
-                            funcoesEsperadas.add(FuncaoToken.OP_OU);
+                            funcoesEsperadas.add(FuncaoToken.OP_REL_MAIOR);
+                            funcoesEsperadas.add(FuncaoToken.OP_REL_MAIOR_IGUAL);
+                            funcoesEsperadas.add(FuncaoToken.OP_REL_MENOR);
+                            funcoesEsperadas.add(FuncaoToken.OP_REL_MENOR_IGUAL);
+                            funcoesEsperadas.add(FuncaoToken.OP_REL_IGUAL);
+                            funcoesEsperadas.add(FuncaoToken.OP_REL_DIFERENTE);
+                            funcoesEsperadas.add(FuncaoToken.OP_LOG_E);
+                            funcoesEsperadas.add(FuncaoToken.OP_LOG_OU);
                             funcoesEsperadas.add(FuncaoToken.RES_COND_ENTAO);
                             add = true;
                     }
@@ -470,12 +470,12 @@ public class Parser {
                                 funcoesEsperadas.clear();
                                 funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
                                 funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
-                                funcoesEsperadas.add(FuncaoToken.OP_SOMA);
-                                funcoesEsperadas.add(FuncaoToken.OP_SUBTRACAO);
-                                funcoesEsperadas.add(FuncaoToken.OP_MULTIPLICACAO);
-                                funcoesEsperadas.add(FuncaoToken.OP_DIV_INTEIRA);
-                                funcoesEsperadas.add(FuncaoToken.OP_DIV_REAL);
-                                funcoesEsperadas.add(FuncaoToken.OP_MOD);
+                                funcoesEsperadas.add(FuncaoToken.OP_MAT_SOMA);
+                                funcoesEsperadas.add(FuncaoToken.OP_MAT_SUBTRACAO);
+                                funcoesEsperadas.add(FuncaoToken.OP_MAT_MULTIPLICACAO);
+                                funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_INTEIRA);
+                                funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_REAL);
+                                funcoesEsperadas.add(FuncaoToken.OP_MAT_MOD);
                                 add = true;
                             //}
                             break;
@@ -489,12 +489,12 @@ public class Parser {
                                 token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
 
                                 funcoesEsperadas.clear();
-                                funcoesEsperadas.add(FuncaoToken.OP_SOMA);
-                                funcoesEsperadas.add(FuncaoToken.OP_SUBTRACAO);
-                                funcoesEsperadas.add(FuncaoToken.OP_MULTIPLICACAO);
-                                funcoesEsperadas.add(FuncaoToken.OP_DIV_INTEIRA);
-                                funcoesEsperadas.add(FuncaoToken.OP_DIV_REAL);
-                                funcoesEsperadas.add(FuncaoToken.OP_MOD);
+                                funcoesEsperadas.add(FuncaoToken.OP_MAT_SOMA);
+                                funcoesEsperadas.add(FuncaoToken.OP_MAT_SUBTRACAO);
+                                funcoesEsperadas.add(FuncaoToken.OP_MAT_MULTIPLICACAO);
+                                funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_INTEIRA);
+                                funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_REAL);
+                                funcoesEsperadas.add(FuncaoToken.OP_MAT_MOD);
                                 funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
                                 funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
                                 funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
@@ -511,20 +511,20 @@ public class Parser {
                                 token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
 
                                 funcoesEsperadas.clear();
-                                funcoesEsperadas.add(FuncaoToken.OP_MAIOR);
-                                funcoesEsperadas.add(FuncaoToken.OP_MAIOR_IGUAL);
-                                funcoesEsperadas.add(FuncaoToken.OP_MENOR);
-                                funcoesEsperadas.add(FuncaoToken.OP_MENOR_IGUAL);
-                                funcoesEsperadas.add(FuncaoToken.OP_IGUAL);
-                                funcoesEsperadas.add(FuncaoToken.OP_DIFERENTE);
-                                funcoesEsperadas.add(FuncaoToken.OP_E);
-                                funcoesEsperadas.add(FuncaoToken.OP_OU);
-                                funcoesEsperadas.add(FuncaoToken.OP_SOMA);
-                                funcoesEsperadas.add(FuncaoToken.OP_SUBTRACAO);
-                                funcoesEsperadas.add(FuncaoToken.OP_MULTIPLICACAO);
-                                funcoesEsperadas.add(FuncaoToken.OP_DIV_INTEIRA);
-                                funcoesEsperadas.add(FuncaoToken.OP_DIV_REAL);
-                                funcoesEsperadas.add(FuncaoToken.OP_MOD);
+                                funcoesEsperadas.add(FuncaoToken.OP_REL_MAIOR);
+                                funcoesEsperadas.add(FuncaoToken.OP_REL_MAIOR_IGUAL);
+                                funcoesEsperadas.add(FuncaoToken.OP_REL_MENOR);
+                                funcoesEsperadas.add(FuncaoToken.OP_REL_MENOR_IGUAL);
+                                funcoesEsperadas.add(FuncaoToken.OP_REL_IGUAL);
+                                funcoesEsperadas.add(FuncaoToken.OP_REL_DIFERENTE);
+                                funcoesEsperadas.add(FuncaoToken.OP_LOG_E);
+                                funcoesEsperadas.add(FuncaoToken.OP_LOG_OU);
+                                funcoesEsperadas.add(FuncaoToken.OP_MAT_SOMA);
+                                funcoesEsperadas.add(FuncaoToken.OP_MAT_SUBTRACAO);
+                                funcoesEsperadas.add(FuncaoToken.OP_MAT_MULTIPLICACAO);
+                                funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_INTEIRA);
+                                funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_REAL);
+                                funcoesEsperadas.add(FuncaoToken.OP_MAT_MOD);
                                 funcoesEsperadas.add(FuncaoToken.RES_COND_ENTAO);
                                 add = true;
                             //}
@@ -568,26 +568,26 @@ public class Parser {
                         case OPERACAO_ARITMETICA:
                             funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
                             funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
-                            funcoesEsperadas.add(FuncaoToken.OP_SOMA);
-                            funcoesEsperadas.add(FuncaoToken.OP_SUBTRACAO);
-                            funcoesEsperadas.add(FuncaoToken.OP_MULTIPLICACAO);
-                            funcoesEsperadas.add(FuncaoToken.OP_DIV_INTEIRA);
-                            funcoesEsperadas.add(FuncaoToken.OP_DIV_REAL);
-                            funcoesEsperadas.add(FuncaoToken.OP_MOD);
+                            funcoesEsperadas.add(FuncaoToken.OP_MAT_SOMA);
+                            funcoesEsperadas.add(FuncaoToken.OP_MAT_SUBTRACAO);
+                            funcoesEsperadas.add(FuncaoToken.OP_MAT_MULTIPLICACAO);
+                            funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_INTEIRA);
+                            funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_REAL);
+                            funcoesEsperadas.add(FuncaoToken.OP_MAT_MOD);
                             break;
                         case CHAMADA_FUNCAO:
                             funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
                             funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
                             break;
                         case OPERACAO_LOGICA:
-                            funcoesEsperadas.add(FuncaoToken.OP_MAIOR);
-                            funcoesEsperadas.add(FuncaoToken.OP_MAIOR_IGUAL);
-                            funcoesEsperadas.add(FuncaoToken.OP_MENOR);
-                            funcoesEsperadas.add(FuncaoToken.OP_MENOR_IGUAL);
-                            funcoesEsperadas.add(FuncaoToken.OP_IGUAL);
-                            funcoesEsperadas.add(FuncaoToken.OP_DIFERENTE);
-                            funcoesEsperadas.add(FuncaoToken.OP_E);
-                            funcoesEsperadas.add(FuncaoToken.OP_OU);
+                            funcoesEsperadas.add(FuncaoToken.OP_REL_MAIOR);
+                            funcoesEsperadas.add(FuncaoToken.OP_REL_MAIOR_IGUAL);
+                            funcoesEsperadas.add(FuncaoToken.OP_REL_MENOR);
+                            funcoesEsperadas.add(FuncaoToken.OP_REL_MENOR_IGUAL);
+                            funcoesEsperadas.add(FuncaoToken.OP_REL_IGUAL);
+                            funcoesEsperadas.add(FuncaoToken.OP_REL_DIFERENTE);
+                            funcoesEsperadas.add(FuncaoToken.OP_LOG_E);
+                            funcoesEsperadas.add(FuncaoToken.OP_LOG_OU);
                             funcoesEsperadas.add(FuncaoToken.RES_COND_ENTAO);
                             add = true;
                             break;

@@ -903,20 +903,20 @@ public class FrmGui extends javax.swing.JFrame {
                     break;
 
                 case OP_ATRIBUICAO:
-                case OP_SOMA:
-                case OP_SUBTRACAO:
-                case OP_MULTIPLICACAO:
-                case OP_DIV_INTEIRA:
-                case OP_DIV_REAL:
-                case OP_MOD:
-                case OP_MAIOR:
-                case OP_MAIOR_IGUAL:
-                case OP_MENOR:
-                case OP_MENOR_IGUAL:
-                case OP_IGUAL:
-                case OP_DIFERENTE:
-                case OP_E:
-                case OP_OU:
+                case OP_MAT_SOMA:
+                case OP_MAT_SUBTRACAO:
+                case OP_MAT_MULTIPLICACAO:
+                case OP_MAT_DIV_INTEIRA:
+                case OP_MAT_DIV_REAL:
+                case OP_MAT_MOD:
+                case OP_REL_MAIOR:
+                case OP_REL_MAIOR_IGUAL:
+                case OP_REL_MENOR:
+                case OP_REL_MENOR_IGUAL:
+                case OP_REL_IGUAL:
+                case OP_REL_DIFERENTE:
+                case OP_LOG_E:
+                case OP_LOG_OU:
                     while (!pilha.isEmpty() && pilha.peek().getPrecedencia() > token.getPrecedencia()){
                         saida.add(pilha.pop());
                     }
@@ -1018,12 +1018,12 @@ public class FrmGui extends javax.swing.JFrame {
                 case CONST_REAL:
                     pilha.push(token);
                     break;
-                case OP_SOMA:
-                case OP_SUBTRACAO:
-                case OP_MULTIPLICACAO:
-                case OP_DIV_INTEIRA:
-                case OP_DIV_REAL:
-                case OP_MOD:
+                case OP_MAT_SOMA:
+                case OP_MAT_SUBTRACAO:
+                case OP_MAT_MULTIPLICACAO:
+                case OP_MAT_DIV_INTEIRA:
+                case OP_MAT_DIV_REAL:
+                case OP_MAT_MOD:
                     docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
                     imprimeTokens(token);
                     
@@ -1050,12 +1050,12 @@ public class FrmGui extends javax.swing.JFrame {
                     }
                     break;
                     
-                case OP_MAIOR:
-                case OP_MAIOR_IGUAL:
-                case OP_MENOR:
-                case OP_MENOR_IGUAL:
-                case OP_IGUAL:
-                case OP_DIFERENTE:
+                case OP_REL_MAIOR:
+                case OP_REL_MAIOR_IGUAL:
+                case OP_REL_MENOR:
+                case OP_REL_MENOR_IGUAL:
+                case OP_REL_IGUAL:
+                case OP_REL_DIFERENTE:
                     docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
                     imprimeTokens(token);
                     
@@ -1082,8 +1082,8 @@ public class FrmGui extends javax.swing.JFrame {
                     }
                     break;
                     
-                case OP_E:
-                case OP_OU:
+                case OP_LOG_E:
+                case OP_LOG_OU:
                     docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
                     imprimeTokens(token);
                     

@@ -26,7 +26,11 @@ public class Scanner {
     public Scanner(String texto) {
         this.texto = texto.toCharArray();
         len = texto.length();
-        pos = posnolf = linha = coluna = order = 0;
+        pos = 0;
+        posnolf = 0;
+        linha = 0;
+        coluna = 0;
+        order = 0;
         next = len > 0;
     }
     
@@ -47,11 +51,7 @@ public class Scanner {
         
         boolean literal = false;
         boolean go = true;
-        Token token = new Token();
-        token.setLinha(linha);
-        token.setPosicao(posnolf);
-        token.setColuna(coluna);
-        token.setOrdem(order++);
+        Token token = new Token(linha, coluna, posnolf, order++);
         
         while (go && next && pos < len){
             if (pos + 1 == len){
@@ -109,7 +109,7 @@ public class Scanner {
                     } else {
                         go = false;
                     }
-                } else if (isLogicalOperator(ch) || isArithmeticOperator(ch)){
+                } else if (isRelationalOperator(ch) || isArithmeticOperator(ch)){
                     if (contAlpha > 0 || contNum > 0){
                         go = false;
                     } else {
@@ -120,7 +120,8 @@ public class Scanner {
                         contOper++;
                     }
                 } else {
-                    System.out.println("Caractere não considerável: " + ch + " (" + (int)ch + ")");
+                    System.out.println("Caractere não considerável: "
+                            + ch + " (" + (int)ch + ")");
                     token.atualizaPalavra(ch);
                     go = false;
                     pos++;
@@ -207,40 +208,55 @@ public class Scanner {
         return list;
     }
     
+    /**
+     * Retorna se um determinado caracter é "em branco" (espaço, quebra de linha, tabulação).
+     * @param ch Caracter a verificar
+     * @return
+     */
     private static boolean isBlank(char ch){
         char[] delimiters = {'\n','\r','\t',' '};
-        for (char cb : delimiters){
-            if (cb == ch){
-                return true;
-            }
-        }
-        return false;
+        return isListed(ch, delimiters);
     }
     
+    /**
+     * Retorna se um determinado caracter é um símbolo reservado (pontuação e delimitadores).
+     * @param ch Caracter a verificar
+     * @return
+     */
     private static boolean isReserved(char ch){
-        char[] delimiters = {':',';','(',')','[',']',',','.'};
-        for (char cd : delimiters){
-            if (cd == ch){
-                return true;
-            }
-        }
-        return false;
+        char[] reserved = {':',';','(',')','[',']',',','.'};
+        return isListed(ch, reserved);
     }
     
+    /**
+     * Retorna se um determinado caracter é um operador aritmético.
+     * @param ch Caracter a verificar
+     * @return
+     */
     private static boolean isArithmeticOperator(char ch){
         char[] arithmetic = {'+','-','*','/'};
-        for (char ca : arithmetic){
-            if (ca == ch){
-                return true;
-            }
-        }
-        return false;
+        return isListed(ch, arithmetic);
     }
     
-    private static boolean isLogicalOperator(char ch){
-        char[] logical = {'>','<','=','!'};
-        for (char cl : logical){
-            if (cl == ch){
+    /**
+     * Retorna se um determinado caracter é um operador relacional
+     * @param ch Caracter a verificar
+     * @return
+     */
+    private static boolean isRelationalOperator(char ch){
+        char[] relational = {'>','<','=','!'};
+        return isListed(ch, relational);
+    }
+    
+    /**
+     * Retorna se um determinado caracter está contido em um array de caracteres
+     * @param ch Caracter a verificar
+     * @param list Array a ser verificado
+     * @return
+     */
+    private static boolean isListed(char ch, char[] list){
+        for (char c : list){
+            if (c == ch){
                 return true;
             }
         }
