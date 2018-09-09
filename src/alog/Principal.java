@@ -9,12 +9,14 @@ import alog.control.Interpreter;
 import alog.control.Parser;
 import alog.control.Scanner;
 import alog.model.Expressao;
+import alog.token.Token;
 import alog.view.FrmGui;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  *
@@ -38,7 +40,21 @@ public class Principal {
                 }
                 
                 Scanner scanner = new Scanner(codigofonte.toString());
-                Parser parser = new Parser(scanner.getAllTokens());
+                List<Token> tokens = scanner.listaTokens();
+                
+                if (scanner.getNumErros() > 0){
+                    System.err.println(scanner.imprimeErros());
+                    System.out.println("\n" + scanner.getNumErros() +
+                            " erros encontrados na análise léxica.");
+                    if (args.length > 2 && args[3].equals("-ignore")){
+                        System.out.println("Prosseguindo com análise sintática\n");
+                    } else {
+                        System.out.println("Verifique os erros, corrija o código e tente novamente.");
+                        System.exit(0);
+                    }
+                } 
+                
+                Parser parser = new Parser(tokens);
                 LinkedList<Expressao> expressoes = new LinkedList<>();
                 while (parser.hasNext()){
                     expressoes.add(parser.parseExpression());
@@ -46,9 +62,10 @@ public class Principal {
                 System.err.println(parser.getStringErros());
                 
                 if (parser.getNumErros() > 0){
-                    System.out.println(parser.getNumErros() + " erros encontrados no processo de análise sintática.");
+                    System.out.println("\n" + parser.getNumErros() +
+                            " erros encontrados na análise sintática.");
                     if (args.length > 2 && args[3].equals("-ignore")){
-                        System.out.println("Prosseguindo com execução/interpretação\n");
+                        System.out.println("Prosseguindo com execução\n");
                     } else {
                         System.out.println("Verifique os erros, corrija o código e tente novamente.");
                         System.exit(0);

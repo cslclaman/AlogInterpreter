@@ -2,15 +2,40 @@ package alog.control;
 
 import alog.token.TipoToken;
 import alog.token.Token;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import javafx.scene.shape.Line;
 
 /**
  * Classe de scanner que realiza análise léxica em um código e retorna os tokens por meio de um iterador.
  * @author Caique
  */
 public class Scanner {
+    
+    private class ErroLexico {
+        char caracter;
+        int linha;
+        int coluna;
+        int posicao;
+        String erro;
+
+        public ErroLexico(
+                char caracter, int linha, int coluna, int posicao, String erro){
+            this.caracter = caracter;
+            this.linha = linha;
+            this.coluna = coluna;
+            this.posicao = posicao;
+            this.erro = erro;
+        }
+
+        @Override
+        public String toString(){
+            return String.format(
+                    "Linha %d, Coluna %d: Caractere '%c' (unicode %d) %s",
+                    linha + 1, coluna + 1, caracter, (int)caracter, erro);  
+            
+        }
+    }
     
     private int indice;
     private int posicao;
@@ -21,7 +46,7 @@ public class Scanner {
     private boolean next;
     private char[] texto;
     
-    private LinkedList<String> erros;
+    private LinkedList<ErroLexico> erros;
 
     /**
      * Constrói uma nova instância do Scanner a partir de uma String de código-fonte.
@@ -44,7 +69,7 @@ public class Scanner {
      * Retorna se ainda há algum token a ser verificado no código.
      * @return True se ainda há tokens.
      */
-    public boolean hasNext(){
+    public boolean existeProximo(){
         return next;
     }
     
@@ -52,7 +77,7 @@ public class Scanner {
      * Retorna o próximo token encontrado, devidamente classificado.
      * @return {@link alog.token.Token}
      */
-    public Token getNext(){
+    public Token proximo(){
         int contLit = 0; // Contagem de caracteres dentro da string literal
         int contAlpha = 0; // Contagem de caracteres alfabéticos
         int contNum = 0; // Contagem de caracteres numéricos
@@ -130,10 +155,8 @@ public class Scanner {
                         contOper++;
                     }
                 } else {
-                    erros.add(String.format(
-                            "Linha %d, Coluna %d: Caractere '%c' (%d) inválido",
-                            linha, coluna, ch, (int)ch
-                    ));
+                    erros.add(new ErroLexico(
+                            ch, linha, coluna, posicao, "inválido"));
                     token.atualizaPalavra(ch);
                     go = false;
                     indice++;
@@ -210,33 +233,67 @@ public class Scanner {
     
     /**
      * Retorna todos os Tokens encontrados no texto.
-     * Esse método cria uma lista e executa o método {@link #getNext() }
+     * Esse método cria uma lista e executa o método {@link #proximo() }
      * até que não haja mais tokens a serem lidos
-     * (ou seja, quando o método {@link #hasNext()} retornar {@code FALSE}.
+     * (ou seja, quando o método {@link #existeProximo()} retornar {@code FALSE}.
      * @return ArrayList com tokens
      */
-    public List<Token> getAllTokens(){
+    public List<Token> listaTokens (){
         LinkedList<Token> list = new LinkedList<>();
-        while (hasNext()){
-            list.add(getNext());
+        while (existeProximo()){
+            list.add(proximo());
         }
         return list;
     }
     
     /**
-     * Retorna se houveram erros de análise léxica.
+     * Retorna número de erros de análise léxica.
      * @return 
      */
-    public boolean hasErrors(){
-        return !erros.isEmpty();
+    public int getNumErros(){
+        return erros.size();
     }
     
     /**
      * Retorna lista com mensagens de erro que ocorreram durante a análise.
      * @return Lista com mensagens ou lista vazia caso não tenham erros
      */
-    public List<String> getErrors(){
-        return erros;
+    public List<String> getListaErros(){
+        LinkedList<String> err = new LinkedList<>();
+        for (ErroLexico e : erros){
+            err.add(e.toString());
+        }
+        return err;
+    }
+    
+    /**
+     * Retorna lista com mensagens de erro que ocorreram durante a análise.
+     * @return Lista com mensagens ou lista vazia caso não tenham erros
+     */
+    public String imprimeErros(){
+        StringBuilder msg = new StringBuilder();
+        for (ErroLexico err : erros){
+            if (msg.length() > 0){
+                msg.append("\n");
+            }
+            msg.append(err.toString());
+        }
+        return msg.toString();
+    }
+    
+    /**
+     * Retorna lista com mensagens de erro que ocorreram durante a análise.
+     * @return Lista com mensagens ou lista vazia caso não tenham erros
+     */
+    public List<Token> retornaErros () {
+        LinkedList<Token> tokens = new LinkedList<>();
+        for (ErroLexico err : erros){
+            Token t = new Token(
+                    err.linha, err.coluna, err.posicao, tokens.size() + 1);
+            t.setPalavra(String.valueOf(err.caracter));
+            tokens.add(t);
+        }
+        return tokens;
     }
     
     /**

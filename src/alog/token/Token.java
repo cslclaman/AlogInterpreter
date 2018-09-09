@@ -293,7 +293,7 @@ public class Token {
                         funcaoToken = FuncaoToken.RES_BLOCO_FIM;
                         break;
                     case "matriz":
-                        funcaoToken = FuncaoToken.RES_TIPO_MATRIZ;
+                        funcaoToken = FuncaoToken.RES_ED_MATRIZ;
                         break;
                     case "caracter":
                         funcaoToken = FuncaoToken.RES_TIPO_CARACTER;
@@ -350,7 +350,11 @@ public class Token {
                         funcaoToken = FuncaoToken.RES_COMUM_DE;
                         break;
                     case "ate":
+                    case "até":
                         funcaoToken = FuncaoToken.RES_REP_ATE;
+                        break;
+                    case "passo":
+                        funcaoToken = FuncaoToken.RES_REP_PASSO;
                         break;
                     case "faca":
                     case "faça":
