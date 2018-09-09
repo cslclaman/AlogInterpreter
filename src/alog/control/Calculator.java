@@ -5,9 +5,9 @@
  */
 package alog.control;
 
-import alog.model.FuncaoToken;
+import alog.token.FuncaoToken;
 import alog.model.TipoVariavel;
-import alog.model.Token;
+import alog.token.Token;
 import alog.model.Variavel;
 
 /**

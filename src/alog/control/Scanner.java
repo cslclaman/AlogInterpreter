@@ -1,7 +1,7 @@
 package alog.control;
 
-import alog.model.TipoToken;
-import alog.model.Token;
+import alog.token.TipoToken;
+import alog.token.Token;
 import java.util.ArrayList;
 
 /**
@@ -44,7 +44,7 @@ public class Scanner {
     
     /**
      * Retorna o próximo token encontrado, devidamente classificado.
-     * @return {@link alog.model.Token}
+     * @return {@link alog.token.Token}
      */
     public Token getNext(){
         int contLit = 0, contAlpha = 0, contNum = 0, contDelim = 0, contOper = 0; 

@@ -7,9 +7,9 @@ package alog.control;
 
 import alog.model.Bloco;
 import alog.model.Expressao;
-import alog.model.FuncaoToken;
+import alog.token.FuncaoToken;
 import alog.model.TipoVariavel;
-import alog.model.Token;
+import alog.token.Token;
 import alog.model.Variavel;
 import java.util.HashMap;
 import java.util.LinkedList;
