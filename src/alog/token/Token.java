@@ -233,6 +233,7 @@ public class Token {
      * <tr><td>{@link #PRECEDENCIA_FUNCAO}</td><td>10</td><td>Leia Escreva Pot Raiz</td><td>Também usado para identificadores de funções/rotinas declaradas</td></tr>
      * <tr><td>{@link #PRECEDENCIA_ARRAY}</td><td>10</td><td>[]</td><td>Acesso a um item de um array</td></tr>
      * <tr><td>{@link #PRECEDENCIA_OP_UNARIO}</td><td>9</td><td>- +</td><td></td></tr>
+     * <tr><td>{@link #PRECEDENCIA_OP_LOGICO_NAO}</td><td>9</td><td>NÃO</td><td></td></tr>
      * <tr><td>{@link #PRECEDENCIA_OP_MULTIPLICACAO}</td><td>8</td><td>* / div mod</td><td></td></tr>
      * <tr><td>{@link #PRECEDENCIA_OP_SOMA}</td><td>7</td><td>+ -</td><td></td></tr>
      * <tr><td>{@link #PRECEDENCIA_OP_RELACIONAL_GRANDEZA}</td><td>6</td><td>{@code > >= < <= }</td><td></td></tr>
@@ -291,6 +292,9 @@ public class Token {
                     case "fim":
                         funcaoToken = FuncaoToken.RES_BLOCO_FIM;
                         break;
+                    case "matriz":
+                        funcaoToken = FuncaoToken.RES_TIPO_MATRIZ;
+                        break;
                     case "caracter":
                         funcaoToken = FuncaoToken.RES_TIPO_CARACTER;
                         break;
@@ -343,7 +347,7 @@ public class Token {
                         funcaoToken = FuncaoToken.RES_REP_PARA;
                         break;
                     case "de":
-                        funcaoToken = FuncaoToken.RES_REP_DE;
+                        funcaoToken = FuncaoToken.RES_COMUM_DE;
                         break;
                     case "ate":
                         funcaoToken = FuncaoToken.RES_REP_ATE;
