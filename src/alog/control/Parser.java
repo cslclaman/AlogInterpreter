@@ -12,6 +12,7 @@ import alog.model.TipoExpressao;
 import alog.token.Token;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Analisador sintático que verifica uma sequência de tokens e retorna expressões executáveis.
@@ -33,23 +34,23 @@ public class Parser {
         }
     }
     
-    private ArrayList<Token> tokens;
-    private ArrayList<String> variaveis;
+    private List<Token> tokens;
+    private List<String> variaveis;
     
-    private ArrayList<FuncaoToken> funcoesEsperadas;
+    private LinkedList<FuncaoToken> funcoesEsperadas;
     private int pos;
-    private ArrayList<ErroSintatico> erros;
+    private LinkedList<ErroSintatico> erros;
     
     private boolean fimAtingido;
     private boolean erro;
     
-    public Parser (ArrayList<Token> tokens){
+    public Parser (List<Token> tokens){
         this.tokens = tokens;
         
-        variaveis = new ArrayList<>();
-        erros = new ArrayList<>();
+        variaveis = new LinkedList<>();
+        erros = new LinkedList<>();
         
-        funcoesEsperadas = new ArrayList<>();
+        funcoesEsperadas = new LinkedList<>();
         funcoesEsperadas.add(FuncaoToken.RES_BLOCO_INICIO);
         funcoesEsperadas.add(FuncaoToken.RES_TIPO_CARACTER);
         funcoesEsperadas.add(FuncaoToken.RES_TIPO_INTEIRO);

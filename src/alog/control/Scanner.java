@@ -3,6 +3,8 @@ package alog.control;
 import alog.token.TipoToken;
 import alog.token.Token;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Classe de scanner que realiza análise léxica em um código e retorna os tokens por meio de um iterador.
@@ -18,6 +20,8 @@ public class Scanner {
     private int len;
     private boolean next;
     private char[] texto;
+    
+    private LinkedList<String> erros;
 
     /**
      * Constrói uma nova instância do Scanner a partir de uma String de código-fonte.
@@ -32,6 +36,8 @@ public class Scanner {
         coluna = 0;
         ordem = 0;
         next = len > 0;
+        
+        erros = new LinkedList<>();
     }
     
     /**
@@ -47,7 +53,11 @@ public class Scanner {
      * @return {@link alog.token.Token}
      */
     public Token getNext(){
-        int contLit = 0, contAlpha = 0, contNum = 0, contDelim = 0, contOper = 0; 
+        int contLit = 0; // Contagem de caracteres dentro da string literal
+        int contAlpha = 0; // Contagem de caracteres alfabéticos
+        int contNum = 0; // Contagem de caracteres numéricos
+        int contDelim = 0; // Contagem de caracteres símbolos delimitadores
+        int contOper = 0; // Contagem de caracteres símbolos operadores
         
         boolean literal = false;
         boolean go = true;
@@ -70,7 +80,7 @@ public class Scanner {
             } else {
                 if (isBlank(ch)){
                     go = false;
-                } else if (Character.isLetter(ch) || ch == '_'){
+                } else if (isLetter(ch)){
                     if (contDelim > 0 || contOper > 0){
                         go = false;
                     } else {
@@ -80,7 +90,7 @@ public class Scanner {
                         coluna ++;
                         contAlpha ++;
                     }
-                } else if (Character.isDigit(ch)){
+                } else if (isNumeric(ch)){
                     if (contDelim > 0 || contOper > 0){
                         go = false;
                     } else {
@@ -120,8 +130,10 @@ public class Scanner {
                         contOper++;
                     }
                 } else {
-                    System.out.println("Caractere não considerável: "
-                            + ch + " (" + (int)ch + ")");
+                    erros.add(String.format(
+                            "Linha %d, Coluna %d: Caractere '%c' (%d) inválido",
+                            linha, coluna, ch, (int)ch
+                    ));
                     token.atualizaPalavra(ch);
                     go = false;
                     indice++;
@@ -198,14 +210,51 @@ public class Scanner {
     
     /**
      * Retorna todos os Tokens encontrados no texto.
+     * Esse método cria uma lista e executa o método {@link #getNext() }
+     * até que não haja mais tokens a serem lidos
+     * (ou seja, quando o método {@link #hasNext()} retornar {@code FALSE}.
      * @return ArrayList com tokens
      */
-    public ArrayList<Token> getAllTokens(){
-        ArrayList<Token> list = new ArrayList<>();
+    public List<Token> getAllTokens(){
+        LinkedList<Token> list = new LinkedList<>();
         while (hasNext()){
             list.add(getNext());
         }
         return list;
+    }
+    
+    /**
+     * Retorna se houveram erros de análise léxica.
+     * @return 
+     */
+    public boolean hasErrors(){
+        return !erros.isEmpty();
+    }
+    
+    /**
+     * Retorna lista com mensagens de erro que ocorreram durante a análise.
+     * @return Lista com mensagens ou lista vazia caso não tenham erros
+     */
+    public List<String> getErrors(){
+        return erros;
+    }
+    
+    /**
+     * Retorna se um determinado caracter é alfabético (A-Z, a-z, '_').
+     * @param ch Caracter a verificar
+     * @return
+     */
+    private static boolean isLetter(char ch){
+        return Character.isLetter(ch) || ch == '_';
+    }
+    
+    /**
+     * Retorna se um determinado caracter é numérico (0-9).
+     * @param ch Caracter a verificar
+     * @return
+     */
+    private static boolean isNumeric(char ch){
+        return Character.isDigit(ch);
     }
     
     /**
