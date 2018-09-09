@@ -27,6 +27,10 @@ public class Token {
      */
     public static final int PRECEDENCIA_OP_UNARIO = 9;
     /**
+     * Precedência de operação para quando o Token é um operador de negação lógica ("não")
+     */
+    public static final int PRECEDENCIA_OP_LOGICO_NAO = 9;
+    /**
      * Precedência de operação para quando o Token é um operador aritmético de multiplicação (* / div mod)
      */
     public static final int PRECEDENCIA_OP_MULTIPLICACAO = 8;
@@ -346,6 +350,7 @@ public class Token {
                         break;
                     case "faca":
                     case "faça":
+                    case "repita":
                         funcaoToken = FuncaoToken.RES_REP_FACA;
                         break;
                     case "enquanto":
@@ -358,6 +363,11 @@ public class Token {
                     case "ou":
                         funcaoToken = FuncaoToken.OP_LOG_OU;
                         precedencia = PRECEDENCIA_OP_LOGICO_OU;
+                        break;
+                    case "nao":
+                    case "não":
+                        funcaoToken = FuncaoToken.OP_LOG_NAO;
+                        precedencia = PRECEDENCIA_OP_LOGICO_NAO;
                         break;
                     case "verdadeiro":
                     case "falso":

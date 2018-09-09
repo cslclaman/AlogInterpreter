@@ -273,4 +273,8 @@ public enum FuncaoToken {
      * Operador lógico OU: "ou"
      */
     OP_LOG_OU,    
+    /**
+     * Operador lógico de inversão/negação: "não" ou "nao"
+     */
+    OP_LOG_NAO, 
 }

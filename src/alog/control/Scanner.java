@@ -10,9 +10,9 @@ import java.util.ArrayList;
  */
 public class Scanner {
     
-    private int pos;
-    private int posnolf;
-    private int order;
+    private int indice;
+    private int posicao;
+    private int ordem;
     private int linha;
     private int coluna;
     private int len;
@@ -26,11 +26,11 @@ public class Scanner {
     public Scanner(String texto) {
         this.texto = texto.toCharArray();
         len = texto.length();
-        pos = 0;
-        posnolf = 0;
+        indice = 0;
+        posicao = 0;
         linha = 0;
         coluna = 0;
-        order = 0;
+        ordem = 0;
         next = len > 0;
     }
     
@@ -47,76 +47,76 @@ public class Scanner {
      * @return {@link alog.model.Token}
      */
     public Token getNext(){
-        int contLit = 0, contAlpha = 0, contNum = 0, contRes = 0, contOper = 0; 
+        int contLit = 0, contAlpha = 0, contNum = 0, contDelim = 0, contOper = 0; 
         
         boolean literal = false;
         boolean go = true;
-        Token token = new Token(linha, coluna, posnolf, order++);
+        Token token = new Token(linha, coluna, posicao, ordem++);
         
-        while (go && next && pos < len){
-            if (pos + 1 == len){
+        while (go && next && indice < len){
+            if (indice + 1 == len){
                 next = false;
             }
-            char ch = texto[pos];
+            char ch = texto[indice];
             if (literal){
                 if (ch == '"'){
                     literal = false;
                     go = false;
                 }
                 token.atualizaPalavra(ch);
-                pos++;
-                posnolf++;
+                indice++;
+                posicao++;
                 contLit++;
             } else {
                 if (isBlank(ch)){
                     go = false;
                 } else if (Character.isLetter(ch) || ch == '_'){
-                    if (contRes > 0 || contOper > 0){
+                    if (contDelim > 0 || contOper > 0){
                         go = false;
                     } else {
                         token.atualizaPalavra(ch);
-                        pos++;
-                        posnolf++;
+                        indice++;
+                        posicao++;
                         coluna ++;
                         contAlpha ++;
                     }
                 } else if (Character.isDigit(ch)){
-                    if (contRes > 0 || contOper > 0){
+                    if (contDelim > 0 || contOper > 0){
                         go = false;
                     } else {
                         token.atualizaPalavra(ch);
-                        pos++;
-                        posnolf++;
+                        indice++;
+                        posicao++;
                         coluna ++;
                         contNum ++;
                     }
-                } else if (isReserved(ch)){
+                } else if (isDelimiter(ch)){
                     if (token.getTamanho() == 0){
                         token.atualizaPalavra(ch);
-                        pos++;
-                        posnolf++;
+                        indice++;
+                        posicao++;
                         coluna ++;
-                        contRes ++;
+                        contDelim ++;
                     }
                     go = false;
                 } else if (ch == '"'){
                     if (token.getTamanho() == 0){
                         literal = true;
                         token.atualizaPalavra(ch);
-                        pos++;
-                        posnolf++;
+                        indice++;
+                        posicao++;
                         coluna++;
                     } else {
                         go = false;
                     }
-                } else if (isRelationalOperator(ch) || isArithmeticOperator(ch)){
+                } else if (isOperator(ch)){
                     if (contAlpha > 0 || contNum > 0){
                         go = false;
                     } else {
                         token.atualizaPalavra(ch);
-                        pos++;
+                        indice++;
                         coluna++;
-                        posnolf++;
+                        posicao++;
                         contOper++;
                     }
                 } else {
@@ -124,18 +124,18 @@ public class Scanner {
                             + ch + " (" + (int)ch + ")");
                     token.atualizaPalavra(ch);
                     go = false;
-                    pos++;
-                    posnolf++;
+                    indice++;
+                    posicao++;
                     coluna++;
                 }
             }
         }
         go = true;
-        while (go && pos < len){
-            char ch = texto[pos];
+        while (go && indice < len){
+            char ch = texto[indice];
             if (ch == '\r') {
-                if (pos < len && texto[pos+1] == '\n'){
-                    pos++;
+                if (indice < len && texto[indice+1] == '\n'){
+                    indice++;
                     continue;
                 } else {
                     ch = '\n';
@@ -143,19 +143,19 @@ public class Scanner {
             }
             switch (ch) {
                 case '\n':
-                    pos ++;
+                    indice ++;
                     coluna = 0;
                     linha ++;
-                    posnolf++;
+                    posicao++;
                     break;
                 case ' ':
-                    pos ++;
-                    posnolf++;
+                    indice ++;
+                    posicao++;
                     coluna ++;
                     break;
                 case '\t':
-                    pos ++;
-                    posnolf += 4;
+                    indice ++;
+                    posicao += 4;
                     coluna += 4;
                     break;
                 default:
@@ -176,7 +176,7 @@ public class Scanner {
                 if (contAlpha > 0){
                     token.setTipoToken(TipoToken.ALFABETICO);
                 } else {
-                    if (contRes > 0){
+                    if (contDelim > 0){
                         token.setTipoToken(TipoToken.DELIMITADOR);
                     } else {
                         if (contOper > 0){
@@ -189,7 +189,7 @@ public class Scanner {
             }
         }
         
-        if (pos == len){
+        if (indice == len){
             next = false;
         }
         
@@ -223,29 +223,19 @@ public class Scanner {
      * @param ch Caracter a verificar
      * @return
      */
-    private static boolean isReserved(char ch){
-        char[] reserved = {':',';','(',')','[',']',',','.'};
-        return isListed(ch, reserved);
+    private static boolean isDelimiter(char ch){
+        char[] delimiter = {':',';','(',')','[',']',',','.'};
+        return isListed(ch, delimiter);
     }
     
     /**
-     * Retorna se um determinado caracter é um operador aritmético.
+     * Retorna se um determinado caracter é um operador (aritmético ou relacional).
      * @param ch Caracter a verificar
      * @return
      */
-    private static boolean isArithmeticOperator(char ch){
-        char[] arithmetic = {'+','-','*','/'};
-        return isListed(ch, arithmetic);
-    }
-    
-    /**
-     * Retorna se um determinado caracter é um operador relacional
-     * @param ch Caracter a verificar
-     * @return
-     */
-    private static boolean isRelationalOperator(char ch){
-        char[] relational = {'>','<','=','!'};
-        return isListed(ch, relational);
+    private static boolean isOperator(char ch){
+        char[] operators = {'+','-','*','/','>','<','='};
+        return isListed(ch, operators);
     }
     
     /**
