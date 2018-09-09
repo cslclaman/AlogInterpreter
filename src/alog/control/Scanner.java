@@ -200,7 +200,7 @@ public class Scanner {
      * Retorna todos os Tokens encontrados no texto.
      * @return ArrayList com tokens
      */
-    public ArrayList<Token> getAll(){
+    public ArrayList<Token> getAllTokens(){
         ArrayList<Token> list = new ArrayList<>();
         while (hasNext()){
             list.add(getNext());

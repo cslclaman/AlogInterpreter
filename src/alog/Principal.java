@@ -38,7 +38,7 @@ public class Principal {
                 }
                 
                 Scanner scanner = new Scanner(codigofonte.toString());
-                Parser parser = new Parser(scanner.getAll());
+                Parser parser = new Parser(scanner.getAllTokens());
                 LinkedList<Expressao> expressoes = new LinkedList<>();
                 while (parser.hasNext()){
                     expressoes.add(parser.parseExpression());

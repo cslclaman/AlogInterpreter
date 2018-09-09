@@ -142,10 +142,10 @@ public class FrmGui extends javax.swing.JFrame {
             }
         });
         txpIde.addInputMethodListener(new java.awt.event.InputMethodListener() {
-            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
-            }
             public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
                 txpIdeCaretPositionChanged(evt);
+            }
+            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
             }
         });
         txpIde.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -400,7 +400,7 @@ public class FrmGui extends javax.swing.JFrame {
         }
         
         Scanner scanner = new Scanner(oldText);
-        Parser parser = new Parser(scanner.getAll());
+        Parser parser = new Parser(scanner.getAllTokens());
         expressoes = new LinkedList<>();
         
         while (parser.hasNext()){
@@ -705,7 +705,7 @@ public class FrmGui extends javax.swing.JFrame {
         }
         
         Scanner scanner = new Scanner(oldText);
-        Parser parser = new Parser(scanner.getAll());
+        Parser parser = new Parser(scanner.getAllTokens());
         expressoes = new LinkedList<>();
         
         while (parser.hasNext()){
