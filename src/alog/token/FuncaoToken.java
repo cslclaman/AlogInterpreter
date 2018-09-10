@@ -184,14 +184,22 @@ public enum FuncaoToken {
     IDENT_NOME_VARIAVEL ("Identificador de Variável"),
     /**
      * Identificador de Função: Sequência de caracteres iniciada em [a-zA-Z], contendo letras, números, underlines.
+     * Vem após {@link #RES_MOD_FUNCAO}.
      * Definida pelo Parser (scanner define como {@link #_INDEF_ALFABETICO} ou {@link #_INDEF_ALFANUMERICO}.
      */
     IDENT_NOME_FUNCAO ("Identificador de Função"),
     /**
      * Identificador de Rotina: Sequência de caracteres iniciada em [a-zA-Z], contendo letras, números, underlines.
+     * Vem após {@link #RES_MOD_ROTINA}.
      * Definida pelo Parser (scanner define como {@link #_INDEF_ALFABETICO} ou {@link #_INDEF_ALFANUMERICO}.
      */
     IDENT_NOME_ROTINA ("Identificador de Rotina"),
+    /**
+     * Identificador do Algoritmo: Sequência de caracteres iniciada em [a-zA-Z], contendo letras, números, underlines.
+     * Vem após {@link #RES_ALGORITMO}.
+     * Definida pelo Parser (scanner define como {@link #_INDEF_ALFABETICO} ou {@link #_INDEF_ALFANUMERICO}.
+     */
+    IDENT_NOME_ALGORITMO ("Identificador do Algoritmo"),
     
     //CATEGORIA: FUNÇÕES INTERNAS (bibliotecas internas padrão)
 

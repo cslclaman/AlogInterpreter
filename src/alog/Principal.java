@@ -8,7 +8,7 @@ package alog;
 import alog.control.Interpreter;
 import alog.control.Parser;
 import alog.control.Scanner;
-import alog.model.Expressao;
+import alog.model.Instrucao;
 import alog.token.Token;
 import alog.view.FrmGui;
 import java.io.BufferedReader;
@@ -55,7 +55,7 @@ public class Principal {
                 } 
                 
                 Parser parser = new Parser(tokens);
-                LinkedList<Expressao> expressoes = new LinkedList<>();
+                LinkedList<Instrucao> expressoes = new LinkedList<>();
                 while (parser.hasNext()){
                     expressoes.add(parser.parseExpression());
                 }
@@ -76,7 +76,7 @@ public class Principal {
                 int linha = 0;
                 
                 Interpreter interpreter = new Interpreter();
-                for (Expressao expr : expressoes){
+                for (Instrucao expr : expressoes){
                     linha = expr.getLinha();
                     if (!interpreter.executa(expr)){
                         execEnd = false;

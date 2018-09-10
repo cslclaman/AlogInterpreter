@@ -1,84 +1,108 @@
 package alog.model;
 
+import alog.token.FuncaoToken;
 import alog.token.Token;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Classe que representa um bloco de expressões (delimitado por início/fim)
  * @author Caique Souza
  */
-public class Bloco extends Expressao {
-    private ArrayList<Expressao> expressoes;
-    protected int linhaFinal;
+public class Bloco extends Instrucao {
+    private LinkedList<Token> tokens;
+    private LinkedList<Instrucao> instrucoes;
+    private Token inicio;
+    private Token fim;
+    private boolean instrucoesValidas;
     
     public Bloco() {
-        super();
-        setTipo(TipoExpressao._BLOCO);
-        expressoes = new ArrayList<>();
-        linhaFinal = 0;
+        tokens = new LinkedList<>();
+        instrucoes = new LinkedList<>();
+        tipo = TipoInstrucao.BLOCO;
+        texto = "";
+        instrucoesValidas = true;
     }
 
-    public int getLinhaFinal() {
-        return linhaFinal;
-    }
-
-    @Override
-    public void setLinha(int linha) {
-        super.setLinha(linha);
-        linhaFinal = expressoes.size() + linha;
-    }
-
-    public void addExpressao(Expressao expressao){
-        expressoes.add(expressao);
-        linhaFinal = expressoes.size() + linha;
-    }
-
-    public Expressao getExpressaoAt(int pos){
-        return expressoes.get(pos);
-    }
-    
-    public int getNumExpressoes(){
-        return expressoes.size();
-    }
-    
-    public ArrayList<Expressao> listExpressoes(){
-        return expressoes;
-    }
-    
-    public boolean hasNextExpressao(){
-        return indice < expressoes.size();
-    }
-
-    @Override
-    public boolean hasNextToken() {
-        return hasNextExpressao();
-    }
-
-    @Override
-    public Token getNextToken() {
-        if (hasNextExpressao()){
-            if (expressoes.get(indice).getNumTokens() > 0){
-                return expressoes.get(indice).getTokenAt(0);
-            }
+    public boolean insereInstrucao(Instrucao instrucao){
+        if (texto.isEmpty() || !instrucao.instrucaoValida()){
+            instrucoesValidas = false;
+            return false;
         } 
-        return null;
-    }
-    
-    public Expressao getNextExpressao(){
-        if (hasNextExpressao()){
-            return expressoes.get(indice++);
-        } else {
-            return null;
+        instrucoes.add(instrucao);
+        texto += "\n    " + instrucao.getTipo();
+        for (Token token : instrucao.listaTokens()){
+            tokens.add(token);
         }
+        return true;
+    }
+
+    public int getNumInstrucoes(){
+        return instrucoes.size();
     }
     
+    public List<Instrucao> listaInstrucoes(){
+        return instrucoes;
+    }
+
     @Override
-    public String printTokens(){
-        StringBuilder str = new StringBuilder();
-        for (Expressao expr : expressoes){
-            str.append(expr.printTokens());
-            str.append("\n");
+    public int getNumTokens() {
+        return tokens.size();
+    }
+
+    @Override
+    public boolean insereToken(Token token) {
+        switch (token.getFuncaoToken()){
+            case RES_BLOCO_INICIO:
+                if (!texto.isEmpty()){
+                    instrucoesValidas = false;
+                    return false;
+                } else {
+                    inicio = token;
+                    texto = token.getPalavra();
+                }
+                break;
+            case RES_BLOCO_FIM:
+                if (texto.isEmpty()){
+                    instrucoesValidas = false;
+                    return false;
+                } else {
+                    fim = token;
+                    texto = "\n" + token.getPalavra();
+                }
+                break;
+            default:
+                return false;
         }
-        return str.toString();
+        tokens.add(token);
+        return true;
+    }
+
+    @Override
+    public List<Token> listaTokens() {
+        return tokens;
+    }
+
+    @Override
+    public boolean instrucaoValida() {
+        boolean valido =
+                inicio != null &&
+                fim != null &&
+                // instrucoes.size() > 0 &&
+                instrucoesValidas;
+        
+        if (!valido){
+            tipo = TipoInstrucao._INVALIDO;
+        }
+        return valido;
+    }
+
+    public Token getInicio() {
+        return inicio;
+    }
+
+    public Token getFim() {
+        return fim;
     }
 }

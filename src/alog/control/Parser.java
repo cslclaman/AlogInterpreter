@@ -6,13 +6,16 @@
 package alog.control;
 
 import alog.model.Bloco;
-import alog.model.Expressao;
+import alog.model.Instrucao;
 import alog.token.FuncaoToken;
-import alog.model.TipoExpressao;
+import alog.model.TipoInstrucao;
+import alog.model.TipoVariavel;
 import alog.token.Token;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Analisador sintático que verifica uma sequência de tokens e retorna expressões executáveis.
@@ -30,104 +33,99 @@ public class Parser {
         
         @Override
         public String toString(){
-            return "Linha " + (token.getLinha() + 1) + ", coluna " + (token.getColuna() + 1) + " - " + erro;
+            return String.format(
+                    "Linha %d, Coluna %d: %s",
+                    token.getLinha() + 1, token.getColuna() + 1, erro);
         }
     }
     
     private List<Token> tokens;
-    private List<String> variaveis;
+    private Map<String, TipoVariavel> variaveis;
     
     private LinkedList<FuncaoToken> funcoesEsperadas;
-    private int pos;
+    private LinkedList<TipoInstrucao> instrucoesEmpilhadas;
     private LinkedList<ErroSintatico> erros;
-    
+    private int pos;
     private boolean fimAtingido;
-    private boolean erro;
     
     public Parser (List<Token> tokens){
         this.tokens = tokens;
         
-        variaveis = new LinkedList<>();
+        variaveis = new HashMap<>();
         erros = new LinkedList<>();
-        
         funcoesEsperadas = new LinkedList<>();
-        funcoesEsperadas.add(FuncaoToken.RES_BLOCO_INICIO);
-        funcoesEsperadas.add(FuncaoToken.RES_TIPO_CARACTER);
-        funcoesEsperadas.add(FuncaoToken.RES_TIPO_INTEIRO);
-        funcoesEsperadas.add(FuncaoToken.RES_TIPO_REAL);
-        funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
-        funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
-        funcoesEsperadas.add(FuncaoToken.RES_COND_SE);
-        funcoesEsperadas.add(FuncaoToken.RES_COND_SENAO);
-        funcoesEsperadas.add(FuncaoToken.LIB_IO_LEIA);
-        funcoesEsperadas.add(FuncaoToken.LIB_IO_ESCREVA);
+        instrucoesEmpilhadas = new LinkedList<>();
         
         pos = 0;
         fimAtingido = false;
+        
+        // Caso modularizado:
+        /* 
+        // Espera por declaração de função
+        funcoesEsperadas.add(FuncaoToken.RES_MOD_FUNCAO);
+        // Espera por declaração de rotina
+        funcoesEsperadas.add(FuncaoToken.RES_MOD_ROTINA);
+        */
+        
+        // Caso não modularizado:
+        funcoesEsperadas.add(FuncaoToken.RES_BLOCO_INICIO);
+        instrucoesEmpilhadas.add(TipoInstrucao._INDEFINIDO);
     }
     
-    public boolean fimAtingido(){
-        return fimAtingido;
-    }
-    
-    public int getPos(){
-        return pos;
-    }
-    
-    public void setPos(int pos){
-        this.pos = pos;
-    }
-    
-    public boolean hasNext(){
+    public boolean existeProxima(){
         return pos < tokens.size();
     }
     
-    public Expressao parseExpression(){
-        Expressao expr = new Expressao();
-        Bloco bloco = null;
+    public Instrucao proxima(){
+        Instrucao instrucao;
         
         LinkedList<Token> parentesesAbre = new LinkedList<>();
         LinkedList<Token> parentesesFecha = new LinkedList<>();
         
         boolean go = true;
-        boolean add = false;
-        erro = false;
         
         while (go && pos < tokens.size()){
-            Token token = tokens.get(pos++);
-            if (expr.getLinha() == 0){
-                expr.setLinha(token.getLinha() + 1);
-            }
-            
-            if (!estadoValido(token)){
+            Token token = tokens.get(pos);
+            if (!funcaoValida(token)){
                 break;
             }
             switch(token.getFuncaoToken()){
                 //MODO: INÍCIO/FIM DE BLOCO
                 case RES_BLOCO_INICIO:
-                    expr.setTipo(TipoExpressao.DELIM_BLOCO);
-                    expr.atualizaTexto(token.getPalavra());
-                    expr.addToken(token);
+                    instrucao = new Bloco();
+                    if (!tipoValido(instrucao)){
+                        break;
+                    }
+                    instrucao.insereToken(token);
                     
-                    bloco = new Bloco();
-                    bloco.addExpressao(expr);
-                    
-                    Parser innerParser = new Parser(tokens);
-                    innerParser.setPos(pos);
-                    while (innerParser.hasNext() && !innerParser.fimAtingido()){
-                        bloco.addExpressao(innerParser.parseExpression());
-                        if (innerParser.hasErroParsing()){
-                            erros.add(new ErroSintatico(innerParser.getTokenUltimoErro(), innerParser.getMsgUltimoErro()));
+                    Parser parserInterno = new Parser(tokens);
+                    parserInterno.variaveis = variaveis;
+                    parserInterno.pos = pos++;
+                    while (parserInterno.existeProxima() && !parserInterno.fimAtingido){
+                        Instrucao proxima = parserInterno.proxima();
+                        if (!((Bloco)instrucao).insereInstrucao(proxima)){
+                            erros.add(parserInterno.erros.getLast());
                         }
                     }
-                    
-                    if (!innerParser.hasNext() && !innerParser.fimAtingido()){
-                        erros.add(new ErroSintatico(bloco.getExpressaoAt(0).getTokenAt(0), "Delimitador FIM para INÍCIO indicado não encontrado"));
+                    if (!parserInterno.existeProxima() && !parserInterno.fimAtingido){
+                        erros.add(new ErroSintatico(
+                                ((Bloco)instrucao).getInicio(),
+                                "Bloco não fechado corretamente"));
                     }
-                    pos = innerParser.getPos();
+                    pos = parserInterno.pos;
+                    token = tokens.get(pos++);
+                    instrucao.insereToken(token);
                     
                     funcoesEsperadas.clear();
-                    funcoesEsperadas.add(FuncaoToken.RES_TIPO_CARACTER);
+                    
+                    //Caso o bloco seja referente a um módulo:
+                    /*
+                    funcoesEsperadas.add(FuncaoToken.RES_MOD_FUNCAO);
+                    funcoesEsperadas.add(FuncaoToken.RES_MOD_ROTINA);
+                    funcoesEsperadas.add(FuncaoToken.RES_ALGORITMO);
+                    */
+                    
+                    //
                     funcoesEsperadas.add(FuncaoToken.RES_TIPO_INTEIRO);
                     funcoesEsperadas.add(FuncaoToken.RES_TIPO_REAL);
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
@@ -141,8 +139,6 @@ public class Parser {
                     go = false;
                     break;
                 case RES_BLOCO_FIM:
-                    expr.setTipo(TipoExpressao.DELIM_BLOCO);
-
                     fimAtingido = true;
                     funcoesEsperadas.clear();
                     
@@ -154,7 +150,7 @@ public class Parser {
                 case RES_TIPO_CARACTER:
                 case RES_TIPO_INTEIRO:
                 case RES_TIPO_REAL:
-                    expr.setTipo(TipoExpressao.CRIACAO_VARIAVEL);
+                    instrucao.setTipo(TipoInstrucao.DECLARACAO_VARIAVEL);
                     funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken.DELIM_DOIS_PONTOS);
                     add = true;
@@ -171,7 +167,7 @@ public class Parser {
                 
                 //MODO: ENTRADA DE DADOS
                 case LIB_IO_LEIA:
-                    expr.setTipo(TipoExpressao.ENTRADA_DE_DADOS);
+                    instrucao.setTipo(TipoInstrucao.ENTRADA_DE_DADOS);
                     funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
                     add = true;
@@ -179,7 +175,7 @@ public class Parser {
                     
                 //MODO: SAÍDA DE DADOS
                 case LIB_IO_ESCREVA:
-                    expr.setTipo(TipoExpressao.SAIDA_DE_DADOS);
+                    instrucao.setTipo(TipoInstrucao.SAIDA_DE_DADOS);
                     funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
                     add = true;
@@ -187,7 +183,7 @@ public class Parser {
                 
                 //MODO: ATRIBUIÇÃO
                 case OP_ATRIBUICAO:
-                    expr.setTipo(TipoExpressao.OPERACAO_ATRIBUICAO);
+                    instrucao.setTipo(TipoInstrucao.ATRIBUICAO);
                     funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
@@ -206,8 +202,8 @@ public class Parser {
                 case OP_MAT_DIV_INTEIRA:
                 case OP_MAT_DIV_REAL:
                 case OP_MAT_MOD:
-                    if (expr.getTipo() == TipoExpressao.OPERACAO_ATRIBUICAO){
-                        expr.setTipo(TipoExpressao.OPERACAO_ARITMETICA);
+                    if (instrucao.getTipo() == TipoInstrucao.ATRIBUICAO){
+                        instrucao.setTipo(TipoInstrucao.OPERACAO_ARITMETICA);
                     }
                     funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
@@ -221,7 +217,7 @@ public class Parser {
                 
                 case LIB_MATH_POT:
                 case LIB_MATH_RAIZ:
-                    expr.setTipo(TipoExpressao.CHAMADA_FUNCAO);
+                    instrucao.setTipo(TipoInstrucao.CHAMADA_FUNCAO);
                     funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
                     add = true;
@@ -229,7 +225,7 @@ public class Parser {
                     
                 //MODO: CONDICIONAL
                 case RES_COND_SE:
-                    expr.setTipo(TipoExpressao.OPERACAO_LOGICA);
+                    instrucao.setTipo(TipoInstrucao.OPERACAO_LOGICA);
                     funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
@@ -273,7 +269,7 @@ public class Parser {
                     break;
                     
                 case RES_COND_SENAO:
-                    expr.setTipo(TipoExpressao.OPERACAO_LOGICA);
+                    instrucao.setTipo(TipoInstrucao.OPERACAO_LOGICA);
                     funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken.RES_BLOCO_INICIO);
                     funcoesEsperadas.add(FuncaoToken.IDENT_NOME_VARIAVEL);
@@ -291,7 +287,7 @@ public class Parser {
                 //DIVERSOS MODOS
                 case DELIM_PARENTESES_ABRE:
                     parentesesAbre.push(token);
-                    switch (expr.getTipo()){
+                    switch (instrucao.getTipo()){
                         case ENTRADA_DE_DADOS:
                             funcoesEsperadas.clear();
                             funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
@@ -308,7 +304,7 @@ public class Parser {
                             funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
                             add = false;
                             break;
-                        case OPERACAO_ATRIBUICAO:
+                        case ATRIBUICAO:
                         case OPERACAO_ARITMETICA:
                             funcoesEsperadas.clear();
                             funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
@@ -342,7 +338,7 @@ public class Parser {
                     
                 case DELIM_PARENTESES_FECHA:
                     parentesesFecha.offer(token);
-                    switch (expr.getTipo()){
+                    switch (instrucao.getTipo()){
                         case ENTRADA_DE_DADOS:
                         case SAIDA_DE_DADOS:
                             funcoesEsperadas.clear();
@@ -350,8 +346,8 @@ public class Parser {
                             add = false;
                             break;
                         case CHAMADA_FUNCAO:
-                            expr.setTipo(TipoExpressao.OPERACAO_ARITMETICA);
-                        case OPERACAO_ATRIBUICAO:
+                            instrucao.setTipo(TipoInstrucao.OPERACAO_ARITMETICA);
+                        case ATRIBUICAO:
                         case OPERACAO_ARITMETICA:
                             funcoesEsperadas.clear();
                             funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
@@ -368,8 +364,8 @@ public class Parser {
                     break;
                     
                 case DELIM_VIRGULA:
-                    switch (expr.getTipo()){
-                        case CRIACAO_VARIAVEL:
+                    switch (instrucao.getTipo()){
+                        case DECLARACAO_VARIAVEL:
                         case ENTRADA_DE_DADOS:
                             funcoesEsperadas.clear();
                             funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
@@ -395,14 +391,14 @@ public class Parser {
                     break;
                 
                 case CONST_CARACTER:
-                    switch (expr.getTipo()){
+                    switch (instrucao.getTipo()){
                         case SAIDA_DE_DADOS:
                             funcoesEsperadas.clear();
                             funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
                             funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
                             add = true;
                             break;
-                        case OPERACAO_ATRIBUICAO:
+                        case ATRIBUICAO:
                             funcoesEsperadas.clear();
                             funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
                             add = true;
@@ -424,8 +420,8 @@ public class Parser {
                     
                 case _INDEF_ALFABETICO:
                 case _INDEF_ALFANUMERICO:
-                    switch (expr.getTipo()){
-                        case CRIACAO_VARIAVEL:
+                    switch (instrucao.getTipo()){
+                        case DECLARACAO_VARIAVEL:
                             char inicial = token.getPalavra().charAt(0);
                             if (inicial >= '0' && inicial <= '9'){
                                 erros.add(new ErroSintatico(token, "Identificador de variável não pode começar com número"));
@@ -458,7 +454,7 @@ public class Parser {
                                 add = true;
                             //}
                             break;
-                        case OPERACAO_ATRIBUICAO:
+                        case ATRIBUICAO:
                         case OPERACAO_ARITMETICA:
                             /*if (!variaveis.contains(token.getPalavra())){
                                 erros.add(new ErroSintatico(token, "Variável \"" + token.getPalavra() + "\" não declarada"));
@@ -553,10 +549,10 @@ public class Parser {
                 case _INDEF_NUMERICO:
                     funcoesEsperadas.clear();
                             
-                    Token lastToken = expr.getTokenAt(expr.getNumTokens() - 1);
+                    Token lastToken = instrucao.getTokenAt(instrucao.getNumTokens() - 1);
                     if (lastToken.getFuncaoToken() == FuncaoToken.CONST_REAL){
                         lastToken.atualizaPalavra(token.getPalavra());
-                        expr.setTokenAt(expr.getNumTokens() - 1, lastToken);
+                        instrucao.setTokenAt(instrucao.getNumTokens() - 1, lastToken);
                         add = false;
                     } else {
                         token.setFuncaoToken(FuncaoToken.CONST_INTEIRA);
@@ -564,8 +560,8 @@ public class Parser {
                         funcoesEsperadas.add(FuncaoToken.DELIM_PONTO);
                     }
                     
-                    switch (expr.getTipo()){
-                        case OPERACAO_ATRIBUICAO:
+                    switch (instrucao.getTipo()){
+                        case ATRIBUICAO:
                         case OPERACAO_ARITMETICA:
                             funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
                             funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
@@ -596,15 +592,15 @@ public class Parser {
                     break;
                     
                 case DELIM_PONTO:
-                    switch (expr.getTipo()){
+                    switch (instrucao.getTipo()){
                         case CHAMADA_FUNCAO:
-                        case OPERACAO_ATRIBUICAO:
+                        case ATRIBUICAO:
                         case OPERACAO_ARITMETICA:
                         case OPERACAO_LOGICA:
-                            lastToken = expr.getTokenAt(expr.getNumTokens() - 1);
+                            lastToken = instrucao.getTokenAt(instrucao.getNumTokens() - 1);
                             lastToken.atualizaPalavra(token.getPalavra());
                             lastToken.setFuncaoToken(FuncaoToken.CONST_REAL);
-                            expr.setTokenAt(expr.getNumTokens() - 1, lastToken);
+                            instrucao.setTokenAt(instrucao.getNumTokens() - 1, lastToken);
                             
                             funcoesEsperadas.clear();
                             funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
@@ -638,9 +634,9 @@ public class Parser {
                     break;
             }
             
-            expr.atualizaTexto(token.getPalavra());
+            instrucao.atualizaTexto(token.getPalavra());
             if (add){
-                expr.addToken(token);
+                instrucao.addToken(token);
             }
         }
         
@@ -661,16 +657,16 @@ public class Parser {
         
         if (bloco == null){
             if (erro){
-                expr.setTipo(TipoExpressao._INVALIDO);
+                instrucao.setTipo(TipoInstrucao._INVALIDO);
             }
-            return expr;
+            return instrucao;
         } else {
             return bloco;
         }
     }
     
-    public LinkedList<Expressao> getAllExpressions(){
-        LinkedList<Expressao> lista = new LinkedList<>();
+    public LinkedList<Instrucao> getAllExpressions(){
+        LinkedList<Instrucao> lista = new LinkedList<>();
         while (hasNext()){
             lista.add(parseExpression());
         }
@@ -712,18 +708,17 @@ public class Parser {
         return errToken;
     }
     
-    private boolean estadoValido(Token token){
+    private boolean funcaoValida(Token token){
         if (!funcoesEsperadas.contains(token.getFuncaoToken())){
             String msgErro = "Encontrou " + token.getFuncaoToken() + ", mas esperava:";
             for (FuncaoToken ft: funcoesEsperadas){
                 msgErro += "\n - " + ft;
             }
             erros.add(new ErroSintatico(token, msgErro));
-            erro = true;
             return false;
         } else {
             return true;
         }
     }
-    
+        
 }

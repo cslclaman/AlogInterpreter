@@ -9,9 +9,9 @@ import alog.control.Calculator;
 import alog.control.Parser;
 import alog.control.Scanner;
 import alog.model.Bloco;
-import alog.model.Expressao;
+import alog.model.Instrucao;
 import alog.token.FuncaoToken;
-import alog.model.TipoExpressao;
+import alog.model.TipoInstrucao;
 import alog.model.TipoVariavel;
 import alog.token.Token;
 import alog.model.Variavel;
@@ -425,9 +425,9 @@ public class FrmGui extends javax.swing.JFrame {
             expressoes = new LinkedList<>();
 
             while (parser.hasNext()){
-                Expressao e = parser.parseExpression();
+                Instrucao e = parser.parseExpression();
                 switch (e.getTipo()){
-                    case CRIACAO_VARIAVEL:
+                    case DECLARACAO_VARIAVEL:
                     case ENTRADA_DE_DADOS:
                     case SAIDA_DE_DADOS:
                         e.setIndice(1);
@@ -514,14 +514,14 @@ public class FrmGui extends javax.swing.JFrame {
             }
         }
         
-        if (expressao.getTipo() == TipoExpressao._BLOCO){
+        if (expressao.getTipo() == TipoInstrucao.BLOCO){
             Bloco bloco = (Bloco)expressao;
             expressoes.remove(expressao);
             int indice = --exprIndex;
             while (bloco.hasNextExpressao()){
-                Expressao e = bloco.getNextExpressao();
+                Instrucao e = bloco.getNextExpressao();
                 switch (e.getTipo()){
-                    case CRIACAO_VARIAVEL:
+                    case DECLARACAO_VARIAVEL:
                     case ENTRADA_DE_DADOS:
                     case SAIDA_DE_DADOS:
                         e.setIndice(1);
@@ -552,7 +552,7 @@ public class FrmGui extends javax.swing.JFrame {
                         break;
                 }
                 break;
-            case CRIACAO_VARIAVEL:
+            case DECLARACAO_VARIAVEL:
                 TipoVariavel tipoVar;
                 switch (expressao.getTokenAt(0).getFuncaoToken()){
                     case RES_TIPO_INTEIRO:
@@ -636,7 +636,7 @@ public class FrmGui extends javax.swing.JFrame {
                 txpSaida.setText(txpSaida.getText() + textoSaida);
                 break;
                 
-            case OPERACAO_ATRIBUICAO:
+            case ATRIBUICAO:
             case OPERACAO_ARITMETICA:
                 Token ultimoExpr = expressao.getTokenAt(expressao.getNumTokens() - 1);
                 Token newToken = new Token();
@@ -755,9 +755,9 @@ public class FrmGui extends javax.swing.JFrame {
             expressoes = new LinkedList<>();
 
             while (parser.hasNext()){
-                Expressao e = parser.parseExpression();
+                Instrucao e = parser.parseExpression();
                 switch (e.getTipo()){
-                    case CRIACAO_VARIAVEL:
+                    case DECLARACAO_VARIAVEL:
                     case ENTRADA_DE_DADOS:
                     case SAIDA_DE_DADOS:
                         e.setIndice(1);
@@ -1461,10 +1461,10 @@ public class FrmGui extends javax.swing.JFrame {
     private javax.swing.JTextPane txpProcessamento;
     private javax.swing.JTextPane txpSaida;
     // End of variables declaration//GEN-END:variables
-    private LinkedList<Expressao> expressoes;
+    private LinkedList<Instrucao> expressoes;
     private HashMap<String,Variavel> variaveis;
     private HashMap<String,Integer> varOrdem;
-    private Expressao expressao;
+    private Instrucao expressao;
     private int exprIndex;
     private int tabIndex;
     private DefaultStyledDocument docIde;

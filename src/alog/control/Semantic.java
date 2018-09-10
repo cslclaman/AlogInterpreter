@@ -6,9 +6,9 @@
 package alog.control;
 
 import alog.model.Bloco;
-import alog.model.Expressao;
+import alog.model.Instrucao;
 import alog.token.FuncaoToken;
-import alog.model.TipoExpressao;
+import alog.model.TipoInstrucao;
 import alog.token.Token;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,10 +19,10 @@ import java.util.HashMap;
  */
 public class Semantic {
     private class ErroSemantico {
-        Expressao expr;
+        Instrucao expr;
         String msgErro;
 
-        public ErroSemantico(Expressao expr, String msgErro) {
+        public ErroSemantico(Instrucao expr, String msgErro) {
             this.expr = expr;
             this.msgErro = msgErro;
         }
@@ -34,12 +34,12 @@ public class Semantic {
     }
     
     private ArrayList<ErroSemantico> erros;
-    private ArrayList<Expressao> programa;
+    private ArrayList<Instrucao> programa;
     private HashMap <String, String> variaveis;
     private HashMap <String, Integer> funcoes;
     private int pos;
     
-    public Semantic(ArrayList<Expressao> expressoes) {
+    public Semantic(ArrayList<Instrucao> expressoes) {
         programa = new ArrayList<>();
         carregaExpressoes(expressoes);
         
@@ -51,9 +51,9 @@ public class Semantic {
         pos = 0;
     }
     
-    private void carregaExpressoes(ArrayList<Expressao> expressoes){
-        for (Expressao expr : expressoes){
-            if (expr.getTipo() == TipoExpressao._BLOCO){
+    private void carregaExpressoes(ArrayList<Instrucao> expressoes){
+        for (Instrucao expr : expressoes){
+            if (expr.getTipo() == TipoInstrucao.BLOCO){
                 carregaExpressoes(((Bloco)expr).listExpressoes());
             } else {
                 programa.add(expr);
@@ -67,9 +67,9 @@ public class Semantic {
     
     public void verifyNext(){
         if (hasNext()){
-            Expressao expressao = programa.get(pos++);
+            Instrucao expressao = programa.get(pos++);
             switch (expressao.getTipo()){
-                case CRIACAO_VARIAVEL:
+                case DECLARACAO_VARIAVEL:
                     String tipoVar = "";
                     for (Token t : expressao.listTokens()){
                         if (t.getFuncaoToken() == FuncaoToken.RES_TIPO_CARACTER ||
@@ -102,7 +102,7 @@ public class Semantic {
                     break;
                     
                 case OPERACAO_ARITMETICA:
-                case OPERACAO_ATRIBUICAO:
+                case ATRIBUICAO:
                 case OPERACAO_LOGICA:
                 case SAIDA_DE_DADOS:
                 case CHAMADA_FUNCAO:

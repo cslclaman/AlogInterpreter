@@ -6,7 +6,7 @@
 package alog.control;
 
 import alog.model.Bloco;
-import alog.model.Expressao;
+import alog.model.Instrucao;
 import alog.token.FuncaoToken;
 import alog.model.TipoVariavel;
 import alog.token.Token;
@@ -38,13 +38,13 @@ public class Interpreter {
         execProx = true;
     }
     
-    public boolean executa(Expressao expressao){
+    public boolean executa(Instrucao expressao){
         if (!execProx){
             execProx = true;
             return true;
         }
         switch(expressao.getTipo()){
-            case _BLOCO:
+            case BLOCO:
                 Bloco bloco = (Bloco)expressao;
                 boolean res = true;
                 while (bloco.hasNextExpressao()){
@@ -56,13 +56,13 @@ public class Interpreter {
                 return res;
             case DELIM_BLOCO:
                 return execDelimBloco(expressao);
-            case CRIACAO_VARIAVEL:
+            case DECLARACAO_VARIAVEL:
                 return execCriacaoVariavel(expressao);
             case ENTRADA_DE_DADOS:
                 return execEntradaDados(expressao);
             case SAIDA_DE_DADOS:
                 return execSaidaDados(expressao);
-            case OPERACAO_ATRIBUICAO:
+            case ATRIBUICAO:
             case OPERACAO_ARITMETICA:
                 return execOperacao(expressao);
             case OPERACAO_LOGICA:
@@ -80,7 +80,7 @@ public class Interpreter {
         
     }
     
-    public boolean execDelimBloco(Expressao expressao){
+    public boolean execDelimBloco(Instrucao expressao){
         switch (expressao.getNextToken().getFuncaoToken()){
             case RES_BLOCO_INICIO:
                 blocoAtual ++;
@@ -92,7 +92,7 @@ public class Interpreter {
         return true;
     }
     
-    public boolean execCriacaoVariavel(Expressao expressao){
+    public boolean execCriacaoVariavel(Instrucao expressao){
         TipoVariavel tipoVar;
         switch (expressao.getNextToken().getFuncaoToken()){
             case RES_TIPO_INTEIRO:
@@ -116,7 +116,7 @@ public class Interpreter {
         return true;
     }
     
-    public boolean execEntradaDados(Expressao expressao){
+    public boolean execEntradaDados(Instrucao expressao){
         expressao.setIndice(1);
         while (expressao.hasNextToken()){
             String nomeVar = expressao.getNextToken().getPalavra();
@@ -162,7 +162,7 @@ public class Interpreter {
         return true;
     }
     
-    public boolean execSaidaDados(Expressao expressao){
+    public boolean execSaidaDados(Instrucao expressao){
         expressao.setIndice(1);
         int pos = 1;
         int qtd = expressao.getNumTokens() - 1;
@@ -206,7 +206,7 @@ public class Interpreter {
         return true;
     }
     
-    public boolean execOperacao(Expressao expressao){
+    public boolean execOperacao(Instrucao expressao){
         LinkedList<Token> pilha = new LinkedList<>();
         LinkedList<Token> saida = new LinkedList<>();
         int funcParam = 0;
@@ -391,7 +391,7 @@ public class Interpreter {
         return true;
     }
     
-    public boolean execCondicional(Expressao expressao){
+    public boolean execCondicional(Instrucao expressao){
         switch (expressao.getNextToken().getFuncaoToken()){
             case RES_COND_SE:
                 LinkedList<Token> pilha = new LinkedList<>();
