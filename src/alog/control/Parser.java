@@ -43,7 +43,8 @@ public class Parser {
     private Map<String, TipoVariavel> variaveis;
     
     private LinkedList<FuncaoToken> funcoesEsperadas;
-    private LinkedList<TipoInstrucao> instrucoesEmpilhadas;
+    private LinkedList<TipoInstrucao> pilhaTiposInstrucoes;
+    private TipoInstrucao tipoInstrucaoAtual;
     private LinkedList<ErroSintatico> erros;
     private int pos;
     private boolean fimAtingido;
@@ -54,7 +55,7 @@ public class Parser {
         variaveis = new HashMap<>();
         erros = new LinkedList<>();
         funcoesEsperadas = new LinkedList<>();
-        instrucoesEmpilhadas = new LinkedList<>();
+        pilhaTiposInstrucoes = new LinkedList<>();
         
         pos = 0;
         fimAtingido = false;
@@ -69,7 +70,7 @@ public class Parser {
         
         // Caso não modularizado:
         funcoesEsperadas.add(FuncaoToken.RES_BLOCO_INICIO);
-        instrucoesEmpilhadas.add(TipoInstrucao._INDEFINIDO);
+        tipoInstrucaoAtual = TipoInstrucao._INDEFINIDO;
     }
     
     public boolean existeProxima(){
@@ -90,9 +91,13 @@ public class Parser {
                 break;
             }
             switch(token.getFuncaoToken()){
-                //MODO: INÍCIO/FIM DE BLOCO
+                //Ao iniciar um bloco:
                 case RES_BLOCO_INICIO:
                     instrucao = new Bloco();
+                    
+                    pilhaTiposInstrucoes.push(tipoInstrucaoAtual);
+                    tipoInstrucaoAtual = instrucao.getTipo();
+                    
                     if (!tipoValido(instrucao)){
                         break;
                     }
@@ -101,48 +106,77 @@ public class Parser {
                     Parser parserInterno = new Parser(tokens);
                     parserInterno.variaveis = variaveis;
                     parserInterno.pos = pos++;
+                    parserInterno.pilhaTiposInstrucoes = pilhaTiposInstrucoes;
+                    parserInterno.tipoInstrucaoAtual = tipoInstrucaoAtual;
+                    
                     while (parserInterno.existeProxima() && !parserInterno.fimAtingido){
                         Instrucao proxima = parserInterno.proxima();
                         if (!((Bloco)instrucao).insereInstrucao(proxima)){
                             erros.add(parserInterno.erros.getLast());
                         }
                     }
+                    
                     if (!parserInterno.existeProxima() && !parserInterno.fimAtingido){
                         erros.add(new ErroSintatico(
                                 ((Bloco)instrucao).getInicio(),
                                 "Bloco não fechado corretamente"));
                     }
+                    
                     pos = parserInterno.pos;
                     token = tokens.get(pos++);
+                    variaveis = parserInterno.variaveis;
+                    
                     instrucao.insereToken(token);
                     
                     funcoesEsperadas.clear();
                     
-                    //Caso o bloco seja referente a um módulo:
-                    /*
-                    funcoesEsperadas.add(FuncaoToken.RES_MOD_FUNCAO);
-                    funcoesEsperadas.add(FuncaoToken.RES_MOD_ROTINA);
-                    funcoesEsperadas.add(FuncaoToken.RES_ALGORITMO);
-                    */
-                    
-                    //
-                    funcoesEsperadas.add(FuncaoToken.RES_TIPO_INTEIRO);
-                    funcoesEsperadas.add(FuncaoToken.RES_TIPO_REAL);
-                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
-                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
-                    funcoesEsperadas.add(FuncaoToken.RES_COND_SE);
-                    funcoesEsperadas.add(FuncaoToken.RES_COND_SENAO);
-                    funcoesEsperadas.add(FuncaoToken.LIB_IO_LEIA);
-                    funcoesEsperadas.add(FuncaoToken.LIB_IO_ESCREVA);
-                    
-                    add = false;
+                    tipoInstrucaoAtual = pilhaTiposInstrucoes.pop();
+                    switch (tipoInstrucaoAtual){
+                        //Caso o bloco seja referente a um módulo:
+                        case MODULO_FUNCAO:
+                        case MODULO_ROTINA:
+                            /*funcoesEsperadas.add(FuncaoToken.RES_MOD_FUNCAO);
+                            funcoesEsperadas.add(FuncaoToken.RES_MOD_ROTINA);
+                            funcoesEsperadas.add(FuncaoToken.RES_ALGORITMO);*/
+                            break;
+                        //Caso seja um módulo principal:
+                        case MODULO_PRINCIPAL:
+                            /*funcoesEsperadas.add(FuncaoToken.RES_MOD_FUNCAO);
+                            funcoesEsperadas.add(FuncaoToken.RES_MOD_ROTINA);*/
+                            break;
+                        //Caso o bloco esteja dentro de outro bloco (por alguma razão obscura):
+                        case BLOCO:
+                        //Caso o bloco seja um algoritmo básico (sem identificador "Algoritmo"
+                        case _INDEFINIDO:
+                            //Declarações de variáveis
+                            funcoesEsperadas.add(FuncaoToken.RES_TIPO_INTEIRO);
+                            funcoesEsperadas.add(FuncaoToken.RES_TIPO_REAL);
+                            funcoesEsperadas.add(FuncaoToken.RES_TIPO_CARACTER);
+                            //Atribuição ou Chamada de rotina
+                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                            //Condicional
+                            funcoesEsperadas.add(FuncaoToken.RES_COND_SE);
+                            //Repetições
+                            funcoesEsperadas.add(FuncaoToken.RES_REP_PARA);
+                            funcoesEsperadas.add(FuncaoToken.RES_REP_ENQUANTO);
+                            funcoesEsperadas.add(FuncaoToken.RES_REP_FACA);
+                            //Entrada/Saída
+                            funcoesEsperadas.add(FuncaoToken.LIB_IO_LEIA);
+                            funcoesEsperadas.add(FuncaoToken.LIB_IO_ESCREVA);
+                            break;
+                        default:
+                            erros.add(new ErroSintatico(
+                                ((Bloco)instrucao).getInicio(),
+                                "Bloco não fechado corretamente"));
+                    }
                     go = false;
                     break;
+                
                 case RES_BLOCO_FIM:
                     fimAtingido = true;
                     funcoesEsperadas.clear();
                     
-                    add = true;
                     go = false;
                     break;
                     
