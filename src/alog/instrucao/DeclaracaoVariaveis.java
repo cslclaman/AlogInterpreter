@@ -61,7 +61,7 @@ public class DeclaracaoVariaveis extends Instrucao {
      */
     @Override
     public boolean instrucaoValida() {
-        if (tipoVariavel != null && !nomesVariaveis.isEmpty()){
+        if (tipoVariavel == null || nomesVariaveis.isEmpty()){
             invalidaInstrucao();
         }
         return super.instrucaoValida();

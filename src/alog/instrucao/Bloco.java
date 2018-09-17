@@ -51,9 +51,9 @@ public class Bloco extends Instrucao {
      */
     @Override
     public boolean instrucaoValida() {
-        if (inicio != null &&
-            fim != null &&
-            !instrucoes.isEmpty()){
+        if (inicio == null ||
+            fim == null ||
+            instrucoes.isEmpty()){
             
             invalidaInstrucao();
         }

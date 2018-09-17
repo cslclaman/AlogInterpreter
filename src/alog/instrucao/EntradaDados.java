@@ -40,7 +40,7 @@ public class EntradaDados extends Instrucao {
 
     @Override
     public boolean instrucaoValida() {
-        if (nome != null && !parametros.isEmpty()){
+        if (nome == null || parametros.isEmpty()){
             invalidaInstrucao();
         }
         return super.instrucaoValida();

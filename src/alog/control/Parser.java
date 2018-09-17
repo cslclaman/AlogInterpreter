@@ -87,7 +87,6 @@ public class Parser {
 
             // Ao finalizar o bloco
             case RES_BLOCO_FIM:
-                instrucao = null;
                 fimAtingido = true;
                 funcoesEsperadas.clear();
                 break;
@@ -269,16 +268,23 @@ public class Parser {
 
         while (parserInterno.existeProxima() && !parserInterno.fimAtingido){
             Instrucao proxima = parserInterno.proxima();
-            if (!proxima.instrucaoValida()){
-                erros.add(parserInterno.erros.getLast());
+            if (proxima != null){
+                if (!proxima.instrucaoValida()){
+                    erros.add(parserInterno.erros.getLast());
+                } else {
+                    bloco.addInstrucao(proxima);
+                }
             } else {
-                bloco.addInstrucao(proxima);
+                erros.add(new ErroSintatico(
+                    tokens.get(parserInterno.pos),
+                    "Instrução inválida - erro ao analisar"));
+                break;
             }
         }
 
         if (!parserInterno.existeProxima() && !parserInterno.fimAtingido){
             erros.add(new ErroSintatico(
-                    ((Bloco)bloco).getInicio(),
+                    bloco.getInicio(),
                     "Bloco não fechado corretamente"));
         }
 
