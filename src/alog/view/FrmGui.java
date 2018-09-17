@@ -10,10 +10,10 @@ import alog.control.Parser;
 import alog.control.Scanner;
 import alog.model.Bloco;
 import alog.model.Expressao;
-import alog.model.FuncaoToken;
+import alog.token.FuncaoToken;
 import alog.model.TipoExpressao;
 import alog.model.TipoVariavel;
-import alog.model.Token;
+import alog.token.Token;
 import alog.model.Variavel;
 import java.util.LinkedList;
 import javax.swing.text.DefaultStyledDocument;
@@ -30,6 +30,7 @@ import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -142,10 +143,10 @@ public class FrmGui extends javax.swing.JFrame {
             }
         });
         txpIde.addInputMethodListener(new java.awt.event.InputMethodListener() {
-            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
-            }
             public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
                 txpIdeCaretPositionChanged(evt);
+            }
+            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
             }
         });
         txpIde.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -400,62 +401,88 @@ public class FrmGui extends javax.swing.JFrame {
         }
         
         Scanner scanner = new Scanner(oldText);
-        Parser parser = new Parser(scanner.getAll());
-        expressoes = new LinkedList<>();
+        List<Token> tokens = scanner.listaTokens();
         
-        while (parser.hasNext()){
-            Expressao e = parser.parseExpression();
-            switch (e.getTipo()){
-                case CRIACAO_VARIAVEL:
-                case ENTRADA_DE_DADOS:
-                case SAIDA_DE_DADOS:
-                    e.setIndice(1);
-                    break;
-                default:
-                    break;
-            }
-            expressoes.add(e);
-        }
+        System.err.println(scanner.imprimeErros());
         
-        System.err.println(parser.getStringErros());
-
-        if (parser.getNumErros() > 0){
-            JOptionPane.showMessageDialog(this, parser.getNumErros() + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
+        if (scanner.getNumErros() > 0){
+            JOptionPane.showMessageDialog(
+                    this,
+                    scanner.getNumErros() +
+                            " erros encontrados - verifique seu algoritmo",
+                    "Verificação concluída",
+                    JOptionPane.WARNING_MESSAGE);
             formatacao = FORMAT_ERROR;
-            for (Token t : parser.getTokensErros()){
+            for (Token t : scanner.retornaErros()){
                 docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
             }
             
             btnProxPerc.setEnabled(false);
             btnInicioPerc.setEnabled(false);
         } else {
-            exprIndex = 1;
-            operacaoCondicional = false;
-            condicionaisResult = new LinkedList<>();
-            execProx = true;
-            nomeVar = "";
-            
-            lblPosCaret.setText("Em execução");
-            
-            variaveis = new HashMap<>();
-            varOrdem = new HashMap<>();
-            expressao = expressoes.getFirst();
-            tabVariaveis.setRowCount(0);
-            
-            txpEntrada.setText("");
-            txpEntrada.setEditable(false);
-            txpEntrada.setBackground(backgroundDisabled);
-
-            docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
-            txpProcessamento.setText("");
-            txpProcessamento.setBackground(backgroundDisabled);
-
-            txpSaida.setText("");
-            txpSaida.setBackground(backgroundDisabled);
         
-            btnVerificar.setEnabled(false);
-            btnProxPerc.setEnabled(true);
-            btnInicioPerc.setEnabled(false);
+            Parser parser = new Parser(tokens);
+            expressoes = new LinkedList<>();
+
+            while (parser.hasNext()){
+                Expressao e = parser.parseExpression();
+                switch (e.getTipo()){
+                    case CRIACAO_VARIAVEL:
+                    case ENTRADA_DE_DADOS:
+                    case SAIDA_DE_DADOS:
+                        e.setIndice(1);
+                        break;
+                    default:
+                        break;
+                }
+                expressoes.add(e);
+            }
+
+            System.err.println(parser.getStringErros());
+
+            if (parser.getNumErros() > 0){
+                JOptionPane.showMessageDialog(
+                        this,
+                        parser.getNumErros() +
+                                " erros encontrados - verifique seu algoritmo",
+                        "Verificação concluída",
+                        JOptionPane.WARNING_MESSAGE);
+                formatacao = FORMAT_ERROR;
+                for (Token t : parser.getTokensErros()){
+                    docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
+                }
+
+                btnProxPerc.setEnabled(false);
+                btnInicioPerc.setEnabled(false);
+            } else {
+                exprIndex = 1;
+                operacaoCondicional = false;
+                condicionaisResult = new LinkedList<>();
+                execProx = true;
+                nomeVar = "";
+
+                lblPosCaret.setText("Em execução");
+
+                variaveis = new HashMap<>();
+                varOrdem = new HashMap<>();
+                expressao = expressoes.getFirst();
+                tabVariaveis.setRowCount(0);
+
+                txpEntrada.setText("");
+                txpEntrada.setEditable(false);
+                txpEntrada.setBackground(backgroundDisabled);
+
+                docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
+                txpProcessamento.setText("");
+                txpProcessamento.setBackground(backgroundDisabled);
+
+                txpSaida.setText("");
+                txpSaida.setBackground(backgroundDisabled);
+
+                btnVerificar.setEnabled(false);
+                btnProxPerc.setEnabled(true);
+                btnInicioPerc.setEnabled(false);
+            }
         }
     }//GEN-LAST:event_btnInicioPercActionPerformed
     
@@ -705,63 +732,83 @@ public class FrmGui extends javax.swing.JFrame {
         }
         
         Scanner scanner = new Scanner(oldText);
-        Parser parser = new Parser(scanner.getAll());
-        expressoes = new LinkedList<>();
+        List<Token> tokens = scanner.listaTokens();
         
-        while (parser.hasNext()){
-            Expressao e = parser.parseExpression();
-            switch (e.getTipo()){
-                case CRIACAO_VARIAVEL:
-                case ENTRADA_DE_DADOS:
-                case SAIDA_DE_DADOS:
-                    e.setIndice(1);
-                    break;
-                default:
-                    break;
-            }
-            expressoes.add(e);
-        }
+        System.err.println(scanner.imprimeErros());
         
-        System.err.println(parser.getStringErros());
-        
-        if (parser.getNumErros() > 0){
-            JOptionPane.showMessageDialog(this, parser.getNumErros() + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
+        if (scanner.getNumErros() > 0){
+            JOptionPane.showMessageDialog(
+                    this,
+                    scanner.getNumErros() +
+                            " erros encontrados - verifique seu algoritmo",
+                    "Verificação concluída",
+                    JOptionPane.WARNING_MESSAGE);
             formatacao = FORMAT_ERROR;
-            for (Token t : parser.getTokensErros()){
+            for (Token t : scanner.retornaErros()){
                 docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
             }
+            
             btnProxPerc.setEnabled(false);
             btnInicioPerc.setEnabled(false);
         } else {
-            JOptionPane.showMessageDialog(this, "Nenhum erro encontrado - pronto para execução", "Verificação concluída", JOptionPane.INFORMATION_MESSAGE);
-            
-            exprIndex = 1;
-            operacaoCondicional = false;
-            condicionaisResult = new LinkedList<>();
-            execProx = true;
-            nomeVar = "";
-            
-            lblPosCaret.setText("Em execução");
-            
-            variaveis = new HashMap<>();
-            varOrdem = new HashMap<>();
-            expressao = expressoes.getFirst();
-            tabVariaveis.setRowCount(0);
-            
-            txpEntrada.setText("");
-            txpEntrada.setEditable(false);
-            txpEntrada.setBackground(backgroundDisabled);
+            Parser parser = new Parser(tokens);
+            expressoes = new LinkedList<>();
 
-            docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
-            txpProcessamento.setText("");
-            txpProcessamento.setBackground(backgroundDisabled);
+            while (parser.hasNext()){
+                Expressao e = parser.parseExpression();
+                switch (e.getTipo()){
+                    case CRIACAO_VARIAVEL:
+                    case ENTRADA_DE_DADOS:
+                    case SAIDA_DE_DADOS:
+                        e.setIndice(1);
+                        break;
+                    default:
+                        break;
+                }
+                expressoes.add(e);
+            }
 
-            txpSaida.setText("");
-            txpSaida.setBackground(backgroundDisabled);
-        
-            btnVerificar.setEnabled(false);
-            btnProxPerc.setEnabled(true);
-            btnInicioPerc.setEnabled(false);
+            System.err.println(parser.getStringErros());
+
+            if (parser.getNumErros() > 0){
+                JOptionPane.showMessageDialog(this, parser.getNumErros() + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
+                formatacao = FORMAT_ERROR;
+                for (Token t : parser.getTokensErros()){
+                    docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
+                }
+                btnProxPerc.setEnabled(false);
+                btnInicioPerc.setEnabled(false);
+            } else {
+                JOptionPane.showMessageDialog(this, "Nenhum erro encontrado - pronto para execução", "Verificação concluída", JOptionPane.INFORMATION_MESSAGE);
+
+                exprIndex = 1;
+                operacaoCondicional = false;
+                condicionaisResult = new LinkedList<>();
+                execProx = true;
+                nomeVar = "";
+
+                lblPosCaret.setText("Em execução");
+
+                variaveis = new HashMap<>();
+                varOrdem = new HashMap<>();
+                expressao = expressoes.getFirst();
+                tabVariaveis.setRowCount(0);
+
+                txpEntrada.setText("");
+                txpEntrada.setEditable(false);
+                txpEntrada.setBackground(backgroundDisabled);
+
+                docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
+                txpProcessamento.setText("");
+                txpProcessamento.setBackground(backgroundDisabled);
+
+                txpSaida.setText("");
+                txpSaida.setBackground(backgroundDisabled);
+
+                btnVerificar.setEnabled(false);
+                btnProxPerc.setEnabled(true);
+                btnInicioPerc.setEnabled(false);
+            }
         }
     }//GEN-LAST:event_btnVerificarActionPerformed
 
@@ -903,20 +950,20 @@ public class FrmGui extends javax.swing.JFrame {
                     break;
 
                 case OP_ATRIBUICAO:
-                case OP_SOMA:
-                case OP_SUBTRACAO:
-                case OP_MULTIPLICACAO:
-                case OP_DIV_INTEIRA:
-                case OP_DIV_REAL:
-                case OP_MOD:
-                case OP_MAIOR:
-                case OP_MAIOR_IGUAL:
-                case OP_MENOR:
-                case OP_MENOR_IGUAL:
-                case OP_IGUAL:
-                case OP_DIFERENTE:
-                case OP_E:
-                case OP_OU:
+                case OP_MAT_SOMA:
+                case OP_MAT_SUBTRACAO:
+                case OP_MAT_MULTIPLICACAO:
+                case OP_MAT_DIV_INTEIRA:
+                case OP_MAT_DIV_REAL:
+                case OP_MAT_MOD:
+                case OP_REL_MAIOR:
+                case OP_REL_MAIOR_IGUAL:
+                case OP_REL_MENOR:
+                case OP_REL_MENOR_IGUAL:
+                case OP_REL_IGUAL:
+                case OP_REL_DIFERENTE:
+                case OP_LOG_E:
+                case OP_LOG_OU:
                     while (!pilha.isEmpty() && pilha.peek().getPrecedencia() > token.getPrecedencia()){
                         saida.add(pilha.pop());
                     }
@@ -1018,12 +1065,12 @@ public class FrmGui extends javax.swing.JFrame {
                 case CONST_REAL:
                     pilha.push(token);
                     break;
-                case OP_SOMA:
-                case OP_SUBTRACAO:
-                case OP_MULTIPLICACAO:
-                case OP_DIV_INTEIRA:
-                case OP_DIV_REAL:
-                case OP_MOD:
+                case OP_MAT_SOMA:
+                case OP_MAT_SUBTRACAO:
+                case OP_MAT_MULTIPLICACAO:
+                case OP_MAT_DIV_INTEIRA:
+                case OP_MAT_DIV_REAL:
+                case OP_MAT_MOD:
                     docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
                     imprimeTokens(token);
                     
@@ -1050,12 +1097,12 @@ public class FrmGui extends javax.swing.JFrame {
                     }
                     break;
                     
-                case OP_MAIOR:
-                case OP_MAIOR_IGUAL:
-                case OP_MENOR:
-                case OP_MENOR_IGUAL:
-                case OP_IGUAL:
-                case OP_DIFERENTE:
+                case OP_REL_MAIOR:
+                case OP_REL_MAIOR_IGUAL:
+                case OP_REL_MENOR:
+                case OP_REL_MENOR_IGUAL:
+                case OP_REL_IGUAL:
+                case OP_REL_DIFERENTE:
                     docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
                     imprimeTokens(token);
                     
@@ -1082,8 +1129,8 @@ public class FrmGui extends javax.swing.JFrame {
                     }
                     break;
                     
-                case OP_E:
-                case OP_OU:
+                case OP_LOG_E:
+                case OP_LOG_OU:
                     docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
                     imprimeTokens(token);
                     

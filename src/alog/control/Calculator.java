@@ -5,9 +5,9 @@
  */
 package alog.control;
 
-import alog.model.FuncaoToken;
+import alog.token.FuncaoToken;
 import alog.model.TipoVariavel;
-import alog.model.Token;
+import alog.token.Token;
 import alog.model.Variavel;
 
 /**
@@ -29,7 +29,7 @@ public class Calculator {
             String result = "";
         
             switch (operador.getFuncaoToken()){
-                case OP_SOMA:
+                case OP_MAT_SOMA:
                     switch (funcao){
                         case CONST_INTEIRA:
                             result = String.valueOf(op1.getValorInteiro() + op2.getValorInteiro());
@@ -39,7 +39,7 @@ public class Calculator {
                             break;
                     }
                     break;
-                case OP_SUBTRACAO:
+                case OP_MAT_SUBTRACAO:
                     switch (funcao){
                         case CONST_INTEIRA:
                             result = String.valueOf(op1.getValorInteiro() - op2.getValorInteiro());
@@ -49,7 +49,7 @@ public class Calculator {
                             break;
                     }
                     break;
-                case OP_MULTIPLICACAO:
+                case OP_MAT_MULTIPLICACAO:
                     switch (funcao){
                         case CONST_INTEIRA:
                             result = String.valueOf(op1.getValorInteiro() * op2.getValorInteiro());
@@ -59,21 +59,21 @@ public class Calculator {
                             break;
                     }
                     break;
-                case OP_DIV_INTEIRA:
+                case OP_MAT_DIV_INTEIRA:
                     if (op2.getValorInteiro() == 0){
                         System.err.println("Erro: Divisão por Zero");
                         return null;
                     }
                     result = String.valueOf(op1.getValorInteiro() / op2.getValorInteiro());
                     break;
-                case OP_MOD:
+                case OP_MAT_MOD:
                     if (op2.getValorInteiro() == 0){
                         System.err.println("Erro: Divisão por Zero");
                         return null;
                     }
                     result = String.valueOf(op1.getValorInteiro() % op2.getValorInteiro());
                     break;
-                case OP_DIV_REAL:
+                case OP_MAT_DIV_REAL:
                     if (op2.getValorReal() == 0.0){
                         System.err.println("Erro: Divisão por Zero");
                         return null;
@@ -164,42 +164,42 @@ public class Calculator {
             Boolean result = null;
             
             switch (operador.getFuncaoToken()){
-                case OP_MAIOR:
+                case OP_REL_MAIOR:
                     if (op1.getTipo() == TipoVariavel.CARACTER){
                         result = op1.getValor().compareTo(op2.getValor()) > 0;
                     } else {
                         result = op1.getValorReal() > op2.getValorReal();
                     }
                     break;
-                case OP_MAIOR_IGUAL:
+                case OP_REL_MAIOR_IGUAL:
                     if (op1.getTipo() == TipoVariavel.CARACTER){
                         result = op1.getValor().compareTo(op2.getValor()) >= 0;
                     } else {
                         result = op1.getValorReal() >= op2.getValorReal();
                     }
                     break;
-                case OP_MENOR:
+                case OP_REL_MENOR:
                     if (op1.getTipo() == TipoVariavel.CARACTER){
                         result = op1.getValor().compareTo(op2.getValor()) < 0;
                     } else {
                         result = op1.getValorReal() < op2.getValorReal();
                     }
                     break;
-                case OP_MENOR_IGUAL:
+                case OP_REL_MENOR_IGUAL:
                     if (op1.getTipo() == TipoVariavel.CARACTER){
                         result = op1.getValor().compareTo(op2.getValor()) <= 0;
                     } else {
                         result = op1.getValorReal() <= op2.getValorReal();
                     }
                     break;
-                case OP_IGUAL:
+                case OP_REL_IGUAL:
                     if (op1.getTipo() == TipoVariavel.CARACTER){
                         result = op1.getValor().compareTo(op2.getValor()) == 0;
                     } else {
                         result = op1.getValorReal() == op2.getValorReal();
                     }
                     break;
-                case OP_DIFERENTE:
+                case OP_REL_DIFERENTE:
                     if (op1.getTipo() == TipoVariavel.CARACTER){
                         result = op1.getValor().compareTo(op2.getValor()) != 0;
                     } else {
@@ -228,10 +228,10 @@ public class Calculator {
             Boolean result = null;
             
             switch (operador.getFuncaoToken()){
-                case OP_E:
+                case OP_LOG_E:
                     result = op1.getValorInteiro() + op2.getValorInteiro() == 2;
                     break;
-                case OP_OU:
+                case OP_LOG_OU:
                     result = op1.getValorInteiro() + op2.getValorInteiro() > 0;
                     break;
             }
@@ -270,9 +270,9 @@ public class Calculator {
         
     private boolean defineOperacao(Variavel op1, Variavel op2){
         switch (operador.getFuncaoToken()){
-            case OP_SOMA:
-            case OP_SUBTRACAO:
-            case OP_MULTIPLICACAO:
+            case OP_MAT_SOMA:
+            case OP_MAT_SUBTRACAO:
+            case OP_MAT_MULTIPLICACAO:
                 if (op1.getTipo() == TipoVariavel.CARACTER || op2.getTipo() == TipoVariavel.CARACTER){
                     System.err.println("Operação " + operador.getFuncaoToken()+ " inválida para tipo de dado Caracter");
                     return false;
@@ -284,8 +284,8 @@ public class Calculator {
                     }
                 }
                 break;
-            case OP_DIV_INTEIRA:
-            case OP_MOD:
+            case OP_MAT_DIV_INTEIRA:
+            case OP_MAT_MOD:
                 if (op1.getTipo() == TipoVariavel.CARACTER || op2.getTipo() == TipoVariavel.CARACTER){
                     System.err.println("Operação " + operador.getFuncaoToken()+ " inválida para tipo de dado Caracter");
                     return false;
@@ -298,7 +298,7 @@ public class Calculator {
                     }
                 }
                 break;
-            case OP_DIV_REAL:
+            case OP_MAT_DIV_REAL:
                 if (op1.getTipo() == TipoVariavel.CARACTER || op2.getTipo() == TipoVariavel.CARACTER){
                     System.err.println("Operação " + operador.getFuncaoToken()+ " inválida para tipo de dado Caracter");
                     return false;
@@ -316,12 +316,12 @@ public class Calculator {
                 }
                 break;
                 
-            case OP_MAIOR:
-            case OP_MAIOR_IGUAL:
-            case OP_MENOR:
-            case OP_MENOR_IGUAL:
-            case OP_IGUAL:
-            case OP_DIFERENTE:
+            case OP_REL_MAIOR:
+            case OP_REL_MAIOR_IGUAL:
+            case OP_REL_MENOR:
+            case OP_REL_MENOR_IGUAL:
+            case OP_REL_IGUAL:
+            case OP_REL_DIFERENTE:
                 if ( (op1.getTipo() == TipoVariavel.CARACTER && op2.getTipo() != TipoVariavel.CARACTER) ||
                      (op2.getTipo() == TipoVariavel.CARACTER && op1.getTipo() != TipoVariavel.CARACTER)
                         ){
@@ -333,8 +333,8 @@ public class Calculator {
                 }
                 break;
                 
-            case OP_E:
-            case OP_OU:
+            case OP_LOG_E:
+            case OP_LOG_OU:
                 if ( op1.getTipo() != TipoVariavel.INTEIRO || op2.getTipo() != TipoVariavel.INTEIRO ){
                     System.err.println("Operação " + operador.getFuncaoToken()+ " inválida"
                             + " - operações lógicas só são possíveis entre variáveis lógicas (inteiros 0 e 1)");

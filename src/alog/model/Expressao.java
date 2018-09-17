@@ -5,6 +5,7 @@
  */
 package alog.model;
 
+import alog.token.Token;
 import java.util.ArrayList;
 
 /**

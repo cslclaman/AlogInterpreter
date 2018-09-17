@@ -1,8 +1,10 @@
 package alog.control;
 
-import alog.model.TipoToken;
-import alog.model.Token;
-import java.util.ArrayList;
+import alog.token.TipoToken;
+import alog.token.Token;
+import java.util.LinkedList;
+import java.util.List;
+import javafx.scene.shape.Line;
 
 /**
  * Classe de scanner que realiza análise léxica em um código e retorna os tokens por meio de um iterador.
@@ -10,14 +12,41 @@ import java.util.ArrayList;
  */
 public class Scanner {
     
-    private int pos;
-    private int posnolf;
-    private int order;
+    private class ErroLexico {
+        char caracter;
+        int linha;
+        int coluna;
+        int posicao;
+        String erro;
+
+        public ErroLexico(
+                char caracter, int linha, int coluna, int posicao, String erro){
+            this.caracter = caracter;
+            this.linha = linha;
+            this.coluna = coluna;
+            this.posicao = posicao;
+            this.erro = erro;
+        }
+
+        @Override
+        public String toString(){
+            return String.format(
+                    "Linha %d, Coluna %d: Caractere '%c' (unicode %d) %s",
+                    linha + 1, coluna + 1, caracter, (int)caracter, erro);  
+            
+        }
+    }
+    
+    private int indice;
+    private int posicao;
+    private int ordem;
     private int linha;
     private int coluna;
     private int len;
     private boolean next;
     private char[] texto;
+    
+    private LinkedList<ErroLexico> erros;
 
     /**
      * Constrói uma nova instância do Scanner a partir de uma String de código-fonte.
@@ -26,115 +55,122 @@ public class Scanner {
     public Scanner(String texto) {
         this.texto = texto.toCharArray();
         len = texto.length();
-        pos = posnolf = linha = coluna = order = 0;
+        indice = 0;
+        posicao = 0;
+        linha = 0;
+        coluna = 0;
+        ordem = 0;
         next = len > 0;
+        
+        erros = new LinkedList<>();
     }
     
     /**
      * Retorna se ainda há algum token a ser verificado no código.
      * @return True se ainda há tokens.
      */
-    public boolean hasNext(){
+    public boolean existeProximo(){
         return next;
     }
     
     /**
      * Retorna o próximo token encontrado, devidamente classificado.
-     * @return {@link alog.model.Token}
+     * @return {@link alog.token.Token}
      */
-    public Token getNext(){
-        int contLit = 0, contAlpha = 0, contNum = 0, contRes = 0, contOper = 0; 
+    public Token proximo(){
+        int contLit = 0; // Contagem de caracteres dentro da string literal
+        int contAlpha = 0; // Contagem de caracteres alfabéticos
+        int contNum = 0; // Contagem de caracteres numéricos
+        int contDelim = 0; // Contagem de caracteres símbolos delimitadores
+        int contOper = 0; // Contagem de caracteres símbolos operadores
         
         boolean literal = false;
         boolean go = true;
-        Token token = new Token();
-        token.setLinha(linha);
-        token.setPosicao(posnolf);
-        token.setColuna(coluna);
-        token.setOrdem(order++);
+        Token token = new Token(linha, coluna, posicao, ordem++);
         
-        while (go && next && pos < len){
-            if (pos + 1 == len){
+        while (go && next && indice < len){
+            if (indice + 1 == len){
                 next = false;
             }
-            char ch = texto[pos];
+            char ch = texto[indice];
             if (literal){
                 if (ch == '"'){
                     literal = false;
                     go = false;
                 }
                 token.atualizaPalavra(ch);
-                pos++;
-                posnolf++;
+                indice++;
+                posicao++;
                 contLit++;
             } else {
                 if (isBlank(ch)){
                     go = false;
-                } else if (Character.isLetter(ch) || ch == '_'){
-                    if (contRes > 0 || contOper > 0){
+                } else if (isLetter(ch)){
+                    if (contDelim > 0 || contOper > 0){
                         go = false;
                     } else {
                         token.atualizaPalavra(ch);
-                        pos++;
-                        posnolf++;
+                        indice++;
+                        posicao++;
                         coluna ++;
                         contAlpha ++;
                     }
-                } else if (Character.isDigit(ch)){
-                    if (contRes > 0 || contOper > 0){
+                } else if (isNumeric(ch)){
+                    if (contDelim > 0 || contOper > 0){
                         go = false;
                     } else {
                         token.atualizaPalavra(ch);
-                        pos++;
-                        posnolf++;
+                        indice++;
+                        posicao++;
                         coluna ++;
                         contNum ++;
                     }
-                } else if (isReserved(ch)){
+                } else if (isDelimiter(ch)){
                     if (token.getTamanho() == 0){
                         token.atualizaPalavra(ch);
-                        pos++;
-                        posnolf++;
+                        indice++;
+                        posicao++;
                         coluna ++;
-                        contRes ++;
+                        contDelim ++;
                     }
                     go = false;
                 } else if (ch == '"'){
                     if (token.getTamanho() == 0){
                         literal = true;
                         token.atualizaPalavra(ch);
-                        pos++;
-                        posnolf++;
+                        indice++;
+                        posicao++;
                         coluna++;
                     } else {
                         go = false;
                     }
-                } else if (isLogicalOperator(ch) || isArithmeticOperator(ch)){
+                } else if (isOperator(ch)){
                     if (contAlpha > 0 || contNum > 0){
                         go = false;
                     } else {
                         token.atualizaPalavra(ch);
-                        pos++;
+                        indice++;
                         coluna++;
-                        posnolf++;
+                        posicao++;
                         contOper++;
                     }
                 } else {
-                    System.out.println("Caractere não considerável: " + ch + " (" + (int)ch + ")");
+                    erros.add(new ErroLexico(
+                            ch, linha, coluna, posicao, "inválido"));
                     token.atualizaPalavra(ch);
                     go = false;
-                    pos++;
-                    posnolf++;
+                    indice++;
+                    posicao++;
                     coluna++;
                 }
             }
         }
         go = true;
-        while (go && pos < len){
-            char ch = texto[pos];
+        while (go && indice < len){
+            char ch = texto[indice];
             if (ch == '\r') {
-                if (pos < len && texto[pos+1] == '\n'){
-                    pos++;
+                if (indice < len && texto[indice+1] == '\n'){
+                    indice++;
                     continue;
                 } else {
                     ch = '\n';
@@ -142,19 +178,19 @@ public class Scanner {
             }
             switch (ch) {
                 case '\n':
-                    pos ++;
+                    indice ++;
                     coluna = 0;
                     linha ++;
-                    posnolf++;
+                    posicao++;
                     break;
                 case ' ':
-                    pos ++;
-                    posnolf++;
+                    indice ++;
+                    posicao++;
                     coluna ++;
                     break;
                 case '\t':
-                    pos ++;
-                    posnolf += 4;
+                    indice ++;
+                    posicao += 4;
                     coluna += 4;
                     break;
                 default:
@@ -175,7 +211,7 @@ public class Scanner {
                 if (contAlpha > 0){
                     token.setTipoToken(TipoToken.ALFABETICO);
                 } else {
-                    if (contRes > 0){
+                    if (contDelim > 0){
                         token.setTipoToken(TipoToken.DELIMITADOR);
                     } else {
                         if (contOper > 0){
@@ -188,7 +224,7 @@ public class Scanner {
             }
         }
         
-        if (pos == len){
+        if (indice == len){
             next = false;
         }
         
@@ -197,50 +233,126 @@ public class Scanner {
     
     /**
      * Retorna todos os Tokens encontrados no texto.
+     * Esse método cria uma lista e executa o método {@link #proximo() }
+     * até que não haja mais tokens a serem lidos
+     * (ou seja, quando o método {@link #existeProximo()} retornar {@code FALSE}.
      * @return ArrayList com tokens
      */
-    public ArrayList<Token> getAll(){
-        ArrayList<Token> list = new ArrayList<>();
-        while (hasNext()){
-            list.add(getNext());
+    public List<Token> listaTokens (){
+        LinkedList<Token> list = new LinkedList<>();
+        while (existeProximo()){
+            list.add(proximo());
         }
         return list;
     }
     
+    /**
+     * Retorna número de erros de análise léxica.
+     * @return 
+     */
+    public int getNumErros(){
+        return erros.size();
+    }
+    
+    /**
+     * Retorna lista com mensagens de erro que ocorreram durante a análise.
+     * @return Lista com mensagens ou lista vazia caso não tenham erros
+     */
+    public List<String> getListaErros(){
+        LinkedList<String> err = new LinkedList<>();
+        for (ErroLexico e : erros){
+            err.add(e.toString());
+        }
+        return err;
+    }
+    
+    /**
+     * Retorna lista com mensagens de erro que ocorreram durante a análise.
+     * @return Lista com mensagens ou lista vazia caso não tenham erros
+     */
+    public String imprimeErros(){
+        StringBuilder msg = new StringBuilder();
+        for (ErroLexico err : erros){
+            if (msg.length() > 0){
+                msg.append("\n");
+            }
+            msg.append(err.toString());
+        }
+        return msg.toString();
+    }
+    
+    /**
+     * Retorna lista com mensagens de erro que ocorreram durante a análise.
+     * @return Lista com mensagens ou lista vazia caso não tenham erros
+     */
+    public List<Token> retornaErros () {
+        LinkedList<Token> tokens = new LinkedList<>();
+        for (ErroLexico err : erros){
+            Token t = new Token(
+                    err.linha, err.coluna, err.posicao, tokens.size() + 1);
+            t.setPalavra(String.valueOf(err.caracter));
+            tokens.add(t);
+        }
+        return tokens;
+    }
+    
+    /**
+     * Retorna se um determinado caracter é alfabético (A-Z, a-z, '_').
+     * @param ch Caracter a verificar
+     * @return
+     */
+    private static boolean isLetter(char ch){
+        return Character.isLetter(ch) || ch == '_';
+    }
+    
+    /**
+     * Retorna se um determinado caracter é numérico (0-9).
+     * @param ch Caracter a verificar
+     * @return
+     */
+    private static boolean isNumeric(char ch){
+        return Character.isDigit(ch);
+    }
+    
+    /**
+     * Retorna se um determinado caracter é "em branco" (espaço, quebra de linha, tabulação).
+     * @param ch Caracter a verificar
+     * @return
+     */
     private static boolean isBlank(char ch){
         char[] delimiters = {'\n','\r','\t',' '};
-        for (char cb : delimiters){
-            if (cb == ch){
-                return true;
-            }
-        }
-        return false;
+        return isListed(ch, delimiters);
     }
     
-    private static boolean isReserved(char ch){
-        char[] delimiters = {':',';','(',')','[',']',',','.'};
-        for (char cd : delimiters){
-            if (cd == ch){
-                return true;
-            }
-        }
-        return false;
+    /**
+     * Retorna se um determinado caracter é um símbolo reservado (pontuação e delimitadores).
+     * @param ch Caracter a verificar
+     * @return
+     */
+    private static boolean isDelimiter(char ch){
+        char[] delimiter = {':',';','(',')','[',']',',','.'};
+        return isListed(ch, delimiter);
     }
     
-    private static boolean isArithmeticOperator(char ch){
-        char[] arithmetic = {'+','-','*','/'};
-        for (char ca : arithmetic){
-            if (ca == ch){
-                return true;
-            }
-        }
-        return false;
+    /**
+     * Retorna se um determinado caracter é um operador (aritmético ou relacional).
+     * @param ch Caracter a verificar
+     * @return
+     */
+    private static boolean isOperator(char ch){
+        char[] operators = {'+','-','*','/','>','<','='};
+        return isListed(ch, operators);
     }
     
-    private static boolean isLogicalOperator(char ch){
-        char[] logical = {'>','<','=','!'};
-        for (char cl : logical){
-            if (cl == ch){
+    /**
+     * Retorna se um determinado caracter está contido em um array de caracteres
+     * @param ch Caracter a verificar
+     * @param list Array a ser verificado
+     * @return
+     */
+    private static boolean isListed(char ch, char[] list){
+        for (char c : list){
+            if (c == ch){
                 return true;
             }
         }
