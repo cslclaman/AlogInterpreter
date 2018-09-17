@@ -5,10 +5,10 @@
  */
 package alog.control;
 
-import alog.model.Bloco;
-import alog.model.Instrucao;
+import alog.instrucao.Bloco;
+import alog.instrucao.Instrucao;
 import alog.token.FuncaoToken;
-import alog.model.TipoInstrucao;
+import alog.instrucao.TipoInstrucao;
 import alog.token.Token;
 import java.util.ArrayList;
 import java.util.HashMap;

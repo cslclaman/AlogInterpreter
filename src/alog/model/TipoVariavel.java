@@ -5,6 +5,8 @@
  */
 package alog.model;
 
+import alog.token.Token;
+
 /**
  *
  * @author Caique Souza
@@ -44,5 +46,15 @@ public enum TipoVariavel {
     @Override
     public String toString() {
         return exibicao;
+    }
+    
+    public static TipoVariavel mapTokenToVariavel (Token token){
+        switch (token.getFuncaoToken()){
+            case RES_TIPO_CARACTER: return CARACTER;
+            case RES_TIPO_INTEIRO:  return INTEIRO;
+            case RES_TIPO_REAL:     return REAL;
+            case RES_TIPO_LOGICO:   return LOGICO;
+            default:                return null;
+        }
     }
 }

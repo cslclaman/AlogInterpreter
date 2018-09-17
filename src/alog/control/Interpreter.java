@@ -5,8 +5,8 @@
  */
 package alog.control;
 
-import alog.model.Bloco;
-import alog.model.Instrucao;
+import alog.instrucao.Bloco;
+import alog.instrucao.Instrucao;
 import alog.token.FuncaoToken;
 import alog.model.TipoVariavel;
 import alog.token.Token;

@@ -8,7 +8,7 @@ package alog;
 import alog.control.Interpreter;
 import alog.control.Parser;
 import alog.control.Scanner;
-import alog.model.Instrucao;
+import alog.instrucao.Instrucao;
 import alog.token.Token;
 import alog.view.FrmGui;
 import java.io.BufferedReader;

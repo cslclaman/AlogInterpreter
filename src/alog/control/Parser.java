@@ -1,17 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package alog.control;
 
-import alog.model.Bloco;
-import alog.model.Instrucao;
+import alog.instrucao.*;
 import alog.token.FuncaoToken;
-import alog.model.TipoInstrucao;
-import alog.model.TipoVariavel;
+import alog.instrucao.TipoInstrucao;
+import alog.model.*;
 import alog.token.Token;
-import java.util.ArrayList;
+//import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,9 +37,8 @@ public class Parser {
     private Map<String, TipoVariavel> variaveis;
     
     private LinkedList<FuncaoToken> funcoesEsperadas;
-    private LinkedList<TipoInstrucao> pilhaTiposInstrucoes;
-    private TipoInstrucao tipoInstrucaoAtual;
     private LinkedList<ErroSintatico> erros;
+    private TipoInstrucao tipoUltimaInstrucao;
     private int pos;
     private boolean fimAtingido;
     
@@ -55,22 +48,12 @@ public class Parser {
         variaveis = new HashMap<>();
         erros = new LinkedList<>();
         funcoesEsperadas = new LinkedList<>();
-        pilhaTiposInstrucoes = new LinkedList<>();
+        tipoUltimaInstrucao = TipoInstrucao._INDEFINIDO;
         
         pos = 0;
         fimAtingido = false;
         
-        // Caso modularizado:
-        /* 
-        // Espera por declaração de função
-        funcoesEsperadas.add(FuncaoToken.RES_MOD_FUNCAO);
-        // Espera por declaração de rotina
-        funcoesEsperadas.add(FuncaoToken.RES_MOD_ROTINA);
-        */
-        
-        // Caso não modularizado:
-        funcoesEsperadas.add(FuncaoToken.RES_BLOCO_INICIO);
-        tipoInstrucaoAtual = TipoInstrucao._INDEFINIDO;
+        funcoesPorInstrucao(tipoUltimaInstrucao);
     }
     
     public boolean existeProxima(){
@@ -78,631 +61,90 @@ public class Parser {
     }
     
     public Instrucao proxima(){
-        Instrucao instrucao;
+        Instrucao instrucao = null;
         
-        LinkedList<Token> parentesesAbre = new LinkedList<>();
-        LinkedList<Token> parentesesFecha = new LinkedList<>();
-        
-        boolean go = true;
-        
-        while (go && pos < tokens.size()){
-            Token token = tokens.get(pos);
-            if (!funcaoValida(token)){
-                break;
-            }
-            switch(token.getFuncaoToken()){
-                //Ao iniciar um bloco:
-                case RES_BLOCO_INICIO:
-                    instrucao = new Bloco();
-                    
-                    pilhaTiposInstrucoes.push(tipoInstrucaoAtual);
-                    tipoInstrucaoAtual = instrucao.getTipo();
-                    
-                    if (!tipoValido(instrucao)){
-                        break;
-                    }
-                    instrucao.insereToken(token);
-                    
-                    Parser parserInterno = new Parser(tokens);
-                    parserInterno.variaveis = variaveis;
-                    parserInterno.pos = pos++;
-                    parserInterno.pilhaTiposInstrucoes = pilhaTiposInstrucoes;
-                    parserInterno.tipoInstrucaoAtual = tipoInstrucaoAtual;
-                    
-                    while (parserInterno.existeProxima() && !parserInterno.fimAtingido){
-                        Instrucao proxima = parserInterno.proxima();
-                        if (!((Bloco)instrucao).insereInstrucao(proxima)){
-                            erros.add(parserInterno.erros.getLast());
-                        }
-                    }
-                    
-                    if (!parserInterno.existeProxima() && !parserInterno.fimAtingido){
-                        erros.add(new ErroSintatico(
-                                ((Bloco)instrucao).getInicio(),
-                                "Bloco não fechado corretamente"));
-                    }
-                    
-                    pos = parserInterno.pos;
-                    token = tokens.get(pos++);
-                    variaveis = parserInterno.variaveis;
-                    
-                    instrucao.insereToken(token);
-                    
-                    funcoesEsperadas.clear();
-                    
-                    tipoInstrucaoAtual = pilhaTiposInstrucoes.pop();
-                    switch (tipoInstrucaoAtual){
-                        //Caso o bloco seja referente a um módulo:
-                        case MODULO_FUNCAO:
-                        case MODULO_ROTINA:
-                            /*funcoesEsperadas.add(FuncaoToken.RES_MOD_FUNCAO);
-                            funcoesEsperadas.add(FuncaoToken.RES_MOD_ROTINA);
-                            funcoesEsperadas.add(FuncaoToken.RES_ALGORITMO);*/
-                            break;
-                        //Caso seja um módulo principal:
-                        case MODULO_PRINCIPAL:
-                            /*funcoesEsperadas.add(FuncaoToken.RES_MOD_FUNCAO);
-                            funcoesEsperadas.add(FuncaoToken.RES_MOD_ROTINA);*/
-                            break;
-                        //Caso o bloco esteja dentro de outro bloco (por alguma razão obscura):
-                        case BLOCO:
-                        //Caso o bloco seja um algoritmo básico (sem identificador "Algoritmo"
-                        case _INDEFINIDO:
-                            //Declarações de variáveis
-                            funcoesEsperadas.add(FuncaoToken.RES_TIPO_INTEIRO);
-                            funcoesEsperadas.add(FuncaoToken.RES_TIPO_REAL);
-                            funcoesEsperadas.add(FuncaoToken.RES_TIPO_CARACTER);
-                            //Atribuição ou Chamada de rotina
-                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
-                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
-                            //Condicional
-                            funcoesEsperadas.add(FuncaoToken.RES_COND_SE);
-                            //Repetições
-                            funcoesEsperadas.add(FuncaoToken.RES_REP_PARA);
-                            funcoesEsperadas.add(FuncaoToken.RES_REP_ENQUANTO);
-                            funcoesEsperadas.add(FuncaoToken.RES_REP_FACA);
-                            //Entrada/Saída
-                            funcoesEsperadas.add(FuncaoToken.LIB_IO_LEIA);
-                            funcoesEsperadas.add(FuncaoToken.LIB_IO_ESCREVA);
-                            break;
-                        default:
-                            erros.add(new ErroSintatico(
-                                ((Bloco)instrucao).getInicio(),
-                                "Bloco não fechado corretamente"));
-                    }
-                    go = false;
-                    break;
-                
-                case RES_BLOCO_FIM:
-                    fimAtingido = true;
-                    funcoesEsperadas.clear();
-                    
-                    go = false;
-                    break;
-                    
-                //MODO: CRIAÇÃO DE VARIÁVEIS
-                case RES_TIPO_CARACTER:
-                case RES_TIPO_INTEIRO:
-                case RES_TIPO_REAL:
-                    instrucao.setTipo(TipoInstrucao.DECLARACAO_VARIAVEL);
-                    funcoesEsperadas.clear();
-                    funcoesEsperadas.add(FuncaoToken.DELIM_DOIS_PONTOS);
-                    add = true;
-                    break;
-                    
-                case DELIM_DOIS_PONTOS:
-                    funcoesEsperadas.clear();
-                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
-                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
-                    add = false;
-                    break;
-                    
-                
-                
-                //MODO: ENTRADA DE DADOS
-                case LIB_IO_LEIA:
-                    instrucao.setTipo(TipoInstrucao.ENTRADA_DE_DADOS);
-                    funcoesEsperadas.clear();
-                    funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
-                    add = true;
-                    break;
-                    
-                //MODO: SAÍDA DE DADOS
-                case LIB_IO_ESCREVA:
-                    instrucao.setTipo(TipoInstrucao.SAIDA_DE_DADOS);
-                    funcoesEsperadas.clear();
-                    funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
-                    add = true;
-                    break;
-                
-                //MODO: ATRIBUIÇÃO
-                case OP_ATRIBUICAO:
-                    instrucao.setTipo(TipoInstrucao.ATRIBUICAO);
-                    funcoesEsperadas.clear();
-                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
-                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
-                    funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
-                    funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
-                    funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
-                    funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
-                    funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
-                    add = true;
-                    break;
-                    
-                //MODO: OPERAÇÃO ARITMÉTICA
-                case OP_MAT_SOMA:
-                case OP_MAT_SUBTRACAO:
-                case OP_MAT_MULTIPLICACAO:
-                case OP_MAT_DIV_INTEIRA:
-                case OP_MAT_DIV_REAL:
-                case OP_MAT_MOD:
-                    if (instrucao.getTipo() == TipoInstrucao.ATRIBUICAO){
-                        instrucao.setTipo(TipoInstrucao.OPERACAO_ARITMETICA);
-                    }
-                    funcoesEsperadas.clear();
-                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
-                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
-                    funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
-                    funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
-                    funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
-                    funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
-                    add = true;
-                    break;
-                
-                case LIB_MATH_POT:
-                case LIB_MATH_RAIZ:
-                    instrucao.setTipo(TipoInstrucao.CHAMADA_FUNCAO);
-                    funcoesEsperadas.clear();
-                    funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
-                    add = true;
-                    break;
-                    
-                //MODO: CONDICIONAL
-                case RES_COND_SE:
-                    instrucao.setTipo(TipoInstrucao.OPERACAO_LOGICA);
-                    funcoesEsperadas.clear();
-                    funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
-                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
-                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
-                    funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
-                    funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
-                    funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
-                    funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
-                    add = true;
-                    break;
-                    
-                case OP_REL_MAIOR:
-                case OP_REL_MAIOR_IGUAL:
-                case OP_REL_MENOR:
-                case OP_REL_MENOR_IGUAL:
-                case OP_REL_IGUAL:
-                case OP_REL_DIFERENTE:
-                case OP_LOG_E:
-                case OP_LOG_OU:
-                    funcoesEsperadas.clear();
-                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
-                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
-                    funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
-                    funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
-                    add = true;
-                    break;
-                    
-                case RES_COND_ENTAO:
-                    funcoesEsperadas.clear();
-                    funcoesEsperadas.add(FuncaoToken.RES_BLOCO_INICIO);
-                    funcoesEsperadas.add(FuncaoToken.IDENT_NOME_VARIAVEL);
-                    funcoesEsperadas.add(FuncaoToken.LIB_IO_LEIA);
-                    funcoesEsperadas.add(FuncaoToken.LIB_IO_ESCREVA);
-                    funcoesEsperadas.add(FuncaoToken.RES_COND_SE);
-                    funcoesEsperadas.add(FuncaoToken.RES_COND_SENAO);
-                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
-                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
-                    
-                    add = false;
-                    go = false;
-                    break;
-                    
-                case RES_COND_SENAO:
-                    instrucao.setTipo(TipoInstrucao.OPERACAO_LOGICA);
-                    funcoesEsperadas.clear();
-                    funcoesEsperadas.add(FuncaoToken.RES_BLOCO_INICIO);
-                    funcoesEsperadas.add(FuncaoToken.IDENT_NOME_VARIAVEL);
-                    funcoesEsperadas.add(FuncaoToken.LIB_IO_LEIA);
-                    funcoesEsperadas.add(FuncaoToken.LIB_IO_ESCREVA);
-                    funcoesEsperadas.add(FuncaoToken.RES_COND_SE);
-                    funcoesEsperadas.add(FuncaoToken.RES_COND_SENAO);
-                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
-                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
-                    
-                    add = true;
-                    go = false;
-                    break;
-                    
-                //DIVERSOS MODOS
-                case DELIM_PARENTESES_ABRE:
-                    parentesesAbre.push(token);
-                    switch (instrucao.getTipo()){
-                        case ENTRADA_DE_DADOS:
-                            funcoesEsperadas.clear();
-                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
-                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
-                            add = false;
-                            break;
-                        case SAIDA_DE_DADOS:
-                            funcoesEsperadas.clear();
-                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
-                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
-                            funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
-                            funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
-                            funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
-                            funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
-                            add = false;
-                            break;
-                        case ATRIBUICAO:
-                        case OPERACAO_ARITMETICA:
-                            funcoesEsperadas.clear();
-                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
-                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
-                            funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
-                            funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
-                            funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
-                            funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
-                            funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
-                            add = true;
-                            break;
-                        case CHAMADA_FUNCAO:
-                            funcoesEsperadas.clear();
-                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
-                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
-                            funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
-                            funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
-                            add = true;
-                            break;
-                        case OPERACAO_LOGICA:
-                            funcoesEsperadas.clear();
-                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
-                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
-                            funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
-                            funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
-                            funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
-                            add = true;
-                            break;
-                    }
-                    break;
-                    
-                case DELIM_PARENTESES_FECHA:
-                    parentesesFecha.offer(token);
-                    switch (instrucao.getTipo()){
-                        case ENTRADA_DE_DADOS:
-                        case SAIDA_DE_DADOS:
-                            funcoesEsperadas.clear();
-                            funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
-                            add = false;
-                            break;
-                        case CHAMADA_FUNCAO:
-                            instrucao.setTipo(TipoInstrucao.OPERACAO_ARITMETICA);
-                        case ATRIBUICAO:
-                        case OPERACAO_ARITMETICA:
-                            funcoesEsperadas.clear();
-                            funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
-                            funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
-                            funcoesEsperadas.add(FuncaoToken.OP_MAT_SOMA);
-                            funcoesEsperadas.add(FuncaoToken.OP_MAT_SUBTRACAO);
-                            funcoesEsperadas.add(FuncaoToken.OP_MAT_MULTIPLICACAO);
-                            funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_INTEIRA);
-                            funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_REAL);
-                            funcoesEsperadas.add(FuncaoToken.OP_MAT_MOD);
-                            add = true;
-                            break;
-                    }
-                    break;
-                    
-                case DELIM_VIRGULA:
-                    switch (instrucao.getTipo()){
-                        case DECLARACAO_VARIAVEL:
-                        case ENTRADA_DE_DADOS:
-                            funcoesEsperadas.clear();
-                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
-                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
-                            add = false;
-                            break;
-                        case SAIDA_DE_DADOS:
-                            funcoesEsperadas.clear();
-                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
-                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
-                            funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
-                            funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
-                            add = true;
-                            break;
-                        case CHAMADA_FUNCAO:
-                            funcoesEsperadas.clear();
-                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
-                            funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
-                            funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
-                            add = true;
-                            break;
-                    }
-                    break;
-                
-                case CONST_CARACTER:
-                    switch (instrucao.getTipo()){
-                        case SAIDA_DE_DADOS:
-                            funcoesEsperadas.clear();
-                            funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
-                            funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
-                            add = true;
-                            break;
-                        case ATRIBUICAO:
-                            funcoesEsperadas.clear();
-                            funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
-                            add = true;
-                            break;
-                        case OPERACAO_LOGICA:
-                            funcoesEsperadas.clear();
-                            funcoesEsperadas.add(FuncaoToken.OP_REL_MAIOR);
-                            funcoesEsperadas.add(FuncaoToken.OP_REL_MAIOR_IGUAL);
-                            funcoesEsperadas.add(FuncaoToken.OP_REL_MENOR);
-                            funcoesEsperadas.add(FuncaoToken.OP_REL_MENOR_IGUAL);
-                            funcoesEsperadas.add(FuncaoToken.OP_REL_IGUAL);
-                            funcoesEsperadas.add(FuncaoToken.OP_REL_DIFERENTE);
-                            funcoesEsperadas.add(FuncaoToken.OP_LOG_E);
-                            funcoesEsperadas.add(FuncaoToken.OP_LOG_OU);
-                            funcoesEsperadas.add(FuncaoToken.RES_COND_ENTAO);
-                            add = true;
-                    }
-                    break;
-                    
-                case _INDEF_ALFABETICO:
-                case _INDEF_ALFANUMERICO:
-                    switch (instrucao.getTipo()){
-                        case DECLARACAO_VARIAVEL:
-                            char inicial = token.getPalavra().charAt(0);
-                            if (inicial >= '0' && inicial <= '9'){
-                                erros.add(new ErroSintatico(token, "Identificador de variável não pode começar com número"));
-                                erro = true;
-                                add = false;
-                                go = false;
-                            } else {
-                                variaveis.add(token.getPalavra());
-                                token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
-
-                                funcoesEsperadas.clear();
-                                funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
-                                funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
-                                add = true;
-                            }
-                            break;
-                        case ENTRADA_DE_DADOS:
-                        case SAIDA_DE_DADOS:
-                            /*if (!variaveis.contains(token.getPalavra())){
-                                erros.add(new ErroSintatico(token, "Variável \"" + token.getPalavra() + "\" não declarada"));
-                                erro = true;
-                                add = false;
-                                go = false;
-                            } else {*/
-                                token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
-
-                                funcoesEsperadas.clear();
-                                funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
-                                funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
-                                add = true;
-                            //}
-                            break;
-                        case ATRIBUICAO:
-                        case OPERACAO_ARITMETICA:
-                            /*if (!variaveis.contains(token.getPalavra())){
-                                erros.add(new ErroSintatico(token, "Variável \"" + token.getPalavra() + "\" não declarada"));
-                                erro = true;
-                                add = false;
-                                go = false;
-                            } else {*/
-                                token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
-
-                                funcoesEsperadas.clear();
-                                funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
-                                funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
-                                funcoesEsperadas.add(FuncaoToken.OP_MAT_SOMA);
-                                funcoesEsperadas.add(FuncaoToken.OP_MAT_SUBTRACAO);
-                                funcoesEsperadas.add(FuncaoToken.OP_MAT_MULTIPLICACAO);
-                                funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_INTEIRA);
-                                funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_REAL);
-                                funcoesEsperadas.add(FuncaoToken.OP_MAT_MOD);
-                                add = true;
-                            //}
-                            break;
-                        case CHAMADA_FUNCAO:
-                            /*if (!variaveis.contains(token.getPalavra())){
-                                erros.add(new ErroSintatico(token, "Variável \"" + token.getPalavra() + "\" não declarada"));
-                                erro = true;
-                                add = false;
-                                go = false;
-                            } else {*/
-                                token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
-
-                                funcoesEsperadas.clear();
-                                funcoesEsperadas.add(FuncaoToken.OP_MAT_SOMA);
-                                funcoesEsperadas.add(FuncaoToken.OP_MAT_SUBTRACAO);
-                                funcoesEsperadas.add(FuncaoToken.OP_MAT_MULTIPLICACAO);
-                                funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_INTEIRA);
-                                funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_REAL);
-                                funcoesEsperadas.add(FuncaoToken.OP_MAT_MOD);
-                                funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
-                                funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
-                                funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
-                                add = true;
-                            //}
-                            break;
-                        case OPERACAO_LOGICA:
-                            /*if (!variaveis.contains(token.getPalavra())){
-                                erros.add(new ErroSintatico(token, "Variável \"" + token.getPalavra() + "\" não declarada"));
-                                erro = true;
-                                add = false;
-                                go = false;
-                            } else {*/
-                                token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
-
-                                funcoesEsperadas.clear();
-                                funcoesEsperadas.add(FuncaoToken.OP_REL_MAIOR);
-                                funcoesEsperadas.add(FuncaoToken.OP_REL_MAIOR_IGUAL);
-                                funcoesEsperadas.add(FuncaoToken.OP_REL_MENOR);
-                                funcoesEsperadas.add(FuncaoToken.OP_REL_MENOR_IGUAL);
-                                funcoesEsperadas.add(FuncaoToken.OP_REL_IGUAL);
-                                funcoesEsperadas.add(FuncaoToken.OP_REL_DIFERENTE);
-                                funcoesEsperadas.add(FuncaoToken.OP_LOG_E);
-                                funcoesEsperadas.add(FuncaoToken.OP_LOG_OU);
-                                funcoesEsperadas.add(FuncaoToken.OP_MAT_SOMA);
-                                funcoesEsperadas.add(FuncaoToken.OP_MAT_SUBTRACAO);
-                                funcoesEsperadas.add(FuncaoToken.OP_MAT_MULTIPLICACAO);
-                                funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_INTEIRA);
-                                funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_REAL);
-                                funcoesEsperadas.add(FuncaoToken.OP_MAT_MOD);
-                                funcoesEsperadas.add(FuncaoToken.RES_COND_ENTAO);
-                                add = true;
-                            //}
-                            break;
-                            
-                        case _INDEFINIDO:
-                        default:
-                            /*if (!variaveis.contains(token.getPalavra())){
-                                erros.add(new ErroSintatico(token, "Comando, variável ou função não identificada: " + token.getPalavra()));
-                                
-                                erro = true;
-                                add = false;
-                                go = false;
-                            } else {*/
-                                token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
-
-                                funcoesEsperadas.clear();
-                                funcoesEsperadas.add(FuncaoToken.OP_ATRIBUICAO);
-                                add = true;
-                            //}
-                            break;
-                    }
-                    break;
-                    
-                case _INDEF_NUMERICO:
-                    funcoesEsperadas.clear();
-                            
-                    Token lastToken = instrucao.getTokenAt(instrucao.getNumTokens() - 1);
-                    if (lastToken.getFuncaoToken() == FuncaoToken.CONST_REAL){
-                        lastToken.atualizaPalavra(token.getPalavra());
-                        instrucao.setTokenAt(instrucao.getNumTokens() - 1, lastToken);
-                        add = false;
-                    } else {
-                        token.setFuncaoToken(FuncaoToken.CONST_INTEIRA);
-                        add = true;
-                        funcoesEsperadas.add(FuncaoToken.DELIM_PONTO);
-                    }
-                    
-                    switch (instrucao.getTipo()){
-                        case ATRIBUICAO:
-                        case OPERACAO_ARITMETICA:
-                            funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
-                            funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
-                            funcoesEsperadas.add(FuncaoToken.OP_MAT_SOMA);
-                            funcoesEsperadas.add(FuncaoToken.OP_MAT_SUBTRACAO);
-                            funcoesEsperadas.add(FuncaoToken.OP_MAT_MULTIPLICACAO);
-                            funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_INTEIRA);
-                            funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_REAL);
-                            funcoesEsperadas.add(FuncaoToken.OP_MAT_MOD);
-                            break;
-                        case CHAMADA_FUNCAO:
-                            funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
-                            funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
-                            break;
-                        case OPERACAO_LOGICA:
-                            funcoesEsperadas.add(FuncaoToken.OP_REL_MAIOR);
-                            funcoesEsperadas.add(FuncaoToken.OP_REL_MAIOR_IGUAL);
-                            funcoesEsperadas.add(FuncaoToken.OP_REL_MENOR);
-                            funcoesEsperadas.add(FuncaoToken.OP_REL_MENOR_IGUAL);
-                            funcoesEsperadas.add(FuncaoToken.OP_REL_IGUAL);
-                            funcoesEsperadas.add(FuncaoToken.OP_REL_DIFERENTE);
-                            funcoesEsperadas.add(FuncaoToken.OP_LOG_E);
-                            funcoesEsperadas.add(FuncaoToken.OP_LOG_OU);
-                            funcoesEsperadas.add(FuncaoToken.RES_COND_ENTAO);
-                            add = true;
-                            break;
-                    }
-                    break;
-                    
-                case DELIM_PONTO:
-                    switch (instrucao.getTipo()){
-                        case CHAMADA_FUNCAO:
-                        case ATRIBUICAO:
-                        case OPERACAO_ARITMETICA:
-                        case OPERACAO_LOGICA:
-                            lastToken = instrucao.getTokenAt(instrucao.getNumTokens() - 1);
-                            lastToken.atualizaPalavra(token.getPalavra());
-                            lastToken.setFuncaoToken(FuncaoToken.CONST_REAL);
-                            instrucao.setTokenAt(instrucao.getNumTokens() - 1, lastToken);
-                            
-                            funcoesEsperadas.clear();
-                            funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
-                            add = false;
-                            break;
-                    }
-                    break;
-                
-                case DELIM_PONTO_VIRGULA:
-                    funcoesEsperadas.clear();
-                    funcoesEsperadas.add(FuncaoToken.RES_TIPO_CARACTER);
-                    funcoesEsperadas.add(FuncaoToken.RES_TIPO_INTEIRO);
-                    funcoesEsperadas.add(FuncaoToken.RES_TIPO_REAL);
-                    funcoesEsperadas.add(FuncaoToken.IDENT_NOME_VARIAVEL);
-                    funcoesEsperadas.add(FuncaoToken.RES_BLOCO_FIM);
-                    funcoesEsperadas.add(FuncaoToken.LIB_IO_LEIA);
-                    funcoesEsperadas.add(FuncaoToken.LIB_IO_ESCREVA);
-                    funcoesEsperadas.add(FuncaoToken.RES_COND_SE);
-                    funcoesEsperadas.add(FuncaoToken.RES_COND_SENAO);
-                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
-                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
-                    
-                    add = false;
-                    go = false;
-                    break;
-                    
-                case _INVALIDO:
-                default:
-                    add = false;
-                    go = false;
-                    break;
-            }
-            
-            instrucao.atualizaTexto(token.getPalavra());
-            if (add){
-                instrucao.addToken(token);
-            }
+        if (!existeProxima()){
+            return null;
         }
         
-        while (!parentesesAbre.isEmpty() && !parentesesFecha.isEmpty()){
-            parentesesAbre.pop();
-            parentesesFecha.pop();
+        Token token = tokens.get(pos);
+        if (!funcaoValida(token)){
+            return null;
         }
         
-        while (!parentesesAbre.isEmpty()){
-            erros.add(new ErroSintatico(parentesesAbre.pop(), "Parêntese não fechado"));
-            erro = true;
-        }
-        
-        while (!parentesesFecha.isEmpty()){
-            erros.add(new ErroSintatico(parentesesFecha.pop(), "Parêntese fechado sem necessidade"));
-            erro = true;
-        }
-        
-        if (bloco == null){
-            if (erro){
-                instrucao.setTipo(TipoInstrucao._INVALIDO);
-            }
+        if (instrucao != null){
+            erros.add(new ErroSintatico(
+                    token, "Instrução anterior não encerrada corretamente"));
             return instrucao;
-        } else {
-            return bloco;
         }
+        
+        switch(token.getFuncaoToken()){
+            //Inicializa uma instrução tipo bloco
+            case RES_BLOCO_INICIO:
+                instrucao = instrucaoBloco();
+                funcoesPorInstrucao(tipoUltimaInstrucao);
+                break;
+
+            // Ao finalizar o bloco
+            case RES_BLOCO_FIM:
+                instrucao = null;
+                fimAtingido = true;
+                funcoesEsperadas.clear();
+                break;
+
+            //Inicializa instrução de declaração de variáveis
+            case RES_TIPO_CARACTER:
+            case RES_TIPO_INTEIRO:
+            case RES_TIPO_REAL:
+                instrucao = instrucaoDeclaracaoVariaveis();
+                funcoesPorInstrucao(tipoUltimaInstrucao);
+                break;
+        
+            //Inicializa instrução de entrada de dados
+            case LIB_IO_LEIA:
+                instrucao = instrucaoEntradaDados();
+                funcoesPorInstrucao(tipoUltimaInstrucao);
+                break;
+                
+            //Inicializa instrução de saída de dados
+            case LIB_IO_ESCREVA:
+                instrucao = instrucaoSaidaDados();
+                funcoesPorInstrucao(tipoUltimaInstrucao);
+                break;
+                
+            //Define Chamada de Rotina ou Atribuição.
+            case _INDEF_ALFABETICO:
+            case _INDEF_ALFANUMERICO:
+                if (variaveis.containsKey(token.getPalavra())){
+                    //Inicializa instrução de atribuição
+                    token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
+                    tokens.set(pos, token);
+                    
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.IDENT_NOME_VARIAVEL);
+                    
+                    instrucao = instrucaoAtribuicao();
+                    funcoesPorInstrucao(tipoUltimaInstrucao);
+                    break;
+                } else {
+                    erros.add(new ErroSintatico(token, "Essa variável não foi declarada"));
+                    break;
+                }
+                
+            //Define estrutura Condicional
+            case RES_COND_SE:
+                instrucao = instrucaoCondicional();
+                funcoesPorInstrucao(tipoUltimaInstrucao);
+                break;
+        }
+        
+        return instrucao;
     }
     
-    public LinkedList<Instrucao> getAllExpressions(){
+    public LinkedList<Instrucao> listaExpressoes(){
         LinkedList<Instrucao> lista = new LinkedList<>();
-        while (hasNext()){
-            lista.add(parseExpression());
+        while (existeProxima()){
+            lista.add(proxima());
         }
         return lista;
     }
@@ -722,10 +164,6 @@ public class Parser {
         return msg.toString();
     }
     
-    public boolean hasErroParsing(){
-        return erro;
-    }
-    
     public Token getTokenUltimoErro(){
         return erros.isEmpty() ? null : erros.get(erros.size() - 1).token;
     }
@@ -734,8 +172,8 @@ public class Parser {
         return erros.isEmpty() ? "" : erros.get(erros.size() - 1).erro;
     }
     
-    public ArrayList<Token> getTokensErros(){
-        ArrayList<Token> errToken = new ArrayList<>();
+    public List<Token> getTokensErros(){
+        LinkedList<Token> errToken = new LinkedList<>();
         for (ErroSintatico err : erros){
             errToken.add(err.token);
         }
@@ -755,4 +193,377 @@ public class Parser {
         }
     }
         
+    private void funcoesPorInstrucao(TipoInstrucao instrucao){
+        funcoesEsperadas.clear();
+        switch (instrucao) {
+            // Indefinido, nesse contexto, é a primeira instrução do algoritmo.
+            case _INDEFINIDO:
+                // Caso modularizado:
+                /* 
+                // Espera por declaração de função
+                funcoesEsperadas.add(FuncaoToken.RES_MOD_FUNCAO);
+                // Espera por declaração de rotina
+                funcoesEsperadas.add(FuncaoToken.RES_MOD_ROTINA);
+                */
+
+                // Caso não modularizado:
+                funcoesEsperadas.add(FuncaoToken.RES_BLOCO_INICIO);
+                break;
+                
+            // Bloco de instruções.
+            case BLOCO:
+                //Bloco interno (espero que não seja usado...)
+                funcoesEsperadas.add(FuncaoToken.RES_BLOCO_INICIO);
+                //Declaração de variáveis
+                funcoesEsperadas.add(FuncaoToken.RES_TIPO_INTEIRO);
+                funcoesEsperadas.add(FuncaoToken.RES_TIPO_REAL);
+                funcoesEsperadas.add(FuncaoToken.RES_TIPO_CARACTER);
+                //Entrada/Saída de dados
+                funcoesEsperadas.add(FuncaoToken.LIB_IO_LEIA);
+                funcoesEsperadas.add(FuncaoToken.LIB_IO_ESCREVA);
+                //Atribuição ou Chamada de rotina
+                funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                //Condicional
+                funcoesEsperadas.add(FuncaoToken.RES_COND_SE);
+                //Repetições
+                funcoesEsperadas.add(FuncaoToken.RES_REP_PARA);
+                funcoesEsperadas.add(FuncaoToken.RES_REP_ENQUANTO);
+                funcoesEsperadas.add(FuncaoToken.RES_REP_FACA);
+                break;
+            
+            // Estrutura condicional
+            case CONDICIONAL:
+                //Bloco de instruções
+                funcoesEsperadas.add(FuncaoToken.RES_BLOCO_INICIO);
+                
+                //Instruções únicas
+                //Entrada/Saída de dados
+                funcoesEsperadas.add(FuncaoToken.LIB_IO_LEIA);
+                funcoesEsperadas.add(FuncaoToken.LIB_IO_ESCREVA);
+                //Atribuição ou Chamada de rotina
+                funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                //Condicional encadeada
+                funcoesEsperadas.add(FuncaoToken.RES_COND_SE);
+                //Repetições
+                funcoesEsperadas.add(FuncaoToken.RES_REP_PARA);
+                funcoesEsperadas.add(FuncaoToken.RES_REP_ENQUANTO);
+                funcoesEsperadas.add(FuncaoToken.RES_REP_FACA);
+                
+            default:
+                break;
+        }
+    }
+    
+    private Bloco instrucaoBloco(){
+        Token token = tokens.get(pos++);
+        Bloco bloco = new Bloco();
+        bloco.setInicio(token);
+
+        Parser parserInterno = new Parser(tokens);
+        parserInterno.variaveis = variaveis;
+        parserInterno.pos = pos;
+        parserInterno.tipoUltimaInstrucao = bloco.getTipo();
+        parserInterno.funcoesPorInstrucao(bloco.getTipo());
+
+        while (parserInterno.existeProxima() && !parserInterno.fimAtingido){
+            Instrucao proxima = parserInterno.proxima();
+            if (!proxima.instrucaoValida()){
+                erros.add(parserInterno.erros.getLast());
+            } else {
+                bloco.addInstrucao(proxima);
+            }
+        }
+
+        if (!parserInterno.existeProxima() && !parserInterno.fimAtingido){
+            erros.add(new ErroSintatico(
+                    ((Bloco)bloco).getInicio(),
+                    "Bloco não fechado corretamente"));
+        }
+
+        pos = parserInterno.pos;
+        variaveis = parserInterno.variaveis;
+        token = tokens.get(pos++);
+
+        bloco.setFim(token);
+        return bloco;
+    }
+    
+    private DeclaracaoVariaveis instrucaoDeclaracaoVariaveis(){
+        DeclaracaoVariaveis declaracaoVariaveis = new DeclaracaoVariaveis();
+        
+        boolean go = true;
+        while (go && pos < tokens.size()){
+            Token token = tokens.get(pos++);
+            if (!funcaoValida(token)){
+                declaracaoVariaveis.invalidaInstrucao();
+                break;
+            }
+            
+            switch (token.getFuncaoToken()){
+                case RES_TIPO_CARACTER:
+                case RES_TIPO_INTEIRO:
+                case RES_TIPO_REAL:
+                //case RES_TIPO_LOGICO:
+                    declaracaoVariaveis.setTipoVariavel(token);
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.DELIM_DOIS_PONTOS);
+                    break;
+                
+                case DELIM_DOIS_PONTOS:
+                case DELIM_VIRGULA:
+                    declaracaoVariaveis.addToken(token);
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                    break;
+                            
+                case _INDEF_ALFABETICO:
+                case _INDEF_ALFANUMERICO:
+                    char inicial = token.getPalavra().charAt(0);
+                    if (Character.isDigit(inicial)){
+                        erros.add(new ErroSintatico(token, "Identificador de variável não pode começar com número"));
+                        go = false;
+                    } else {
+                        token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
+                        if (variaveis.containsKey(token.getPalavra())){
+                            erros.add(new ErroSintatico(token, "Outra variável já foi declarada com esse nome"));
+                            go = false;
+                        } else {
+                            declaracaoVariaveis.addNomeVariavel(token);
+                            
+                            funcoesEsperadas.clear();
+                            funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
+                            funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
+                        }
+                    }
+                    break;
+                            
+                case DELIM_PONTO_VIRGULA:
+                    for (Variavel var : declaracaoVariaveis.getVariaveis() ){
+                        variaveis.put(var.getNome(), var.getTipo());
+                    }
+                    declaracaoVariaveis.addToken(token);
+                    go = false;
+                    break;
+
+            }
+                    
+        }
+        
+        return declaracaoVariaveis;
+    }
+    
+    private EntradaDados instrucaoEntradaDados(){
+        EntradaDados entradaDados = new EntradaDados();
+        
+        boolean go = true;
+        while (go && pos < tokens.size()){
+            Token token = tokens.get(pos++);
+            if (!funcaoValida(token)){
+                entradaDados.invalidaInstrucao();
+                break;
+            }
+            
+            switch (token.getFuncaoToken()){
+                case LIB_IO_LEIA:
+                    entradaDados.setTokenNome(token);
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
+                    break;
+                    
+                case DELIM_PARENTESES_ABRE:
+                case DELIM_VIRGULA:
+                    entradaDados.addToken(token);
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                    break;
+                            
+                case _INDEF_ALFABETICO:
+                case _INDEF_ALFANUMERICO:
+                    if (variaveis.containsKey(token.getPalavra())){
+                        token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
+                        entradaDados.addVariavel(token);
+                        funcoesEsperadas.clear();
+                        funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
+                        funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
+                    } else {
+                        erros.add(new ErroSintatico(token, "Essa variável não foi declarada"));
+                        go = false;
+                    }
+                    break;
+                    
+                case DELIM_PARENTESES_FECHA:
+                    entradaDados.addToken(token);
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
+                            
+                case DELIM_PONTO_VIRGULA:
+                    entradaDados.addToken(token);
+                    go = false;
+                    funcoesEsperadas.clear();
+                    break;
+            }
+                    
+        }
+        
+        return entradaDados;
+    }
+    
+    private SaidaDados instrucaoSaidaDados(){
+        SaidaDados saidaDados = new SaidaDados();
+        
+        boolean go = true;
+        while (go && pos < tokens.size()){
+            Token token = tokens.get(pos++);
+            if (!funcaoValida(token)){
+                break;
+            }
+            
+            switch (token.getFuncaoToken()){
+                case LIB_IO_ESCREVA:
+                    saidaDados.setTokenNome(token);
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
+                    break;
+                    
+                case DELIM_PARENTESES_ABRE:
+                case DELIM_VIRGULA:
+                    saidaDados.addToken(token);
+                    funcoesEsperadas.clear();
+                    
+                    //deve esperar expressão
+                    
+                    break;
+                            
+                case DELIM_PARENTESES_FECHA:
+                    saidaDados.addToken(token);
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
+                            
+                case DELIM_PONTO_VIRGULA:
+                    saidaDados.addToken(token);
+                    go = false;
+                    funcoesEsperadas.clear();
+                    break;
+                    
+                //case Expressão:?
+            }
+                    
+        }
+        
+        return saidaDados;
+    }
+    
+    private Atribuicao instrucaoAtribuicao(){
+        Atribuicao atribuicao = new Atribuicao();
+        
+        boolean go = true;
+        while (go && pos < tokens.size()){
+            Token token = tokens.get(pos++);
+            if (!funcaoValida(token)){
+                break;
+            }
+            
+            switch (token.getFuncaoToken()){
+                case IDENT_NOME_VARIAVEL:
+                    atribuicao.setVariavel(token);
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.OP_ATRIBUICAO);
+                    break;
+                    
+                case OP_ATRIBUICAO:
+                    atribuicao.addToken(token);
+                    funcoesEsperadas.clear();
+                    
+                    //deve esperar expressão
+                    
+                    break;
+                    
+                //case Expressão:?
+                    
+                case DELIM_PONTO_VIRGULA:
+                    atribuicao.addToken(token);
+                    go = false;
+                    funcoesEsperadas.clear();
+                    break;
+            }
+        }
+        return atribuicao;
+    }
+    
+    private Condicional instrucaoCondicional(){
+        Condicional condicional = new Condicional();
+        
+        boolean go = true;
+        while (go && pos < tokens.size()){
+            Token token = tokens.get(pos++);
+            if (!funcaoValida(token)){
+                break;
+            }
+            
+            switch (token.getFuncaoToken()){
+                case RES_COND_SE:
+                
+                    condicional.setTokenSe(token);
+                    funcoesEsperadas.clear();
+                    
+                    // deve esperar expressão
+                    
+                    break;
+                    
+                case RES_COND_ENTAO:
+                    condicional.addToken(token);
+                    funcoesPorInstrucao(condicional.getTipo());
+                    
+                    Parser parserInterno = new Parser(tokens);
+                    parserInterno.variaveis = variaveis;
+                    parserInterno.pos = pos;
+                    parserInterno.tipoUltimaInstrucao = condicional.getTipo();
+                    parserInterno.funcoesPorInstrucao(condicional.getTipo());
+                    
+                    Instrucao instrucaoInterna = parserInterno.proxima();
+                    if (!instrucaoInterna.instrucaoValida()){
+                        erros.add(parserInterno.erros.getLast());
+                    } else {
+                        condicional.setInstrucaoSe(instrucaoInterna);
+                    }
+                    
+                    pos = parserInterno.pos;
+                    variaveis = parserInterno.variaveis;
+                    go = false;
+                    funcoesEsperadas.clear();
+                    break;
+                    
+                //case Expressão:?
+                
+            }
+        }
+        
+        if (go && pos < tokens.size()){
+            Token token = tokens.get(pos+1);
+            if (token.getFuncaoToken() == FuncaoToken.RES_COND_SENAO){
+                condicional.setTokenSenao(token);
+                funcoesPorInstrucao(condicional.getTipo());
+
+                Parser parserInterno = new Parser(tokens);
+                parserInterno.variaveis = variaveis;
+                parserInterno.pos = pos;
+                parserInterno.tipoUltimaInstrucao = condicional.getTipo();
+                parserInterno.funcoesPorInstrucao(condicional.getTipo());
+
+                Instrucao instrucaoInterna = parserInterno.proxima();
+                if (!instrucaoInterna.instrucaoValida()){
+                    erros.add(parserInterno.erros.getLast());
+                } else {
+                    condicional.setInstrucaoSenao(instrucaoInterna);
+                }
+            }
+        }
+        
+        return condicional;
+    }
+    
 }
