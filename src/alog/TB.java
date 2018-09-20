@@ -12,12 +12,7 @@ import alog.token.Token;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import javax.sound.midi.SysexMessage;
 
 /**
  *
@@ -26,10 +21,12 @@ import javax.sound.midi.SysexMessage;
 public class TB {
 
     public static void main(String[] args) throws FileNotFoundException, IOException {
-        String path = String.format("%s%s%s",
+        String path = String.format("%s%s%s%s%s",
                 System.getProperty("user.dir"),
                 System.getProperty("file.separator"),
-                "test_parser01.txt"
+                "RevisaoParser",
+                System.getProperty("file.separator"),
+                "RunParser01.txt"
         );
         FileReader fr = new FileReader(path);
         
