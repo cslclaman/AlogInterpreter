@@ -199,6 +199,21 @@ public enum TipoInstrucao {
     REPETICAO_FACA ("Estrutura Repetitiva Faça-Enquanto"),
     
     /**
+     * Instrução de Estrutura Repetitiva "Repita-Até" (teste no final, condição negativa).
+     * Deve conter (obrigatoriamente):
+     * <ul>
+     * <li>Token Repita ({@link FuncaoToken#RES_REP_REPITA})</li>
+     * <li>Instrução (ou {@link Bloco}) a ser executada enquanto a
+     * condição for falsa</li>
+     * <li>Condição booleana a testar ({@link TipoInstrucao#EXPRESSAO})</li>
+     * </ul>
+     * Tokens opcionais (para fins de exibição, não usados pelo interpretador): 
+     *      {@link FuncaoToken#RES_REP_ATE} (antes da expressão de condição) e 
+     *      {@link FuncaoToken#DELIM_PONTO_VIRGULA} (após a expressão de condição)
+     */
+    REPETICAO_REPITA ("Estrutura Repetitiva Repita-Até"),
+    
+    /**
      * Chamada de rotina declarada anteriormente.
      * Deve conter (obrigatoriamente):
      * <ul>

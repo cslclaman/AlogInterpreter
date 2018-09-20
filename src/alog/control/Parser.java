@@ -1,5 +1,6 @@
 package alog.control;
 
+import alog.analise.Erro;
 import alog.instrucao.*;
 import alog.token.FuncaoToken;
 import alog.instrucao.TipoInstrucao;
@@ -16,35 +17,19 @@ import java.util.Map;
  * @author Caique
  */
 public class Parser {
-    private class ErroSintatico {
-        Token token;
-        String erro;
-
-        public ErroSintatico(Token token, String erro) {
-            this.token = token;
-            this.erro = erro;
-        }
-        
-        @Override
-        public String toString(){
-            return String.format(
-                    "Linha %d, Coluna %d: %s",
-                    token.getLinha() + 1, token.getColuna() + 1, erro);
-        }
-    }
-    
     private List<Token> tokens;
     private Map<String, TipoVariavel> variaveis;
     
     private LinkedList<FuncaoToken> funcoesEsperadas;
-    private LinkedList<ErroSintatico> erros;
+    private LinkedList<Erro> erros;
     private TipoInstrucao tipoUltimaInstrucao;
     private int pos;
+    private int size;
     private boolean fimAtingido;
     
     public Parser (List<Token> tokens){
         this.tokens = tokens;
-        
+        this.size = tokens.size();
         variaveis = new HashMap<>();
         erros = new LinkedList<>();
         funcoesEsperadas = new LinkedList<>();
@@ -53,42 +38,45 @@ public class Parser {
         pos = 0;
         fimAtingido = false;
         
-        funcoesPorInstrucao(tipoUltimaInstrucao);
+        funcoesEsperadas = funcoesAlgoritmo();
     }
     
     public boolean existeProxima(){
-        return pos < tokens.size();
+        return pos < size;
     }
     
     public Instrucao proxima(){
-        Instrucao instrucao = null;
+        Instrucao instrucao = new InstrucaoInvalida();
         
         if (!existeProxima()){
-            return null;
+            return instrucao;
         }
         
         Token token = tokens.get(pos);
         if (!funcaoValida(token)){
-            return null;
-        }
-        
-        if (instrucao != null){
-            erros.add(new ErroSintatico(
-                    token, "Instrução anterior não encerrada corretamente"));
             return instrucao;
         }
+        
+        funcoesEsperadas.clear();
         
         switch(token.getFuncaoToken()){
             //Inicializa uma instrução tipo bloco
             case RES_BLOCO_INICIO:
                 instrucao = instrucaoBloco();
-                funcoesPorInstrucao(tipoUltimaInstrucao);
+                
+                switch (tipoUltimaInstrucao){
+                    case _INDEFINIDO:
+                        //funcoesEsperadas = funcoesAlgoritmo();
+                        break;
+                    case BLOCO:
+                        funcoesEsperadas = funcoesBloco();
+                        break;
+                }
                 break;
 
             // Ao finalizar o bloco
             case RES_BLOCO_FIM:
                 fimAtingido = true;
-                funcoesEsperadas.clear();
                 break;
 
             //Inicializa instrução de declaração de variáveis
@@ -96,19 +84,19 @@ public class Parser {
             case RES_TIPO_INTEIRO:
             case RES_TIPO_REAL:
                 instrucao = instrucaoDeclaracaoVariaveis();
-                funcoesPorInstrucao(tipoUltimaInstrucao);
+                funcoesEsperadas = funcoesBloco();
                 break;
         
             //Inicializa instrução de entrada de dados
             case LIB_IO_LEIA:
                 instrucao = instrucaoEntradaDados();
-                funcoesPorInstrucao(tipoUltimaInstrucao);
+                funcoesEsperadas = funcoesBloco();
                 break;
                 
             //Inicializa instrução de saída de dados
             case LIB_IO_ESCREVA:
                 instrucao = instrucaoSaidaDados();
-                funcoesPorInstrucao(tipoUltimaInstrucao);
+                funcoesEsperadas = funcoesBloco();
                 break;
                 
             //Define Chamada de Rotina ou Atribuição.
@@ -123,17 +111,16 @@ public class Parser {
                     funcoesEsperadas.add(FuncaoToken.IDENT_NOME_VARIAVEL);
                     
                     instrucao = instrucaoAtribuicao();
-                    funcoesPorInstrucao(tipoUltimaInstrucao);
-                    break;
+                    funcoesEsperadas = funcoesBloco();
                 } else {
-                    erros.add(new ErroSintatico(token, "Essa variável não foi declarada"));
-                    break;
+                    erros.add(new Erro(Erro.ALERTA, token, "Essa variável não foi declarada"));
                 }
+                break;
                 
             //Define estrutura Condicional
             case RES_COND_SE:
                 instrucao = instrucaoCondicional();
-                funcoesPorInstrucao(tipoUltimaInstrucao);
+                funcoesEsperadas = funcoesBloco();
                 break;
         }
         
@@ -152,9 +139,9 @@ public class Parser {
         return erros.size();
     }
     
-    public String getStringErros(){
+    public String imprimeErros(){
         StringBuilder msg = new StringBuilder();
-        for (ErroSintatico err : erros){
+        for (Erro err : erros){
             if (msg.length() > 0){
                 msg.append("\n");
             }
@@ -164,17 +151,17 @@ public class Parser {
     }
     
     public Token getTokenUltimoErro(){
-        return erros.isEmpty() ? null : erros.get(erros.size() - 1).token;
+        return erros.isEmpty() ? null : erros.get(erros.size() - 1).getToken();
     }
     
     public String getMsgUltimoErro(){
-        return erros.isEmpty() ? "" : erros.get(erros.size() - 1).erro;
+        return erros.isEmpty() ? "" : erros.get(erros.size() - 1).getErro();
     }
     
     public List<Token> getTokensErros(){
         LinkedList<Token> errToken = new LinkedList<>();
-        for (ErroSintatico err : erros){
-            errToken.add(err.token);
+        for (Erro err : erros){
+            errToken.add(err.getToken());
         }
         return errToken;
     }
@@ -185,74 +172,93 @@ public class Parser {
             for (FuncaoToken ft: funcoesEsperadas){
                 msgErro += "\n - " + ft;
             }
-            erros.add(new ErroSintatico(token, msgErro));
+            erros.add(new Erro(Erro.ERRO, token, msgErro));
             return false;
         } else {
             return true;
         }
     }
         
-    private void funcoesPorInstrucao(TipoInstrucao instrucao){
-        funcoesEsperadas.clear();
-        switch (instrucao) {
-            // Indefinido, nesse contexto, é a primeira instrução do algoritmo.
-            case _INDEFINIDO:
-                // Caso modularizado:
-                /* 
-                // Espera por declaração de função
-                funcoesEsperadas.add(FuncaoToken.RES_MOD_FUNCAO);
-                // Espera por declaração de rotina
-                funcoesEsperadas.add(FuncaoToken.RES_MOD_ROTINA);
-                */
+    private LinkedList<FuncaoToken> funcoesAlgoritmo(){
+        LinkedList<FuncaoToken> funcoes = new LinkedList<>();
+        /*
+        // Espera por declaração de função
+        funcoes.add(FuncaoToken.RES_MOD_FUNCAO);
+        // Espera por declaração de rotina
+        funcoes.add(FuncaoToken.RES_MOD_ROTINA);
+        // Espera por declaração de nome de algoritmo
+        funcoes.add(FuncaoToken.RES_ALGORITMO);
+        */
+        // Espera por início de bloco caso não modularizado
+        funcoes.add(FuncaoToken.RES_BLOCO_INICIO);
+        return funcoes;
+    }
+    
+    private LinkedList<FuncaoToken> funcoesBloco(){
+        LinkedList<FuncaoToken> funcoes = new LinkedList<>();
+        //Bloco interno (espero que não seja usado...)
+        funcoes.add(FuncaoToken.RES_BLOCO_INICIO);
+        //Declaração de variáveis
+        funcoes.add(FuncaoToken.RES_TIPO_INTEIRO);
+        funcoes.add(FuncaoToken.RES_TIPO_REAL);
+        funcoes.add(FuncaoToken.RES_TIPO_CARACTER);
+        //Entrada/Saída de dados
+        funcoes.add(FuncaoToken.LIB_IO_LEIA);
+        funcoes.add(FuncaoToken.LIB_IO_ESCREVA);
+        //Atribuição ou Chamada de rotina
+        funcoes.add(FuncaoToken._INDEF_ALFABETICO);
+        funcoes.add(FuncaoToken._INDEF_ALFANUMERICO);
+        //Condicional
+        funcoes.add(FuncaoToken.RES_COND_SE);
+        //Repetições
+        funcoes.add(FuncaoToken.RES_REP_PARA);
+        funcoes.add(FuncaoToken.RES_REP_ENQUANTO);
+        funcoes.add(FuncaoToken.RES_REP_FACA);
+        //Fechamento do bloco
+        funcoes.add(FuncaoToken.RES_BLOCO_FIM);
+        return funcoes;
+    }
+    
+    private LinkedList<FuncaoToken> funcoesCondicional(){
+        LinkedList<FuncaoToken> funcoes = new LinkedList<>();
+        //Bloco de instruções
+        funcoes.add(FuncaoToken.RES_BLOCO_INICIO);
 
-                // Caso não modularizado:
-                funcoesEsperadas.add(FuncaoToken.RES_BLOCO_INICIO);
-                break;
-                
-            // Bloco de instruções.
-            case BLOCO:
-                //Bloco interno (espero que não seja usado...)
-                funcoesEsperadas.add(FuncaoToken.RES_BLOCO_INICIO);
-                //Declaração de variáveis
-                funcoesEsperadas.add(FuncaoToken.RES_TIPO_INTEIRO);
-                funcoesEsperadas.add(FuncaoToken.RES_TIPO_REAL);
-                funcoesEsperadas.add(FuncaoToken.RES_TIPO_CARACTER);
-                //Entrada/Saída de dados
-                funcoesEsperadas.add(FuncaoToken.LIB_IO_LEIA);
-                funcoesEsperadas.add(FuncaoToken.LIB_IO_ESCREVA);
-                //Atribuição ou Chamada de rotina
-                funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
-                funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
-                //Condicional
-                funcoesEsperadas.add(FuncaoToken.RES_COND_SE);
-                //Repetições
-                funcoesEsperadas.add(FuncaoToken.RES_REP_PARA);
-                funcoesEsperadas.add(FuncaoToken.RES_REP_ENQUANTO);
-                funcoesEsperadas.add(FuncaoToken.RES_REP_FACA);
-                break;
-            
-            // Estrutura condicional
-            case CONDICIONAL:
-                //Bloco de instruções
-                funcoesEsperadas.add(FuncaoToken.RES_BLOCO_INICIO);
-                
-                //Instruções únicas
-                //Entrada/Saída de dados
-                funcoesEsperadas.add(FuncaoToken.LIB_IO_LEIA);
-                funcoesEsperadas.add(FuncaoToken.LIB_IO_ESCREVA);
-                //Atribuição ou Chamada de rotina
-                funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
-                funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
-                //Condicional encadeada
-                funcoesEsperadas.add(FuncaoToken.RES_COND_SE);
-                //Repetições
-                funcoesEsperadas.add(FuncaoToken.RES_REP_PARA);
-                funcoesEsperadas.add(FuncaoToken.RES_REP_ENQUANTO);
-                funcoesEsperadas.add(FuncaoToken.RES_REP_FACA);
-                
-            default:
-                break;
-        }
+        //Instruções únicas
+        //Entrada/Saída de dados
+        funcoes.add(FuncaoToken.LIB_IO_LEIA);
+        funcoes.add(FuncaoToken.LIB_IO_ESCREVA);
+        //Atribuição ou Chamada de rotina
+        funcoes.add(FuncaoToken._INDEF_ALFABETICO);
+        funcoes.add(FuncaoToken._INDEF_ALFANUMERICO);
+        //Condicional encadeada
+        funcoes.add(FuncaoToken.RES_COND_SE);
+        //Repetições
+        funcoes.add(FuncaoToken.RES_REP_PARA);
+        funcoes.add(FuncaoToken.RES_REP_ENQUANTO);
+        funcoes.add(FuncaoToken.RES_REP_FACA);
+        return funcoes;
+    }
+    
+    private LinkedList<FuncaoToken> funcoesRepeticao(){
+        LinkedList<FuncaoToken> funcoes = new LinkedList<>();
+        //Bloco de instruções
+        funcoes.add(FuncaoToken.RES_BLOCO_INICIO);
+
+        //Instruções únicas
+        //Entrada/Saída de dados
+        funcoes.add(FuncaoToken.LIB_IO_LEIA);
+        funcoes.add(FuncaoToken.LIB_IO_ESCREVA);
+        //Atribuição ou Chamada de rotina
+        funcoes.add(FuncaoToken._INDEF_ALFABETICO);
+        funcoes.add(FuncaoToken._INDEF_ALFANUMERICO);
+        //Condicional encadeada
+        funcoes.add(FuncaoToken.RES_COND_SE);
+        //Repetições
+        funcoes.add(FuncaoToken.RES_REP_PARA);
+        funcoes.add(FuncaoToken.RES_REP_ENQUANTO);
+        funcoes.add(FuncaoToken.RES_REP_FACA);
+        return funcoes;
     }
     
     private Bloco instrucaoBloco(){
@@ -264,35 +270,31 @@ public class Parser {
         parserInterno.variaveis = variaveis;
         parserInterno.pos = pos;
         parserInterno.tipoUltimaInstrucao = bloco.getTipo();
-        parserInterno.funcoesPorInstrucao(bloco.getTipo());
+        parserInterno.funcoesEsperadas = funcoesBloco();
 
         while (parserInterno.existeProxima() && !parserInterno.fimAtingido){
             Instrucao proxima = parserInterno.proxima();
-            if (proxima != null){
-                if (!proxima.instrucaoValida()){
-                    erros.add(parserInterno.erros.getLast());
-                } else {
-                    bloco.addInstrucao(proxima);
-                }
+            if (proxima.instrucaoValida()){
+                bloco.addInstrucao(proxima);
             } else {
-                erros.add(new ErroSintatico(
-                    tokens.get(parserInterno.pos),
-                    "Instrução inválida - erro ao analisar"));
-                break;
+                erros.add(parserInterno.erros.getLast());
             }
         }
-
-        if (!parserInterno.existeProxima() && !parserInterno.fimAtingido){
-            erros.add(new ErroSintatico(
-                    bloco.getInicio(),
-                    "Bloco não fechado corretamente"));
-        }
-
+        
         pos = parserInterno.pos;
         variaveis = parserInterno.variaveis;
-        token = tokens.get(pos++);
 
-        bloco.setFim(token);
+        if (!existeProxima() && !parserInterno.fimAtingido){
+            erros.add(new Erro(
+                    Erro.ERRO, 
+                    bloco.getInicio(),
+                    "Bloco iniciado não foi fechado corretamente"));
+        } else {
+            token = tokens.get(pos++);
+            if (token.getFuncaoToken() == FuncaoToken.RES_BLOCO_FIM){
+                bloco.setFim(token);
+            } 
+        }
         return bloco;
     }
     
@@ -300,7 +302,7 @@ public class Parser {
         DeclaracaoVariaveis declaracaoVariaveis = new DeclaracaoVariaveis();
         
         boolean go = true;
-        while (go && pos < tokens.size()){
+        while (go && existeProxima()){
             Token token = tokens.get(pos++);
             if (!funcaoValida(token)){
                 declaracaoVariaveis.invalidaInstrucao();
@@ -329,12 +331,12 @@ public class Parser {
                 case _INDEF_ALFANUMERICO:
                     char inicial = token.getPalavra().charAt(0);
                     if (Character.isDigit(inicial)){
-                        erros.add(new ErroSintatico(token, "Identificador de variável não pode começar com número"));
+                        erros.add(new Erro(Erro.ERRO, token, "Identificador de variável não pode começar com número"));
                         go = false;
                     } else {
                         token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
                         if (variaveis.containsKey(token.getPalavra())){
-                            erros.add(new ErroSintatico(token, "Outra variável já foi declarada com esse nome"));
+                            erros.add(new Erro(Erro.ERRO, token, "Outra variável já foi declarada com esse nome"));
                             go = false;
                         } else {
                             declaracaoVariaveis.addNomeVariavel(token);
@@ -365,7 +367,7 @@ public class Parser {
         EntradaDados entradaDados = new EntradaDados();
         
         boolean go = true;
-        while (go && pos < tokens.size()){
+        while (go && existeProxima()){
             Token token = tokens.get(pos++);
             if (!funcaoValida(token)){
                 entradaDados.invalidaInstrucao();
@@ -396,7 +398,7 @@ public class Parser {
                         funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
                         funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
                     } else {
-                        erros.add(new ErroSintatico(token, "Essa variável não foi declarada"));
+                        erros.add(new Erro(Erro.ERRO, token, "Essa variável não foi declarada"));
                         go = false;
                     }
                     break;
@@ -422,7 +424,7 @@ public class Parser {
         SaidaDados saidaDados = new SaidaDados();
         
         boolean go = true;
-        while (go && pos < tokens.size()){
+        while (go && existeProxima()){
             Token token = tokens.get(pos++);
             if (!funcaoValida(token)){
                 break;
@@ -467,7 +469,7 @@ public class Parser {
         Atribuicao atribuicao = new Atribuicao();
         
         boolean go = true;
-        while (go && pos < tokens.size()){
+        while (go && existeProxima()){
             Token token = tokens.get(pos++);
             if (!funcaoValida(token)){
                 break;
@@ -504,7 +506,7 @@ public class Parser {
         Condicional condicional = new Condicional();
         
         boolean go = true;
-        while (go && pos < tokens.size()){
+        while (go && existeProxima()){
             Token token = tokens.get(pos++);
             if (!funcaoValida(token)){
                 break;
@@ -520,15 +522,17 @@ public class Parser {
                     
                     break;
                     
+                //case Expressão:?
+                    
                 case RES_COND_ENTAO:
                     condicional.addToken(token);
-                    funcoesPorInstrucao(condicional.getTipo());
+                    funcoesEsperadas.clear();
                     
                     Parser parserInterno = new Parser(tokens);
                     parserInterno.variaveis = variaveis;
                     parserInterno.pos = pos;
                     parserInterno.tipoUltimaInstrucao = condicional.getTipo();
-                    parserInterno.funcoesPorInstrucao(condicional.getTipo());
+                    parserInterno.funcoesEsperadas = funcoesCondicional();
                     
                     Instrucao instrucaoInterna = parserInterno.proxima();
                     if (!instrucaoInterna.instrucaoValida()){
@@ -540,25 +544,20 @@ public class Parser {
                     pos = parserInterno.pos;
                     variaveis = parserInterno.variaveis;
                     go = false;
-                    funcoesEsperadas.clear();
                     break;
-                    
-                //case Expressão:?
-                
             }
         }
         
-        if (go && pos < tokens.size()){
-            Token token = tokens.get(pos+1);
+        if (existeProxima()){
+            Token token = tokens.get(pos + 1);
             if (token.getFuncaoToken() == FuncaoToken.RES_COND_SENAO){
                 condicional.setTokenSenao(token);
-                funcoesPorInstrucao(condicional.getTipo());
-
+                
                 Parser parserInterno = new Parser(tokens);
                 parserInterno.variaveis = variaveis;
                 parserInterno.pos = pos;
                 parserInterno.tipoUltimaInstrucao = condicional.getTipo();
-                parserInterno.funcoesPorInstrucao(condicional.getTipo());
+                parserInterno.funcoesEsperadas = funcoesCondicional();
 
                 Instrucao instrucaoInterna = parserInterno.proxima();
                 if (!instrucaoInterna.instrucaoValida()){

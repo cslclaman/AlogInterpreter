@@ -59,7 +59,7 @@ public class Principal {
                 while (parser.hasNext()){
                     expressoes.add(parser.parseExpression());
                 }
-                System.err.println(parser.getStringErros());
+                System.err.println(parser.imprimeErros());
                 
                 if (parser.getNumErros() > 0){
                     System.out.println("\n" + parser.getNumErros() +

@@ -358,8 +358,10 @@ public class Token {
                         break;
                     case "faca":
                     case "faça":
-                    case "repita":
                         funcaoToken = FuncaoToken.RES_REP_FACA;
+                        break;
+                    case "repita":
+                        funcaoToken = FuncaoToken.RES_REP_REPITA;
                         break;
                     case "enquanto":
                         funcaoToken = FuncaoToken.RES_REP_ENQUANTO;

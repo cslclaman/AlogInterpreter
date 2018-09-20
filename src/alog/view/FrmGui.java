@@ -438,7 +438,7 @@ public class FrmGui extends javax.swing.JFrame {
                 expressoes.add(e);
             }
 
-            System.err.println(parser.getStringErros());
+            System.err.println(parser.imprimeErros());
 
             if (parser.getNumErros() > 0){
                 JOptionPane.showMessageDialog(
@@ -768,7 +768,7 @@ public class FrmGui extends javax.swing.JFrame {
                 expressoes.add(e);
             }
 
-            System.err.println(parser.getStringErros());
+            System.err.println(parser.imprimeErros());
 
             if (parser.getNumErros() > 0){
                 JOptionPane.showMessageDialog(this, parser.getNumErros() + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);

@@ -107,6 +107,10 @@ public enum FuncaoToken {
      */
     RES_REP_FACA ("Repetição - Faça"),
     /**
+     * Estrutura repetitiva: "repita"
+     */
+    RES_REP_REPITA ("Repetição - Repita"),
+    /**
      * Estrutura repetitiva: "enquanto"
      */
     RES_REP_ENQUANTO ("Repetição - Enquanto"),
