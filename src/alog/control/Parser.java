@@ -57,8 +57,6 @@ public class Parser {
             return instrucao;
         }
         
-        funcoesEsperadas.clear();
-        
         switch(token.getFuncaoToken()){
             //Inicializa uma instrução tipo bloco
             case RES_BLOCO_INICIO:
@@ -69,6 +67,7 @@ public class Parser {
                         //funcoesEsperadas = funcoesAlgoritmo();
                         break;
                     case BLOCO:
+                        funcoesEsperadas.clear();
                         funcoesEsperadas = funcoesBloco();
                         break;
                 }
@@ -76,6 +75,8 @@ public class Parser {
 
             // Ao finalizar o bloco
             case RES_BLOCO_FIM:
+                instrucao = new FimBloco();
+                instrucao.addToken(token);
                 fimAtingido = true;
                 break;
 
@@ -84,18 +85,21 @@ public class Parser {
             case RES_TIPO_INTEIRO:
             case RES_TIPO_REAL:
                 instrucao = instrucaoDeclaracaoVariaveis();
+                funcoesEsperadas.clear();
                 funcoesEsperadas = funcoesBloco();
                 break;
         
             //Inicializa instrução de entrada de dados
             case LIB_IO_LEIA:
                 instrucao = instrucaoEntradaDados();
+                funcoesEsperadas.clear();
                 funcoesEsperadas = funcoesBloco();
                 break;
                 
             //Inicializa instrução de saída de dados
             case LIB_IO_ESCREVA:
                 instrucao = instrucaoSaidaDados();
+                funcoesEsperadas.clear();
                 funcoesEsperadas = funcoesBloco();
                 break;
                 
@@ -111,6 +115,7 @@ public class Parser {
                     funcoesEsperadas.add(FuncaoToken.IDENT_NOME_VARIAVEL);
                     
                     instrucao = instrucaoAtribuicao();
+                    funcoesEsperadas.clear();
                     funcoesEsperadas = funcoesBloco();
                 } else {
                     erros.add(new Erro(Erro.ALERTA, token, "Essa variável não foi declarada"));
@@ -120,6 +125,7 @@ public class Parser {
             //Define estrutura Condicional
             case RES_COND_SE:
                 instrucao = instrucaoCondicional();
+                funcoesEsperadas.clear();
                 funcoesEsperadas = funcoesBloco();
                 break;
         }
@@ -127,7 +133,7 @@ public class Parser {
         return instrucao;
     }
     
-    public LinkedList<Instrucao> listaExpressoes(){
+    public LinkedList<Instrucao> listaInstrucoes(){
         LinkedList<Instrucao> lista = new LinkedList<>();
         while (existeProxima()){
             lista.add(proxima());
@@ -275,7 +281,9 @@ public class Parser {
         while (parserInterno.existeProxima() && !parserInterno.fimAtingido){
             Instrucao proxima = parserInterno.proxima();
             if (proxima.instrucaoValida()){
-                bloco.addInstrucao(proxima);
+                if (!(proxima instanceof FimBloco)){
+                    bloco.addInstrucao(proxima);
+                }
             } else {
                 erros.add(parserInterno.erros.getLast());
             }

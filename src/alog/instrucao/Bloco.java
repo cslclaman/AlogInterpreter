@@ -17,10 +17,9 @@ public class Bloco extends Instrucao {
      * Constrói um bloco vazio, sem instruções.
      */
     public Bloco() {
-        tokens = new LinkedList<>();
-        instrucoes = new LinkedList<>();
+        super();
         tipo = TipoInstrucao.BLOCO;
-        texto = "";
+        instrucoes = new LinkedList<>();
     }
 
     /**
@@ -30,7 +29,7 @@ public class Bloco extends Instrucao {
     public void addInstrucao(Instrucao instrucao){
         if (inicio != null && instrucao.instrucaoValida()){
             instrucoes.add(instrucao);
-            texto += "\n    " + instrucao.getTipo();
+            texto.append("\n    ").append(instrucao.toString());
             for (Token token : instrucao.listaTokens()){
                 tokens.add(token);
             }
@@ -63,15 +62,15 @@ public class Bloco extends Instrucao {
     public void setInicio(Token inicio){
         if (this.inicio == null){
             this.inicio = inicio;
-            texto += inicio.getPalavra();
+            texto.append(inicio.getPalavra());
             tokens.add(inicio);
         }
     }
     
     public void setFim(Token fim){
-        if (inicio != null && !instrucoes.isEmpty()){
+        if (inicio != null){
             this.fim = fim;
-            texto += "\n" + fim.getPalavra();
+            texto.append("\n").append(fim.getPalavra());
             tokens.add(fim);
         }
     }

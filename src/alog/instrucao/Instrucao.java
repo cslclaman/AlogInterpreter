@@ -12,12 +12,12 @@ import java.util.List;
 public abstract class Instrucao {
     protected LinkedList<Token> tokens;
     protected TipoInstrucao tipo;
-    protected String texto;
+    protected StringBuffer texto;
     
     public Instrucao(){
         tokens = new LinkedList<>();
         tipo = TipoInstrucao._INDEFINIDO;
-        texto = "";
+        texto = new StringBuffer();
     }
     
     /**
@@ -25,7 +25,7 @@ public abstract class Instrucao {
      * @return {@code "Var <- Op1 + ( Op2 - Op3 ) ;" }
      */
     public String getTexto() {
-        return texto;
+        return texto.toString().trim();
     }
     
     /**
@@ -51,6 +51,7 @@ public abstract class Instrucao {
      */
     public void addToken(Token token) {
         tokens.add(token);
+        texto.append(token.getPalavra()).append(" ");
     }
     
     /**

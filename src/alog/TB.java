@@ -52,7 +52,7 @@ public class TB {
         }
         
         Parser parser = new Parser(tokens);
-        List<Instrucao> instrucoes = parser.listaExpressoes();
+        List<Instrucao> instrucoes = parser.listaInstrucoes();
         
         if (parser.getNumErros() > 0){
             System.out.println(parser.imprimeErros());
