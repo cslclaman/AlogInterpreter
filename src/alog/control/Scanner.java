@@ -1,41 +1,17 @@
 package alog.control;
 
+import alog.analise.Erro;
+import alog.token.FuncaoToken;
 import alog.token.TipoToken;
 import alog.token.Token;
 import java.util.LinkedList;
 import java.util.List;
-import javafx.scene.shape.Line;
 
 /**
  * Classe de scanner que realiza análise léxica em um código e retorna os tokens por meio de um iterador.
  * @author Caique
  */
 public class Scanner {
-    
-    private class ErroLexico {
-        char caracter;
-        int linha;
-        int coluna;
-        int posicao;
-        String erro;
-
-        public ErroLexico(
-                char caracter, int linha, int coluna, int posicao, String erro){
-            this.caracter = caracter;
-            this.linha = linha;
-            this.coluna = coluna;
-            this.posicao = posicao;
-            this.erro = erro;
-        }
-
-        @Override
-        public String toString(){
-            return String.format(
-                    "Linha %d, Coluna %d: Caractere '%c' (unicode %d) %s",
-                    linha + 1, coluna + 1, caracter, (int)caracter, erro);  
-            
-        }
-    }
     
     private int indice;
     private int posicao;
@@ -46,7 +22,7 @@ public class Scanner {
     private boolean next;
     private char[] texto;
     
-    private LinkedList<ErroLexico> erros;
+    private LinkedList<Erro> erros;
 
     /**
      * Constrói uma nova instância do Scanner a partir de uma String de código-fonte.
@@ -155,7 +131,7 @@ public class Scanner {
                         contOper++;
                     }
                 } else {
-                    erros.add(new ErroLexico(
+                    erros.add(new Erro(
                             ch, linha, coluna, posicao, "inválido"));
                     token.atualizaPalavra(ch);
                     go = false;
@@ -241,7 +217,11 @@ public class Scanner {
     public List<Token> listaTokens (){
         LinkedList<Token> list = new LinkedList<>();
         while (existeProximo()){
-            list.add(proximo());
+            Token proximo = proximo();
+            list.add(proximo);
+        }
+        if (list.isEmpty()){
+            erros.add(new Erro(' ', 0, 0, 0, "Nenhum token encontrado"));
         }
         return list;
     }
@@ -260,7 +240,7 @@ public class Scanner {
      */
     public List<String> getListaErros(){
         LinkedList<String> err = new LinkedList<>();
-        for (ErroLexico e : erros){
+        for (Erro e : erros){
             err.add(e.toString());
         }
         return err;
@@ -272,7 +252,7 @@ public class Scanner {
      */
     public String imprimeErros(){
         StringBuilder msg = new StringBuilder();
-        for (ErroLexico err : erros){
+        for (Erro err : erros){
             if (msg.length() > 0){
                 msg.append("\n");
             }
@@ -287,10 +267,8 @@ public class Scanner {
      */
     public List<Token> retornaErros () {
         LinkedList<Token> tokens = new LinkedList<>();
-        for (ErroLexico err : erros){
-            Token t = new Token(
-                    err.linha, err.coluna, err.posicao, tokens.size() + 1);
-            t.setPalavra(String.valueOf(err.caracter));
+        for (Erro err : erros){
+            Token t = err.getToken();
             tokens.add(t);
         }
         return tokens;

@@ -1,6 +1,7 @@
 package alog.control;
 
 import alog.analise.Erro;
+import alog.analise.TipoErro;
 import alog.instrucao.*;
 import alog.token.FuncaoToken;
 import alog.instrucao.TipoInstrucao;
@@ -118,7 +119,7 @@ public class Parser {
                     funcoesEsperadas.clear();
                     funcoesEsperadas = funcoesBloco();
                 } else {
-                    erros.add(new Erro(Erro.ALERTA, token, "Essa variável não foi declarada"));
+                    erros.add(new Erro(TipoErro.ERRO, token, "Essa variável não foi declarada"));
                 }
                 break;
                 
@@ -178,7 +179,7 @@ public class Parser {
             for (FuncaoToken ft: funcoesEsperadas){
                 msgErro += "\n - " + ft;
             }
-            erros.add(new Erro(Erro.ERRO, token, msgErro));
+            erros.add(new Erro(TipoErro.ERRO, token, msgErro));
             return false;
         } else {
             return true;
@@ -294,7 +295,7 @@ public class Parser {
 
         if (!existeProxima() && !parserInterno.fimAtingido){
             erros.add(new Erro(
-                    Erro.ERRO, 
+                    TipoErro.ERRO, 
                     bloco.getInicio(),
                     "Bloco iniciado não foi fechado corretamente"));
         } else {
@@ -339,12 +340,12 @@ public class Parser {
                 case _INDEF_ALFANUMERICO:
                     char inicial = token.getPalavra().charAt(0);
                     if (Character.isDigit(inicial)){
-                        erros.add(new Erro(Erro.ERRO, token, "Identificador de variável não pode começar com número"));
+                        erros.add(new Erro(TipoErro.ERRO.ERRO, token, "Identificador de variável não pode começar com número"));
                         go = false;
                     } else {
                         token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
                         if (variaveis.containsKey(token.getPalavra())){
-                            erros.add(new Erro(Erro.ERRO, token, "Outra variável já foi declarada com esse nome"));
+                            erros.add(new Erro(TipoErro.ERRO, token, "Outra variável já foi declarada com esse nome"));
                             go = false;
                         } else {
                             declaracaoVariaveis.addNomeVariavel(token);
@@ -406,7 +407,7 @@ public class Parser {
                         funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
                         funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
                     } else {
-                        erros.add(new Erro(Erro.ERRO, token, "Essa variável não foi declarada"));
+                        erros.add(new Erro(TipoErro.ERRO, token, "Essa variável não foi declarada"));
                         go = false;
                     }
                     break;
