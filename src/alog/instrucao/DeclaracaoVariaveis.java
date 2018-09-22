@@ -20,9 +20,8 @@ public class DeclaracaoVariaveis extends Instrucao {
      * Cria uma instrução vazia.
      */
     public DeclaracaoVariaveis() {
-        tokens = new LinkedList<>();
+        super();
         tipo = TipoInstrucao.DECLARACAO_VARIAVEL;
-        tokens = new LinkedList<>();
         nomesVariaveis = new LinkedList<>();
     }
 
@@ -35,7 +34,7 @@ public class DeclaracaoVariaveis extends Instrucao {
         if (this.tokenTipoVariavel == null) {
             this.tokenTipoVariavel = token;
             tipoVariavel = TipoVariavel.mapTokenToVariavel(token);
-            tokens.add(token);
+            addToken(token);
         }
     }
     
@@ -46,7 +45,7 @@ public class DeclaracaoVariaveis extends Instrucao {
     public void addNomeVariavel(Token token) {
         if (tokenTipoVariavel != null) {
             nomesVariaveis.add(token);
-            tokens.add(token);
+            addToken(token);
         }
     }
 

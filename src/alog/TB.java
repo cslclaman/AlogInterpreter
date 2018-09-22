@@ -12,6 +12,8 @@ import alog.token.Token;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -39,28 +41,52 @@ public class TB {
         
         String codigo = sb.toString();
         
+        int lastErros = 0;
+        int thisErros = 0;
+        
         Scanner scanner = new Scanner(codigo);
-        List<Token> tokens = scanner.listaTokens();
-        if (scanner.getNumErros() > 0){
-            System.out.println(scanner.imprimeErros());
-        } else {
+        List<Token> tokens = new ArrayList<>();
+        while (scanner.existeProximo()){
+            tokens.add(scanner.proximo());
+            thisErros = scanner.getNumErros();
+            if (thisErros > lastErros){
+                for (int e = lastErros - 1; e < thisErros; e++){
+                    System.out.println(scanner.getListaErros().get(e));
+                }
+                lastErros = thisErros;
+            }
+        }
+        
+        if (thisErros == 0){
             System.out.println("Scanner sem erros de leitura");
         }
+        
+        thisErros = 0;
+        lastErros = 0;
         
         for (Token t : tokens){
             System.out.println("*** " + t);
         }
         
         Parser parser = new Parser(tokens);
-        List<Instrucao> instrucoes = parser.listaInstrucoes();
+        List<Instrucao> instrucoes = new LinkedList<>();
+        while (parser.existeProxima()){
+            instrucoes.add(parser.proxima());
+            thisErros = parser.getNumErros();
+            if (thisErros > lastErros){
+                for (int e = lastErros - 1; e < thisErros; e++){
+                    System.out.println(parser.getListaErros().get(e));
+                }
+                lastErros = thisErros;
+            }
+        }
         
-        if (parser.getNumErros() > 0){
-            System.out.println(parser.imprimeErros());
-        } else {
+        if (thisErros == 0){
             System.out.println("Parser sem erros de leitura");
         }
+        
         for (Instrucao i : instrucoes){
-            System.out.println("*** " + i);
+            System.out.println("*** " + i.toString());
         }
         
     }

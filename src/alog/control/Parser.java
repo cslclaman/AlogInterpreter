@@ -173,6 +173,14 @@ public class Parser {
         return errToken;
     }
     
+    public List<String> getListaErros(){
+        LinkedList<String> err = new LinkedList<>();
+        for (Erro e : erros){
+            err.add(e.toString());
+        }
+        return err;
+    }
+    
     private boolean funcaoValida(Token token){
         if (!funcoesEsperadas.contains(token.getFuncaoToken())){
             String msgErro = "Encontrou " + token.getFuncaoToken() + ", mas esperava:";
@@ -349,6 +357,7 @@ public class Parser {
                             go = false;
                         } else {
                             declaracaoVariaveis.addNomeVariavel(token);
+                            variaveis.put(token.getPalavra(), declaracaoVariaveis.getTipoVariavel());
                             
                             funcoesEsperadas.clear();
                             funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
@@ -358,13 +367,9 @@ public class Parser {
                     break;
                             
                 case DELIM_PONTO_VIRGULA:
-                    for (Variavel var : declaracaoVariaveis.getVariaveis() ){
-                        variaveis.put(var.getNome(), var.getTipo());
-                    }
                     declaracaoVariaveis.addToken(token);
                     go = false;
                     break;
-
             }
                     
         }
