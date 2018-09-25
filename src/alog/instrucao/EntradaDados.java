@@ -18,23 +18,22 @@ public class EntradaDados extends Instrucao {
     protected LinkedList<Token> parametros;
     
     public EntradaDados() {
-        texto = "";
+        super();
         tipo = TipoInstrucao.ENTRADA_DE_DADOS;
-        tokens = new LinkedList<>();
         parametros = new LinkedList<>();
     }
     
     public void setTokenNome(Token token){
         if (nome == null) {
             nome = token;
-            tokens.add(token);
+            super.addToken(token);
         }
     }
     
     public void addVariavel(Token token) {
         if (nome != null) {
             parametros.add(token);
-            tokens.add(token);
+            super.addToken(token);
         }
     }
 

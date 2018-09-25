@@ -2,6 +2,7 @@ package alog.control;
 
 import alog.analise.Erro;
 import alog.analise.TipoErro;
+import alog.expressao.Expressao;
 import alog.instrucao.*;
 import alog.token.FuncaoToken;
 import alog.instrucao.TipoInstrucao;
@@ -18,8 +19,9 @@ import java.util.Map;
  * @author Caique
  */
 public class Parser {
-    private List<Token> tokens;
-    private Map<String, TipoVariavel> variaveis;
+    private final List<Token> tokens;
+    
+    private Map<String, TipoVariavel> declVariaveis;
     
     private LinkedList<FuncaoToken> funcoesEsperadas;
     private LinkedList<Erro> erros;
@@ -31,7 +33,7 @@ public class Parser {
     public Parser (List<Token> tokens){
         this.tokens = tokens;
         this.size = tokens.size();
-        variaveis = new HashMap<>();
+        declVariaveis = new HashMap<>();
         erros = new LinkedList<>();
         funcoesEsperadas = new LinkedList<>();
         tipoUltimaInstrucao = TipoInstrucao._INDEFINIDO;
@@ -50,11 +52,20 @@ public class Parser {
         Instrucao instrucao = new InstrucaoInvalida();
         
         if (!existeProxima()){
+            if (size <= 0){
+                erros.add(new Erro(TipoErro.ERRO, ' ', 0, 0, 0,
+                        "Nenhum token encontrado"));
+            } else {
+                erros.add(new Erro(TipoErro.ALERTA, tokens.get(size - 1),
+                        "Fim do programa atingido"));
+            }
             return instrucao;
-        }
+        } 
         
         Token token = tokens.get(pos);
         if (!funcaoValida(token)){
+            pos++;
+            instrucao.addToken(token);
             return instrucao;
         }
         
@@ -107,7 +118,7 @@ public class Parser {
             //Define Chamada de Rotina ou Atribuição.
             case _INDEF_ALFABETICO:
             case _INDEF_ALFANUMERICO:
-                if (variaveis.containsKey(token.getPalavra())){
+                if (declVariaveis.containsKey(token.getPalavra())){
                     //Inicializa instrução de atribuição
                     token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
                     tokens.set(pos, token);
@@ -119,7 +130,11 @@ public class Parser {
                     funcoesEsperadas.clear();
                     funcoesEsperadas = funcoesBloco();
                 } else {
-                    erros.add(new Erro(TipoErro.ERRO, token, "Essa variável não foi declarada"));
+                    erros.add(new Erro(TipoErro.ERRO, token, 
+                            String.format("Variável, função ou rotina \"%s\" não declarada", token.getPalavra())));
+                    
+                    pos++;
+                    instrucao.addToken(token);
                 }
                 break;
                 
@@ -282,24 +297,24 @@ public class Parser {
         bloco.setInicio(token);
 
         Parser parserInterno = new Parser(tokens);
-        parserInterno.variaveis = variaveis;
+        parserInterno.declVariaveis = declVariaveis;
         parserInterno.pos = pos;
         parserInterno.tipoUltimaInstrucao = bloco.getTipo();
         parserInterno.funcoesEsperadas = funcoesBloco();
 
         while (parserInterno.existeProxima() && !parserInterno.fimAtingido){
             Instrucao proxima = parserInterno.proxima();
-            if (proxima.instrucaoValida()){
-                if (!(proxima instanceof FimBloco)){
-                    bloco.addInstrucao(proxima);
-                }
-            } else {
-                erros.add(parserInterno.erros.getLast());
+            if (!(proxima instanceof FimBloco)){
+                bloco.addInstrucao(proxima);
             }
+        }
+
+        for (Erro erro : parserInterno.erros){
+            erros.add(erro);
         }
         
         pos = parserInterno.pos;
-        variaveis = parserInterno.variaveis;
+        declVariaveis = parserInterno.declVariaveis;
 
         if (!existeProxima() && !parserInterno.fimAtingido){
             erros.add(new Erro(
@@ -348,22 +363,25 @@ public class Parser {
                 case _INDEF_ALFANUMERICO:
                     char inicial = token.getPalavra().charAt(0);
                     if (Character.isDigit(inicial)){
-                        erros.add(new Erro(TipoErro.ERRO.ERRO, token, "Identificador de variável não pode começar com número"));
-                        go = false;
+                        declaracaoVariaveis.addToken(token);
+                        erros.add(new Erro(TipoErro.ERRO, token,
+                                "Identificador de variável não pode começar com número"));
+                        declaracaoVariaveis.invalidaInstrucao();
                     } else {
                         token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
-                        if (variaveis.containsKey(token.getPalavra())){
-                            erros.add(new Erro(TipoErro.ERRO, token, "Outra variável já foi declarada com esse nome"));
-                            go = false;
+                        if (declVariaveis.containsKey(token.getPalavra())){
+                            declaracaoVariaveis.addToken(token);
+                            erros.add(new Erro(TipoErro.ERRO, token,
+                                    String.format("Variável \"%s\" já declarada", token.getPalavra())));
+                            declaracaoVariaveis.invalidaInstrucao();
                         } else {
                             declaracaoVariaveis.addNomeVariavel(token);
-                            variaveis.put(token.getPalavra(), declaracaoVariaveis.getTipoVariavel());
-                            
-                            funcoesEsperadas.clear();
-                            funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
-                            funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
+                            declVariaveis.put(token.getPalavra(), declaracaoVariaveis.getTipoVariavel());
                         }
                     }
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
+                    funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
                     break;
                             
                 case DELIM_PONTO_VIRGULA:
@@ -405,22 +423,25 @@ public class Parser {
                             
                 case _INDEF_ALFABETICO:
                 case _INDEF_ALFANUMERICO:
-                    if (variaveis.containsKey(token.getPalavra())){
+                    if (declVariaveis.containsKey(token.getPalavra())){
                         token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
                         entradaDados.addVariavel(token);
-                        funcoesEsperadas.clear();
-                        funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
-                        funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
                     } else {
-                        erros.add(new Erro(TipoErro.ERRO, token, "Essa variável não foi declarada"));
-                        go = false;
+                        entradaDados.addToken(token);
+                        erros.add(new Erro(TipoErro.ERRO, token, 
+                        String.format("Variável \"%s\" não declarada", token.getPalavra())));
+                        entradaDados.invalidaInstrucao();
                     }
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
+                    funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
                     break;
                     
                 case DELIM_PARENTESES_FECHA:
                     entradaDados.addToken(token);
                     funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
+                    break;
                             
                 case DELIM_PONTO_VIRGULA:
                     entradaDados.addToken(token);
@@ -543,7 +564,7 @@ public class Parser {
                     funcoesEsperadas.clear();
                     
                     Parser parserInterno = new Parser(tokens);
-                    parserInterno.variaveis = variaveis;
+                    parserInterno.declVariaveis = declVariaveis;
                     parserInterno.pos = pos;
                     parserInterno.tipoUltimaInstrucao = condicional.getTipo();
                     parserInterno.funcoesEsperadas = funcoesCondicional();
@@ -556,7 +577,7 @@ public class Parser {
                     }
                     
                     pos = parserInterno.pos;
-                    variaveis = parserInterno.variaveis;
+                    declVariaveis = parserInterno.declVariaveis;
                     go = false;
                     break;
             }
@@ -568,7 +589,7 @@ public class Parser {
                 condicional.setTokenSenao(token);
                 
                 Parser parserInterno = new Parser(tokens);
-                parserInterno.variaveis = variaveis;
+                parserInterno.declVariaveis = declVariaveis;
                 parserInterno.pos = pos;
                 parserInterno.tipoUltimaInstrucao = condicional.getTipo();
                 parserInterno.funcoesEsperadas = funcoesCondicional();

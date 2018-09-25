@@ -1,7 +1,7 @@
 package alog.control;
 
 import alog.analise.Erro;
-import alog.token.FuncaoToken;
+import alog.analise.TipoErro;
 import alog.token.TipoToken;
 import alog.token.Token;
 import java.util.LinkedList;
@@ -39,6 +39,9 @@ public class Scanner {
         next = len > 0;
         
         erros = new LinkedList<>();
+        if (len <= 0){
+            erros.add(new Erro(TipoErro.ALERTA, ' ', 0, 0, 0, "Nenhum token encontrado"));
+        }
     }
     
     /**
@@ -219,9 +222,6 @@ public class Scanner {
         while (existeProximo()){
             Token proximo = proximo();
             list.add(proximo);
-        }
-        if (list.isEmpty()){
-            erros.add(new Erro(' ', 0, 0, 0, "Nenhum token encontrado"));
         }
         return list;
     }

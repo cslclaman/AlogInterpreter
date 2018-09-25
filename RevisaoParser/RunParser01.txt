@@ -1,2 +1,6 @@
 Início
+    Inteiro: Idade, Nota;
+    Caracter: Nome;
+    Real: IdadeDias;
+    Leia(Idade, Faltas);
 Fim

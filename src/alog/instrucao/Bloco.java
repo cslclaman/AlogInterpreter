@@ -12,7 +12,7 @@ public class Bloco extends Instrucao {
     private LinkedList<Instrucao> instrucoes;
     private Token inicio;
     private Token fim;
-    
+    private boolean blocoValido;
     /**
      * Constrói um bloco vazio, sem instruções.
      */
@@ -20,6 +20,7 @@ public class Bloco extends Instrucao {
         super();
         tipo = TipoInstrucao.BLOCO;
         instrucoes = new LinkedList<>();
+        blocoValido = true;
     }
 
     /**
@@ -27,12 +28,13 @@ public class Bloco extends Instrucao {
      * @param instrucao 
      */
     public void addInstrucao(Instrucao instrucao){
-        if (inicio != null && instrucao.instrucaoValida()){
-            instrucoes.add(instrucao);
-            texto.append("\n    ").append(instrucao.toString());
-            for (Token token : instrucao.listaTokens()){
-                tokens.add(token);
-            }
+        instrucoes.add(instrucao);
+        texto.append("\n    ").append(instrucao.toString());
+        for (Token token : instrucao.listaTokens()){
+            tokens.add(token);
+        }
+        if (!instrucao.instrucaoValida()){
+            blocoValido = false;
         }
     }
 
@@ -52,27 +54,23 @@ public class Bloco extends Instrucao {
     public boolean instrucaoValida() {
         if (inicio == null ||
             fim == null ||
-            instrucoes.isEmpty()){
-            
+            instrucoes.isEmpty() ||
+            !blocoValido
+        ){
             invalidaInstrucao();
         }
         return super.instrucaoValida();
     }
     
     public void setInicio(Token inicio){
-        if (this.inicio == null){
-            this.inicio = inicio;
-            texto.append(inicio.getPalavra());
-            tokens.add(inicio);
-        }
+        this.inicio = inicio;
+        addToken(inicio);
     }
     
     public void setFim(Token fim){
-        if (inicio != null){
-            this.fim = fim;
-            texto.append("\n").append(fim.getPalavra());
-            tokens.add(fim);
-        }
+        this.fim = fim;
+        texto.append("\n").append(fim.getPalavra());
+        tokens.add(fim);
     }
 
     public Token getInicio() {

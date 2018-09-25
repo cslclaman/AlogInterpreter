@@ -23,7 +23,7 @@ public enum TipoInstrucao {
      * Instrução inválida, ou seja, que não pode ser executada.
      * Para ser inválida, contem tokens fora da ordem sintática esperada.
      */
-    _INVALIDO ("Expressão Inválida"),
+    _INVALIDO ("Instrução Inválida"),
     
     /**
      * Módulo Principal do programa (equivalente ao {@code main()} de algumas linguagens).
