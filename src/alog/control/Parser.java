@@ -102,6 +102,8 @@ public class Parser {
             if (!estadoValido(token)){
                 break;
             }
+            
+            String nomevar;
             switch(token.getFuncaoToken()){
                 //MODO: INÍCIO/FIM DE BLOCO
                 case RES_BLOCO_INICIO:
@@ -433,39 +435,49 @@ public class Parser {
                                 add = false;
                                 go = false;
                             } else {
-                                variaveis.add(token.getPalavra());
-                                token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
+                                nomevar = token.getPalavra();
+                                if (variaveis.contains(nomevar)) {
+                                    erros.add(new ErroSintatico(token, "Variável " + nomevar + " já declarada"));
+                                    erro = true;
+                                    add = false;
+                                    go = false;
+                                } else {
+                                    variaveis.add(nomevar);
+                                    token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
 
-                                funcoesEsperadas.clear();
-                                funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
-                                funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
+                                    funcoesEsperadas.clear();
+                                    funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
+                                    funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
+                                }
                                 add = true;
                             }
                             break;
                         case ENTRADA_DE_DADOS:
                         case SAIDA_DE_DADOS:
-                            /*if (!variaveis.contains(token.getPalavra())){
-                                erros.add(new ErroSintatico(token, "Variável \"" + token.getPalavra() + "\" não declarada"));
+                            nomevar = token.getPalavra();
+                            if (!variaveis.contains(nomevar)){
+                                erros.add(new ErroSintatico(token, "Variável \"" + nomevar + "\" não declarada"));
                                 erro = true;
                                 add = false;
                                 go = false;
-                            } else {*/
+                            } else {
                                 token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
 
                                 funcoesEsperadas.clear();
                                 funcoesEsperadas.add(FuncaoToken.DELIM_VIRGULA);
                                 funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
                                 add = true;
-                            //}
+                            }
                             break;
                         case OPERACAO_ATRIBUICAO:
                         case OPERACAO_ARITMETICA:
-                            /*if (!variaveis.contains(token.getPalavra())){
-                                erros.add(new ErroSintatico(token, "Variável \"" + token.getPalavra() + "\" não declarada"));
+                            nomevar = token.getPalavra();
+                            if (!variaveis.contains(nomevar)){
+                                erros.add(new ErroSintatico(token, "Variável \"" + nomevar + "\" não declarada"));
                                 erro = true;
                                 add = false;
                                 go = false;
-                            } else {*/
+                            } else {
                                 token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
 
                                 funcoesEsperadas.clear();
@@ -478,15 +490,16 @@ public class Parser {
                                 funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_REAL);
                                 funcoesEsperadas.add(FuncaoToken.OP_MAT_MOD);
                                 add = true;
-                            //}
+                            }
                             break;
                         case CHAMADA_FUNCAO:
-                            /*if (!variaveis.contains(token.getPalavra())){
-                                erros.add(new ErroSintatico(token, "Variável \"" + token.getPalavra() + "\" não declarada"));
+                            nomevar = token.getPalavra();
+                            if (!variaveis.contains(nomevar)){
+                                erros.add(new ErroSintatico(token, "Variável \"" + nomevar + "\" não declarada"));
                                 erro = true;
                                 add = false;
                                 go = false;
-                            } else {*/
+                            } else {
                                 token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
 
                                 funcoesEsperadas.clear();
@@ -500,15 +513,16 @@ public class Parser {
                                 funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
                                 funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
                                 add = true;
-                            //}
+                            }
                             break;
                         case OPERACAO_LOGICA:
-                            /*if (!variaveis.contains(token.getPalavra())){
-                                erros.add(new ErroSintatico(token, "Variável \"" + token.getPalavra() + "\" não declarada"));
+                            nomevar = token.getPalavra();
+                            if (!variaveis.contains(nomevar)){
+                                erros.add(new ErroSintatico(token, "Variável \"" + nomevar + "\" não declarada"));
                                 erro = true;
                                 add = false;
                                 go = false;
-                            } else {*/
+                            } else {
                                 token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
 
                                 funcoesEsperadas.clear();
@@ -528,24 +542,25 @@ public class Parser {
                                 funcoesEsperadas.add(FuncaoToken.OP_MAT_MOD);
                                 funcoesEsperadas.add(FuncaoToken.RES_COND_ENTAO);
                                 add = true;
-                            //}
+                            }
                             break;
                             
                         case _INDEFINIDO:
                         default:
-                            /*if (!variaveis.contains(token.getPalavra())){
-                                erros.add(new ErroSintatico(token, "Comando, variável ou função não identificada: " + token.getPalavra()));
+                            nomevar = token.getPalavra();
+                            if (!variaveis.contains(token.getPalavra())){
+                                erros.add(new ErroSintatico(token, "Comando, variável ou função não identificada: \"" + nomevar + "\""));
                                 
                                 erro = true;
                                 add = false;
                                 go = false;
-                            } else {*/
+                            } else {
                                 token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
 
                                 funcoesEsperadas.clear();
                                 funcoesEsperadas.add(FuncaoToken.OP_ATRIBUICAO);
                                 add = true;
-                            //}
+                            }
                             break;
                     }
                     break;
@@ -554,7 +569,7 @@ public class Parser {
                     funcoesEsperadas.clear();
                             
                     Token lastToken = expr.getTokenAt(expr.getNumTokens() - 1);
-                    if (lastToken.getFuncaoToken() == FuncaoToken.CONST_REAL){
+                    if (lastToken != null && lastToken.getFuncaoToken() == FuncaoToken.CONST_REAL){
                         lastToken.atualizaPalavra(token.getPalavra());
                         expr.setTokenAt(expr.getNumTokens() - 1, lastToken);
                         add = false;
@@ -602,13 +617,17 @@ public class Parser {
                         case OPERACAO_ARITMETICA:
                         case OPERACAO_LOGICA:
                             lastToken = expr.getTokenAt(expr.getNumTokens() - 1);
-                            lastToken.atualizaPalavra(token.getPalavra());
-                            lastToken.setFuncaoToken(FuncaoToken.CONST_REAL);
-                            expr.setTokenAt(expr.getNumTokens() - 1, lastToken);
-                            
+                            if (lastToken != null && lastToken.getFuncaoToken() == FuncaoToken.CONST_INTEIRA) {
+                                lastToken.atualizaPalavra(token.getPalavra());
+                                lastToken.setFuncaoToken(FuncaoToken.CONST_REAL);
+                                expr.setTokenAt(expr.getNumTokens() - 1, lastToken);
+                                add = false;
+                            } else {
+                                add = true;
+                            }
                             funcoesEsperadas.clear();
                             funcoesEsperadas.add(FuncaoToken._INDEF_NUMERICO);
-                            add = false;
+                            
                             break;
                     }
                     break;
@@ -679,6 +698,14 @@ public class Parser {
     
     public int getNumErros(){
         return erros.size();
+    }
+    
+    public List<String> getListaErros(){
+        LinkedList<String> listaErr = new LinkedList<>();
+        for (ErroSintatico err : erros){
+            listaErr.add(err.toString());
+        }
+        return listaErr;
     }
     
     public String getStringErros(){

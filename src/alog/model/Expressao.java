@@ -100,7 +100,11 @@ public class Expressao {
     }
     
     public Token getTokenAt(int i){
-        return tokens.get(i);
+        if (i >= 0 && i < tokens.size()){
+            return tokens.get(i);
+        } else {
+            return null;
+        }
     }
     
     public void setTokenAt(int i, Token token){
