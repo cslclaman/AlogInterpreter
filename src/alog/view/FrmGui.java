@@ -19,6 +19,9 @@ import java.util.LinkedList;
 import javax.swing.text.DefaultStyledDocument;
 import alog.view.append.TextLineNumber;
 import java.awt.Color;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.File;
@@ -134,6 +137,8 @@ public class FrmGui extends javax.swing.JFrame {
         mitSalvar = new javax.swing.JMenuItem();
         mitSalvarComo = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
+        mitSobre = new javax.swing.JMenuItem();
+        jSeparator2 = new javax.swing.JPopupMenu.Separator();
         mitSair = new javax.swing.JMenuItem();
 
         jMenu1.setText("jMenu1");
@@ -327,6 +332,15 @@ public class FrmGui extends javax.swing.JFrame {
         });
         mnuArquivo.add(mitSalvarComo);
         mnuArquivo.add(jSeparator1);
+
+        mitSobre.setText("Sobre");
+        mitSobre.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mitSobreActionPerformed(evt);
+            }
+        });
+        mnuArquivo.add(mitSobre);
+        mnuArquivo.add(jSeparator2);
 
         mitSair.setText("Sair");
         mitSair.addActionListener(new java.awt.event.ActionListener() {
@@ -1447,6 +1461,29 @@ public class FrmGui extends javax.swing.JFrame {
     private void btnSairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSairActionPerformed
         dispose();
     }//GEN-LAST:event_btnSairActionPerformed
+
+    private void mitSobreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitSobreActionPerformed
+        int opcao = JOptionPane.showOptionDialog(this, "Interpretador de Algoritmos - Versão Beta 2 (Set/2018)"
+                + "\n\nCurso de Análise e Desenvolvimento de Sistemas - Fatec Sorocaba"
+                + "\nTrabalho de Graduação do aluno Caíque de Souza Lima Siqueira"
+                + "\nOrientador: Prof. Dimas Ferreira Cardoso"
+                + "\n\nContato: interpretador-alog-fatecso@outlook.com.br"
+                + "\nProjeto hospedado em: https://github.com/cslclaman/AlogInterpreter"
+                ,"Sobre o programa",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                lblLogo.getIcon(),
+                new String[]{"Copiar e-mail", "Fechar"},
+                "Fechar");
+        
+        StringSelection selection;
+        Clipboard clipboard;
+        if (opcao == JOptionPane.YES_OPTION) {
+            selection = new StringSelection("interpretador-alog-fatecso@outlook.com.br");
+            clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(selection, selection);
+        }
+    }//GEN-LAST:event_mitSobreActionPerformed
     
     private void imprimeTokens(Token op){
         LinkedList<Token> tokens = new LinkedList<>();
@@ -1526,6 +1563,7 @@ public class FrmGui extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JPopupMenu.Separator jSeparator1;
+    private javax.swing.JPopupMenu.Separator jSeparator2;
     private javax.swing.JLabel lblLogo;
     private javax.swing.JLabel lblPosCaret;
     private javax.swing.JLabel lblVariavelEntrada;
@@ -1534,6 +1572,7 @@ public class FrmGui extends javax.swing.JFrame {
     private javax.swing.JMenuItem mitSair;
     private javax.swing.JMenuItem mitSalvar;
     private javax.swing.JMenuItem mitSalvarComo;
+    private javax.swing.JMenuItem mitSobre;
     private javax.swing.JMenu mnuArquivo;
     private javax.swing.JTable tblVariaveis;
     private javax.swing.JTextPane txpEntrada;
