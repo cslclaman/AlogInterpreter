@@ -1,6 +1,9 @@
 Início
-    Inteiro: Idade, Nota;
+    Inteiro: Idade;
     Caracter: Nome;
     Real: IdadeDias;
-    Leia(Idade, Faltas);
+    Leia(Idade);
+    IdadeDias <- 365.25 * Idade;
+    Nome <- "Alguma coisa";
+    Escreva(IdadeDias);
 Fim

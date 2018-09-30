@@ -8,7 +8,6 @@ import alog.token.FuncaoToken;
 import alog.instrucao.TipoInstrucao;
 import alog.model.*;
 import alog.token.Token;
-//import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -462,6 +461,7 @@ public class Parser {
         while (go && existeProxima()){
             Token token = tokens.get(pos++);
             if (!funcaoValida(token)){
+                saidaDados.invalidaInstrucao();
                 break;
             }
             
@@ -476,23 +476,21 @@ public class Parser {
                 case DELIM_VIRGULA:
                     saidaDados.addToken(token);
                     funcoesEsperadas.clear();
-                    
-                    //deve esperar expressão
-                    
+                    saidaDados.addParametro(instrucaoExpressao(
+                            FuncaoToken.DELIM_VIRGULA, FuncaoToken.DELIM_PARENTESES_FECHA));
                     break;
                             
                 case DELIM_PARENTESES_FECHA:
                     saidaDados.addToken(token);
                     funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
+                    break;
                             
                 case DELIM_PONTO_VIRGULA:
                     saidaDados.addToken(token);
                     go = false;
                     funcoesEsperadas.clear();
                     break;
-                    
-                //case Expressão:?
             }
                     
         }
@@ -507,6 +505,7 @@ public class Parser {
         while (go && existeProxima()){
             Token token = tokens.get(pos++);
             if (!funcaoValida(token)){
+                atribuicao.invalidaInstrucao();
                 break;
             }
             
@@ -520,12 +519,8 @@ public class Parser {
                 case OP_ATRIBUICAO:
                     atribuicao.addToken(token);
                     funcoesEsperadas.clear();
-                    
-                    //deve esperar expressão
-                    
+                    atribuicao.setExpressao(instrucaoExpressao(FuncaoToken.DELIM_PONTO_VIRGULA));
                     break;
-                    
-                //case Expressão:?
                     
                 case DELIM_PONTO_VIRGULA:
                     atribuicao.addToken(token);
@@ -544,20 +539,16 @@ public class Parser {
         while (go && existeProxima()){
             Token token = tokens.get(pos++);
             if (!funcaoValida(token)){
+                condicional.invalidaInstrucao();
                 break;
             }
             
             switch (token.getFuncaoToken()){
                 case RES_COND_SE:
-                
                     condicional.setTokenSe(token);
                     funcoesEsperadas.clear();
-                    
-                    // deve esperar expressão
-                    
+                    condicional.setExpressao(instrucaoExpressao(FuncaoToken.RES_COND_ENTAO));
                     break;
-                    
-                //case Expressão:?
                     
                 case RES_COND_ENTAO:
                     condicional.addToken(token);
@@ -606,4 +597,144 @@ public class Parser {
         return condicional;
     }
     
+    private Expressao instrucaoExpressao(FuncaoToken... condicoesParada) {
+        Expressao expressao = new Expressao();
+        Token token;
+        
+        LinkedList<Token> pilha = new LinkedList<>();
+        LinkedList<Token> saida = new LinkedList<>();
+        
+        funcoesEsperadas.clear();
+        //funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
+        funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+        funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+        funcoesEsperadas.add(FuncaoToken.CONST_INTEIRA);
+        funcoesEsperadas.add(FuncaoToken.CONST_REAL);
+        //funcoesEsperadas.add(FuncaoToken.OP_MAT_SUBTRACAO);
+        funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
+        //funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
+        //funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
+                    
+        boolean go = true;
+        while (go && existeProxima()){
+            token = tokens.get(pos++);
+            if (!funcaoValida(token)) {
+                expressao.invalidaInstrucao();
+                break;
+            }
+            boolean parada = false;
+            for (FuncaoToken condParada : condicoesParada) {
+                if (condParada == token.getFuncaoToken()) {
+                    parada = true;
+                    break;
+                }
+            }
+            if (parada) {
+                pos--;
+                break;
+            }
+            switch (token.getFuncaoToken()) {
+                case CONST_CARACTER:
+                    saida.add(token);
+                    funcoesEsperadas.clear();
+                    for (FuncaoToken condicaoParada : condicoesParada) {
+                        funcoesEsperadas.add(condicaoParada);
+                    }
+                    break;
+                case _INDEF_ALFABETICO:
+                case _INDEF_ALFANUMERICO:
+                    if (declVariaveis.containsKey(token.getPalavra())){
+                        token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
+                        saida.add(token);
+                    } else {
+                        erros.add(new Erro(TipoErro.ERRO, token, 
+                        String.format("Variável \"%s\" não declarada", token.getPalavra())));
+                        expressao.invalidaInstrucao();
+                    }
+                    funcoesEsperadas.clear();
+                    for (FuncaoToken condicaoParada : condicoesParada) {
+                        funcoesEsperadas.add(condicaoParada);
+                    }
+                    funcoesEsperadas.add(FuncaoToken.OP_MAT_SOMA);
+                    funcoesEsperadas.add(FuncaoToken.OP_MAT_SUBTRACAO);
+                    funcoesEsperadas.add(FuncaoToken.OP_MAT_MULTIPLICACAO);
+                    funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_REAL);
+                    funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_INTEIRA);
+                    funcoesEsperadas.add(FuncaoToken.OP_MAT_MOD);
+                    break;
+                case CONST_INTEIRA:
+                case CONST_REAL:
+                    saida.add(token);
+                    funcoesEsperadas.clear();
+                    for (FuncaoToken condicaoParada : condicoesParada) {
+                        funcoesEsperadas.add(condicaoParada);
+                    }
+                    funcoesEsperadas.add(FuncaoToken.OP_MAT_SOMA);
+                    funcoesEsperadas.add(FuncaoToken.OP_MAT_SUBTRACAO);
+                    funcoesEsperadas.add(FuncaoToken.OP_MAT_MULTIPLICACAO);
+                    funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_REAL);
+                    funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_INTEIRA);
+                    funcoesEsperadas.add(FuncaoToken.OP_MAT_MOD);
+                    break;
+                case OP_MAT_SOMA:
+                case OP_MAT_SUBTRACAO:
+                case OP_MAT_MULTIPLICACAO:
+                case OP_MAT_DIV_REAL:
+                case OP_MAT_DIV_INTEIRA:
+                case OP_MAT_MOD:
+                    Token topo = pilha.peek();
+                    while (topo != null &&
+                            topo.getPrecedencia() > token.getPrecedencia() &&
+                            topo.getFuncaoToken() != FuncaoToken.DELIM_PARENTESES_ABRE) {
+                        saida.add(pilha.pop());
+                        topo = pilha.peek();
+                    }
+                    pilha.push(token);
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                    funcoesEsperadas.add(FuncaoToken.CONST_INTEIRA);
+                    funcoesEsperadas.add(FuncaoToken.CONST_REAL);
+                    break;
+                case DELIM_PARENTESES_ABRE:
+                    saida.add(token);
+                    pilha.push(token);
+                    break;
+                case DELIM_PARENTESES_FECHA:
+                    while (!pilha.isEmpty() &&
+                            pilha.peek().getFuncaoToken() != FuncaoToken.DELIM_PARENTESES_ABRE) {
+                        saida.add(pilha.pop());
+                    }
+                    if (pilha.isEmpty()) {
+                        erros.add(new Erro(TipoErro.ERRO, token, 
+                        "Parêntese de abertura não encontrado"));
+                        expressao.invalidaInstrucao();
+                    } else {
+                        pilha.pop();
+                    }
+                    saida.add(token);
+                    break;
+            }
+        }
+        while (!pilha.isEmpty()) {
+            token = pilha.pop();
+            if (token.getFuncaoToken() == FuncaoToken.DELIM_PARENTESES_ABRE) {
+                erros.add(new Erro(TipoErro.ERRO, token, 
+                "Parêntese de fechamento não encontrado"));
+                expressao.invalidaInstrucao();
+            }
+            saida.add(token);
+        }
+        
+        for (Token t : saida) {
+            expressao.addToken(t);
+        }
+        
+        funcoesEsperadas.clear();
+        for (FuncaoToken condicaoParada : condicoesParada) {
+            funcoesEsperadas.add(condicaoParada);
+        }
+        
+        return expressao;
+    }
 }
