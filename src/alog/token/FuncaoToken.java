@@ -38,15 +38,6 @@ public enum FuncaoToken {
      * </ul>
      */
     _INDEF_ALFANUMERICO ("Identificador Alfanumérico"),
-    /**
-     * Numeral (0 a 9).
-     * Token com mais de uma função possível (classificada pelo Parser):
-     * <ul>
-     * <li>{@link #CONST_INTEIRA} (<code>VarInteira &lt;- <u>30</u> ...</code>)</li>
-     * <li>{@link #CONST_REAL} (<code>Valor * <u>0</u>.<u>65</u> ...</code>)</li>
-     * </ul>
-     */
-    _INDEF_NUMERICO ("Numeral"),
     
     //CATEGORIA: PALAVRAS RESERVADAS (Funções e identificadores exclusivos)
     

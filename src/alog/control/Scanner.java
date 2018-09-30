@@ -2,6 +2,7 @@ package alog.control;
 
 import alog.analise.Erro;
 import alog.analise.TipoErro;
+import alog.token.FuncaoToken;
 import alog.token.TipoToken;
 import alog.token.Token;
 import java.util.LinkedList;
@@ -68,9 +69,6 @@ public class Scanner {
         Token token = new Token(linha, coluna, posicao, ordem++);
         
         while (go && next && indice < len){
-            if (indice + 1 == len){
-                next = false;
-            }
             char ch = texto[indice];
             if (literal){
                 if (ch == '"'){
@@ -180,15 +178,39 @@ public class Scanner {
         if (contLit > 0){
             token.setTipoToken(TipoToken.LITERAL);
         } else {
-            if (contNum > 0){
-                if (contAlpha > 0){
+            if (contAlpha > 0){
+                if (contNum > 0) {
                     token.setTipoToken(TipoToken.ALFANUMERICO);
                 } else {
-                    token.setTipoToken(TipoToken.NUMERICO);
+                    token.setTipoToken(TipoToken.ALFABETICO);
                 }
             } else {
-                if (contAlpha > 0){
-                    token.setTipoToken(TipoToken.ALFABETICO);
+                if (contNum > 0){
+                    Scanner scannerInterno = new Scanner(new String(texto));
+                    scannerInterno.indice = this.indice;
+                    scannerInterno.posicao = this.posicao;
+                    scannerInterno.linha = this.linha;
+                    scannerInterno.coluna = this.coluna;
+                    scannerInterno.ordem = this.ordem;
+                    
+                    Token prox1 = scannerInterno.proximo();
+                    Token prox2 = scannerInterno.proximo();
+                    if (prox1.getFuncaoToken() == FuncaoToken.DELIM_PONTO) {
+                        token.atualizaPalavra(prox1.getPalavra());
+                        token.atualizaPalavra(prox2.getPalavra());
+                        this.indice = scannerInterno.indice;
+                        this.posicao = scannerInterno.posicao;
+                        this.linha = scannerInterno.linha;
+                        this.coluna = scannerInterno.coluna;
+                        this.ordem = scannerInterno.ordem;
+                        if (prox2.getFuncaoToken() == FuncaoToken.CONST_INTEIRA){
+                            token.setTipoToken(TipoToken.NUMERICO);
+                        } else {
+                            token.setTipoToken(TipoToken.INDEFINIDO);
+                        }
+                    } else {
+                        token.setTipoToken(TipoToken.NUMERICO);
+                    }
                 } else {
                     if (contDelim > 0){
                         token.setTipoToken(TipoToken.DELIMITADOR);

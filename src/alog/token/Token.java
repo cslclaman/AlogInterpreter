@@ -477,7 +477,12 @@ public class Token {
                 funcaoToken = FuncaoToken._INDEF_ALFANUMERICO;
                 break;
             case NUMERICO:
-                funcaoToken = FuncaoToken._INDEF_NUMERICO;
+                int ponto = palavra.indexOf(".");
+                if (ponto > 0 && ponto < palavra.length() - 1) {
+                    funcaoToken = FuncaoToken.CONST_REAL;
+                } else {
+                    funcaoToken = FuncaoToken.CONST_INTEIRA;
+                }
                 break;
             default:
                 funcaoToken = FuncaoToken._INVALIDO;
