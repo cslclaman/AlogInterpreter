@@ -19,16 +19,15 @@ public class ChamadaRotina extends Instrucao {
     protected LinkedList<Expressao> parametros;
     
     public ChamadaRotina() {
-        texto = "";
+        super();
         tipo = TipoInstrucao.CHAMADA_ROTINA;
-        tokens = new LinkedList<>();
         parametros = new LinkedList<>();
     }
 
     public void setTokenNome(Token token){
         if (nome == null) {
             nome = token;
-            tokens.add(token);
+            super.addToken(token);
         }
     }
     
@@ -36,7 +35,7 @@ public class ChamadaRotina extends Instrucao {
         if (nome != null) {
             parametros.add(expressao);
             for (Token token : expressao.listaTokens()){
-                tokens.add(token);
+                super.addToken(token);
             }
         }
     }

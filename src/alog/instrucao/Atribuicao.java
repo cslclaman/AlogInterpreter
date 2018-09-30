@@ -19,9 +19,8 @@ public class Atribuicao extends Instrucao {
     protected Expressao expressao;
 
     public Atribuicao() {
-        texto = "";
+        super();
         tipo = TipoInstrucao.ATRIBUICAO;
-        tokens = new LinkedList<>();
     }
     
     public Token getVariavel() {
@@ -31,7 +30,7 @@ public class Atribuicao extends Instrucao {
     public void setVariavel(Token variavel) {
         if (this.variavel == null){
             this.variavel = variavel;
-            tokens.add(variavel);
+            super.addToken(variavel);
         }
     }
 
@@ -42,8 +41,11 @@ public class Atribuicao extends Instrucao {
     public void setExpressao(Expressao expressao) {
         if (variavel != null) {
             this.expressao = expressao;
+            if (!expressao.instrucaoValida()){
+                invalidaInstrucao();
+            }
             for (Token token : expressao.listaTokens()){
-                tokens.add(token);
+                super.addToken(token);
             }
         }
     }
