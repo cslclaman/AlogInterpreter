@@ -2,8 +2,14 @@ Início
     Inteiro: Idade;
     Caracter: Nome;
     Real: IdadeDias;
-    Leia(Idade);
-    IdadeDias <- 365.25 * Idade;
-    Nome <- "Alguma coisa";
+    Leia(Idade, Nome);
+    IdadeDias <- (360 + 5 + 0.25) * Idade;
+    Se Nome = "A" Então
+        Escreva("Seu nome é A");
+    Senão
+    Início
+        Nome <- "Não A";
+        Escreva("Seu nome não é A");
+    Fim
     Escreva(IdadeDias);
 Fim

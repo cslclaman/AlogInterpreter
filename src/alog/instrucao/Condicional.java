@@ -17,16 +17,15 @@ public class Condicional extends Instrucao {
     private Instrucao instrucaoSenao;
 
     public Condicional() {
-        texto = "";
+        super();
         tipo = TipoInstrucao.CONDICIONAL;
-        tokens = new LinkedList<>();
         composta = false;
     }
 
     public void setTokenSe(Token tokenSe) {
         if (this.tokenSe == null){
             this.tokenSe = tokenSe;
-            tokens.add(tokenSe);
+            super.addToken(tokenSe);
         }
     }
 
@@ -34,7 +33,10 @@ public class Condicional extends Instrucao {
         if (this.tokenSe != null){
             this.condicional = condicional;
             for (Token token : condicional.listaTokens()){
-                tokens.add(token);
+                super.addToken(token);
+            }
+            if (!condicional.instrucaoValida()){
+                invalidaInstrucao();
             }
         }
     }
@@ -42,16 +44,20 @@ public class Condicional extends Instrucao {
     public void setInstrucaoSe(Instrucao instrucaoSe) {
         if (this.condicional != null){
             this.instrucaoSe = instrucaoSe;
+            texto.append("\n        ").append(instrucaoSe.toString());
             for (Token token : instrucaoSe.listaTokens()){
+                //super.addToken(token);
                 tokens.add(token);
             }
+            
         }
     }
 
     public void setTokenSenao(Token tokenSenao) {
         if (this.instrucaoSe != null){
             this.tokenSenao = tokenSenao;
-            tokens.add(tokenSenao);
+            texto.append("\n    ");            
+            super.addToken(tokenSenao);
             composta = true;
         }
     }
@@ -59,7 +65,9 @@ public class Condicional extends Instrucao {
     public void setInstrucaoSenao(Instrucao instrucaoSenao) {
         if (composta){
             this.instrucaoSenao = instrucaoSenao;
+            texto.append("\n        ").append(instrucaoSenao.toString());
             for (Token token : instrucaoSenao.listaTokens()){
+                //super.addToken(token);
                 tokens.add(token);
             }
         }

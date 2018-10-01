@@ -575,8 +575,9 @@ public class Parser {
         }
         
         if (existeProxima()){
-            Token token = tokens.get(pos + 1);
+            Token token = tokens.get(pos);
             if (token.getFuncaoToken() == FuncaoToken.RES_COND_SENAO){
+                pos++;
                 condicional.setTokenSenao(token);
                 
                 Parser parserInterno = new Parser(tokens);
@@ -591,6 +592,9 @@ public class Parser {
                 } else {
                     condicional.setInstrucaoSenao(instrucaoInterna);
                 }
+                
+                pos = parserInterno.pos;
+                declVariaveis = parserInterno.declVariaveis;
             }
         }
         
@@ -599,13 +603,14 @@ public class Parser {
     
     private Expressao instrucaoExpressao(FuncaoToken... condicoesParada) {
         Expressao expressao = new Expressao();
-        Token token;
+        Token token, topo;
         
         LinkedList<Token> pilha = new LinkedList<>();
         LinkedList<Token> saida = new LinkedList<>();
         
+        int balancParenteses = 0;
         funcoesEsperadas.clear();
-        //funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
+        funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
         funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
         funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
         funcoesEsperadas.add(FuncaoToken.CONST_INTEIRA);
@@ -625,6 +630,10 @@ public class Parser {
             boolean parada = false;
             for (FuncaoToken condParada : condicoesParada) {
                 if (condParada == token.getFuncaoToken()) {
+                    if (condParada == FuncaoToken.DELIM_PARENTESES_FECHA &&
+                            balancParenteses > 0) {
+                        break;
+                    }
                     parada = true;
                     break;
                 }
@@ -640,6 +649,15 @@ public class Parser {
                     for (FuncaoToken condicaoParada : condicoesParada) {
                         funcoesEsperadas.add(condicaoParada);
                     }
+                    if (balancParenteses > 0) {
+                        funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
+                    }
+                    funcoesEsperadas.add(FuncaoToken.OP_REL_MAIOR);
+                    funcoesEsperadas.add(FuncaoToken.OP_REL_MAIOR_IGUAL);
+                    funcoesEsperadas.add(FuncaoToken.OP_REL_MENOR);
+                    funcoesEsperadas.add(FuncaoToken.OP_REL_MENOR_IGUAL);
+                    funcoesEsperadas.add(FuncaoToken.OP_REL_IGUAL);
+                    funcoesEsperadas.add(FuncaoToken.OP_REL_DIFERENTE);
                     break;
                 case _INDEF_ALFABETICO:
                 case _INDEF_ALFANUMERICO:
@@ -655,12 +673,21 @@ public class Parser {
                     for (FuncaoToken condicaoParada : condicoesParada) {
                         funcoesEsperadas.add(condicaoParada);
                     }
+                    if (balancParenteses > 0) {
+                        funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
+                    }
                     funcoesEsperadas.add(FuncaoToken.OP_MAT_SOMA);
                     funcoesEsperadas.add(FuncaoToken.OP_MAT_SUBTRACAO);
                     funcoesEsperadas.add(FuncaoToken.OP_MAT_MULTIPLICACAO);
                     funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_REAL);
                     funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_INTEIRA);
                     funcoesEsperadas.add(FuncaoToken.OP_MAT_MOD);
+                    funcoesEsperadas.add(FuncaoToken.OP_REL_MAIOR);
+                    funcoesEsperadas.add(FuncaoToken.OP_REL_MAIOR_IGUAL);
+                    funcoesEsperadas.add(FuncaoToken.OP_REL_MENOR);
+                    funcoesEsperadas.add(FuncaoToken.OP_REL_MENOR_IGUAL);
+                    funcoesEsperadas.add(FuncaoToken.OP_REL_IGUAL);
+                    funcoesEsperadas.add(FuncaoToken.OP_REL_DIFERENTE);
                     break;
                 case CONST_INTEIRA:
                 case CONST_REAL:
@@ -669,12 +696,21 @@ public class Parser {
                     for (FuncaoToken condicaoParada : condicoesParada) {
                         funcoesEsperadas.add(condicaoParada);
                     }
+                    if (balancParenteses > 0) {
+                        funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
+                    }
                     funcoesEsperadas.add(FuncaoToken.OP_MAT_SOMA);
                     funcoesEsperadas.add(FuncaoToken.OP_MAT_SUBTRACAO);
                     funcoesEsperadas.add(FuncaoToken.OP_MAT_MULTIPLICACAO);
                     funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_REAL);
                     funcoesEsperadas.add(FuncaoToken.OP_MAT_DIV_INTEIRA);
                     funcoesEsperadas.add(FuncaoToken.OP_MAT_MOD);
+                    funcoesEsperadas.add(FuncaoToken.OP_REL_MAIOR);
+                    funcoesEsperadas.add(FuncaoToken.OP_REL_MAIOR_IGUAL);
+                    funcoesEsperadas.add(FuncaoToken.OP_REL_MENOR);
+                    funcoesEsperadas.add(FuncaoToken.OP_REL_MENOR_IGUAL);
+                    funcoesEsperadas.add(FuncaoToken.OP_REL_IGUAL);
+                    funcoesEsperadas.add(FuncaoToken.OP_REL_DIFERENTE);
                     break;
                 case OP_MAT_SOMA:
                 case OP_MAT_SUBTRACAO:
@@ -682,7 +718,7 @@ public class Parser {
                 case OP_MAT_DIV_REAL:
                 case OP_MAT_DIV_INTEIRA:
                 case OP_MAT_MOD:
-                    Token topo = pilha.peek();
+                    topo = pilha.peek();
                     while (topo != null &&
                             topo.getPrecedencia() > token.getPrecedencia() &&
                             topo.getFuncaoToken() != FuncaoToken.DELIM_PARENTESES_ABRE) {
@@ -691,14 +727,38 @@ public class Parser {
                     }
                     pilha.push(token);
                     funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                    funcoesEsperadas.add(FuncaoToken.CONST_INTEIRA);
+                    funcoesEsperadas.add(FuncaoToken.CONST_REAL);
+                    break;
+                case OP_REL_MAIOR:
+                case OP_REL_MAIOR_IGUAL:
+                case OP_REL_MENOR:
+                case OP_REL_MENOR_IGUAL:
+                case OP_REL_IGUAL:
+                case OP_REL_DIFERENTE:
+                    topo = pilha.peek();
+                    while (topo != null &&
+                            topo.getPrecedencia() > token.getPrecedencia() &&
+                            topo.getFuncaoToken() != FuncaoToken.DELIM_PARENTESES_ABRE) {
+                        saida.add(pilha.pop());
+                        topo = pilha.peek();
+                    }
+                    pilha.push(token);
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                    funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
                     funcoesEsperadas.add(FuncaoToken.CONST_INTEIRA);
                     funcoesEsperadas.add(FuncaoToken.CONST_REAL);
                     break;
                 case DELIM_PARENTESES_ABRE:
                     saida.add(token);
                     pilha.push(token);
+                    balancParenteses ++;
                     break;
                 case DELIM_PARENTESES_FECHA:
                     while (!pilha.isEmpty() &&
@@ -713,6 +773,7 @@ public class Parser {
                         pilha.pop();
                     }
                     saida.add(token);
+                    balancParenteses --;
                     break;
             }
         }
