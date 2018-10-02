@@ -10,23 +10,65 @@ import java.util.LinkedList;
  * 
  * @author Caique
  */
-public class Expressao extends Instrucao {
+public abstract class Expressao extends Instrucao {
 
-    private TipoExpressao tipoExpressao;
-    private TipoVariavel tipoResultado;
-    private String resultado;
+    protected TipoExpressao tipoExpressao;
+    protected TipoVariavel tipoResultado;
+    protected String resultado;
     private Token parentesesAbre;
     private Token parentesesFecha;
-    private Token operador;
-    private Token operando;
-    private Expressao membroEsq;
-    private Expressao membroDir;
     
-    public Expressao() {
+    protected Expressao() {
         super();
         tipo = TipoInstrucao.EXPRESSAO;
-        tipoResultado = null;
         tipoExpressao = TipoExpressao._INDEFINIDO;
-        tokens = new LinkedList<>();
     }
+
+    public TipoExpressao getTipoExpressao() {
+        return tipoExpressao;
+    }
+
+    public TipoVariavel getTipoResultado() {
+        return tipoResultado;
+    }
+
+    public void setTipoResultado(TipoVariavel tipoResultado) {
+        this.tipoResultado = tipoResultado;
+    }
+
+    public String getResultado() {
+        return resultado;
+    }
+
+    public void setResultado(String resultado) {
+        this.resultado = resultado;
+    }
+
+    public Token getParentesesAbre() {
+        return parentesesAbre;
+    }
+
+    public void setParentesesAbre(Token parentesesAbre) {
+        this.parentesesAbre = parentesesAbre;
+    }
+
+    public Token getParentesesFecha() {
+        return parentesesFecha;
+    }
+
+    public void setParentesesFecha(Token parentesesFecha) {
+        this.parentesesFecha = parentesesFecha;
+    }
+
+    @Override
+    public String toString() {
+        return texto.toString();
+    }
+
+    @Override
+    public String getTexto() {
+        return toString();
+    }
+    
+    
 }

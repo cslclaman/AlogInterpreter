@@ -2,16 +2,21 @@ package alog.control;
 
 import alog.analise.Erro;
 import alog.analise.TipoErro;
+import alog.expressao.ChamadaFuncao;
 import alog.expressao.Expressao;
+import alog.expressao.Operando;
+import alog.expressao.SubExpressao;
 import alog.instrucao.*;
 import alog.token.FuncaoToken;
 import alog.instrucao.TipoInstrucao;
 import alog.model.*;
 import alog.token.Token;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * Analisador sintático que verifica uma sequência de tokens e retorna expressões executáveis.
@@ -602,9 +607,10 @@ public class Parser {
     }
     
     private Expressao instrucaoExpressao(FuncaoToken... condicoesParada) {
-        Expressao expressao = new Expressao();
-        Token token, topo;
-        
+        boolean expressaoValida = true;
+        Token token;
+        Token topo;
+        LinkedList<Token> texto = new LinkedList<>();
         LinkedList<Token> pilha = new LinkedList<>();
         LinkedList<Token> saida = new LinkedList<>();
         
@@ -624,7 +630,7 @@ public class Parser {
         while (go && existeProxima()){
             token = tokens.get(pos++);
             if (!funcaoValida(token)) {
-                expressao.invalidaInstrucao();
+                expressaoValida = false;
                 break;
             }
             boolean parada = false;
@@ -642,6 +648,7 @@ public class Parser {
                 pos--;
                 break;
             }
+            texto.add(token);
             switch (token.getFuncaoToken()) {
                 case CONST_CARACTER:
                     saida.add(token);
@@ -667,7 +674,7 @@ public class Parser {
                     } else {
                         erros.add(new Erro(TipoErro.ERRO, token, 
                         String.format("Variável \"%s\" não declarada", token.getPalavra())));
-                        expressao.invalidaInstrucao();
+                        expressaoValida = false;
                     }
                     funcoesEsperadas.clear();
                     for (FuncaoToken condicaoParada : condicoesParada) {
@@ -688,6 +695,8 @@ public class Parser {
                     funcoesEsperadas.add(FuncaoToken.OP_REL_MENOR_IGUAL);
                     funcoesEsperadas.add(FuncaoToken.OP_REL_IGUAL);
                     funcoesEsperadas.add(FuncaoToken.OP_REL_DIFERENTE);
+                    funcoesEsperadas.add(FuncaoToken.OP_LOG_E);
+                    funcoesEsperadas.add(FuncaoToken.OP_LOG_OU);
                     break;
                 case CONST_INTEIRA:
                 case CONST_REAL:
@@ -711,6 +720,8 @@ public class Parser {
                     funcoesEsperadas.add(FuncaoToken.OP_REL_MENOR_IGUAL);
                     funcoesEsperadas.add(FuncaoToken.OP_REL_IGUAL);
                     funcoesEsperadas.add(FuncaoToken.OP_REL_DIFERENTE);
+                    funcoesEsperadas.add(FuncaoToken.OP_LOG_E);
+                    funcoesEsperadas.add(FuncaoToken.OP_LOG_OU);
                     break;
                 case OP_MAT_SOMA:
                 case OP_MAT_SUBTRACAO:
@@ -755,6 +766,24 @@ public class Parser {
                     funcoesEsperadas.add(FuncaoToken.CONST_INTEIRA);
                     funcoesEsperadas.add(FuncaoToken.CONST_REAL);
                     break;
+                case OP_LOG_E:
+                case OP_LOG_OU:
+                    topo = pilha.peek();
+                    while (topo != null &&
+                            topo.getPrecedencia() > token.getPrecedencia() &&
+                            topo.getFuncaoToken() != FuncaoToken.DELIM_PARENTESES_ABRE) {
+                        saida.add(pilha.pop());
+                        topo = pilha.peek();
+                    }
+                    pilha.push(token);
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                    funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
+                    funcoesEsperadas.add(FuncaoToken.CONST_INTEIRA);
+                    funcoesEsperadas.add(FuncaoToken.CONST_REAL);
+                    break;
                 case DELIM_PARENTESES_ABRE:
                     saida.add(token);
                     pilha.push(token);
@@ -768,7 +797,7 @@ public class Parser {
                     if (pilha.isEmpty()) {
                         erros.add(new Erro(TipoErro.ERRO, token, 
                         "Parêntese de abertura não encontrado"));
-                        expressao.invalidaInstrucao();
+                        expressaoValida = false;
                     } else {
                         pilha.pop();
                     }
@@ -782,13 +811,68 @@ public class Parser {
             if (token.getFuncaoToken() == FuncaoToken.DELIM_PARENTESES_ABRE) {
                 erros.add(new Erro(TipoErro.ERRO, token, 
                 "Parêntese de fechamento não encontrado"));
-                expressao.invalidaInstrucao();
+                expressaoValida = false;
             }
             saida.add(token);
         }
         
+        Expressao expressao = null;
+        LinkedList<Expressao> stack = new LinkedList<>();
+        
         for (Token t : saida) {
-            expressao.addToken(t);
+            switch (t.getFuncaoToken()){
+                case CONST_CARACTER:
+                case CONST_INTEIRA:
+                case CONST_REAL:
+                case IDENT_NOME_VARIAVEL:
+                    Operando operando = new Operando();
+                    operando.setOperando(t);
+                    stack.push(operando);
+                    break;
+                    
+                case OP_MAT_SOMA:
+                case OP_MAT_SUBTRACAO:
+                case OP_MAT_MULTIPLICACAO:
+                case OP_MAT_DIV_REAL:
+                case OP_MAT_DIV_INTEIRA:
+                case OP_MAT_MOD:
+                case OP_REL_MAIOR:
+                case OP_REL_MAIOR_IGUAL:
+                case OP_REL_MENOR:
+                case OP_REL_MENOR_IGUAL:
+                case OP_REL_IGUAL:
+                case OP_REL_DIFERENTE:
+                case OP_LOG_E:
+                case OP_LOG_OU:
+                    SubExpressao subExpressao = new SubExpressao();
+                    subExpressao.setOperador(t);
+                    try {
+                        subExpressao.setExpressaoDir(stack.pop());
+                        subExpressao.setExpressaoEsq(stack.pop());
+                    } catch (NoSuchElementException ex){
+                        erros.add(new Erro(TipoErro.ERRO, t, 
+                            "Erro ao montar expressão"));
+                        expressaoValida = false;
+                    }
+                    stack.push(subExpressao);
+                    break;
+                    
+                case DELIM_PARENTESES_ABRE:
+                case DELIM_PARENTESES_FECHA:
+                    break;
+            }
+        }
+        try {
+            expressao = stack.pop();
+        } catch (NoSuchElementException ex){
+            erros.add(new Erro(TipoErro.ERRO, saida.getFirst(), 
+                "Erro ao finalizar expressão"));
+            expressaoValida = false;
+            expressao = new Operando();
+        }
+        
+        if (!expressaoValida) {
+            expressao.invalidaInstrucao();
         }
         
         funcoesEsperadas.clear();
