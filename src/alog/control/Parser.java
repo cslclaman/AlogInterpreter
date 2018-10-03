@@ -78,6 +78,10 @@ public class Parser {
             //Inicializa uma instrução tipo bloco
             case RES_BLOCO_INICIO:
                 instrucao = instrucaoBloco();
+                if (((Bloco)instrucao).listaInstrucoes().isEmpty()) {
+                    erros.add(new Erro(TipoErro.ERRO, ((Bloco)instrucao).getInicio(),
+                        "Bloco vazio declarado"));
+                }
                 
                 switch (tipoUltimaInstrucao){
                     case _INDEFINIDO:
@@ -149,6 +153,13 @@ public class Parser {
                 funcoesEsperadas.clear();
                 funcoesEsperadas = funcoesBloco();
                 break;
+                
+            //Define estrutura Repetitiva "Enquanto-Faça"
+            /*case RES_REP_ENQUANTO:
+                instrucao = instrucaoRepetitivaEnquantoFaca();
+                funcoesEsperadas.clear();
+                funcoesEsperadas = funcoesBloco();
+                break;*/
         }
         
         return instrucao;
@@ -232,10 +243,7 @@ public class Parser {
             }
         }
 
-        for (Erro erro : parserInterno.erros){
-            erros.add(erro);
-        }
-        
+        erros.addAll(parserInterno.erros);
         pos = parserInterno.pos;
         declVariaveis = parserInterno.declVariaveis;
 
@@ -486,7 +494,7 @@ public class Parser {
                     
                     Instrucao instrucaoInterna = parserInterno.proxima();
                     if (!instrucaoInterna.instrucaoValida()){
-                        erros.add(parserInterno.erros.getLast());
+                        erros.addAll(parserInterno.erros);
                     } else {
                         condicional.setInstrucaoSe(instrucaoInterna);
                     }
@@ -512,7 +520,7 @@ public class Parser {
 
                 Instrucao instrucaoInterna = parserInterno.proxima();
                 if (!instrucaoInterna.instrucaoValida()){
-                    erros.add(parserInterno.erros.getLast());
+                    erros.addAll(parserInterno.erros);
                 } else {
                     condicional.setInstrucaoSenao(instrucaoInterna);
                 }
@@ -800,7 +808,7 @@ public class Parser {
                         subExpressao.setExpressaoEsq(pilhaExpressoes.pop());
                     } catch (NoSuchElementException ex){
                         erros.add(new Erro(TipoErro.ERRO, t, 
-                            "Erro ao montar expressão"));
+                            "Erro ao montar expressão - operando não encontrado"));
                         expressaoValida = false;
                         subExpressao.addToken(t);
                     }
@@ -822,7 +830,7 @@ public class Parser {
                         pilhaExpressoes.push(parenteseada);
                     } catch (NoSuchElementException | ClassCastException ex){
                         erros.add(new Erro(TipoErro.ALERTA, t, 
-                            "Alerta ao montar expressão"));
+                            "Alerta ao montar expressão - não pôde encontrar parênteses"));
                     }
                     break;
             }
@@ -831,8 +839,8 @@ public class Parser {
         try {
             expressao = pilhaExpressoes.pop();
         } catch (NoSuchElementException ex){
-            erros.add(new Erro(TipoErro.ERRO, saida.getFirst(), 
-                "Erro ao finalizar expressão"));
+            erros.add(new Erro(TipoErro.ERRO, tokens.get(pos-1), 
+                "Erro ao finalizar expressão - última operação inválida ou nula"));
             expressaoValida = false;
             expressao = new Operando();
         }
