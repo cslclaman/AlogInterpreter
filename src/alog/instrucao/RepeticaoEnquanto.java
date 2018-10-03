@@ -12,12 +12,10 @@ import alog.token.Token;
  *
  * @author Caique
  */
-public class RepeticaoEnquanto extends Instrucao {
+public class RepeticaoEnquanto extends EstruturaControle {
     private Token tokenEnquanto;
     private Token tokenFaca;
-    private Expressao condicao;
-    private Instrucao instrucao;
-
+    
     public RepeticaoEnquanto() {
         super();
         tipo = TipoInstrucao.REPETICAO_ENQUANTO;
@@ -33,24 +31,4 @@ public class RepeticaoEnquanto extends Instrucao {
         super.addToken(tokenFaca);
     }
 
-    public void setExpressao(Expressao condicao) {
-        this.condicao = condicao;
-        tokens.addAll(condicao.listaTokens());
-        texto.append(condicao.toString());
-        if (!condicao.instrucaoValida()){
-            invalidaInstrucao();
-        }
-    }
-
-    public void setInstrucao(Instrucao instrucao) {
-        this.instrucao = instrucao;
-        tokens.addAll(instrucao.listaTokens());
-        texto.append("\n    ").append(instrucao.toString());
-        if (!instrucao.instrucaoValida()){
-            invalidaInstrucao();
-        }
-    }
-    
-    
-    
 }
