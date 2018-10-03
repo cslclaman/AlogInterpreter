@@ -1,18 +1,29 @@
 Início
-    Inteiro: Idade;
-    Real: IdadeDias;
-    Caracter: Opcao;
-
-    Leia(Opcao);
-    Enquanto Opcao = "S" ou Opcao = "s" Faça
+    Inteiro: Result, Multiplic, Num;
+    
+    Leia(Num);
+    
+    Multiplic <- 1;
+    Enquanto Multiplic <= 10 Faça
     Início
-        Leia(Idade);
-        Se Idade >= 18 Então
-            Escreva ("Maior de idade");
-        Senão
-            Escreva ("Menor de idade");
-        IdadeDias <- (360 + 5 + 0.25) * Idade;
-        Escreva(IdadeDias);
-        Leia (Opcao);
+        Result <- Num * Multiplic;
+        Escreva (Num, " x ", Multiplic, " = ", Result);
+        Multiplic <- Multiplic + 1;
     Fim
+
+    Multiplic <- 1;
+    Faça
+    Início
+        Result <- Num * Multiplic;
+        Escreva (Num, " x ", Multiplic, " = ", Result);
+        Multiplic <- Multiplic + 1;
+    Fim
+    Enquanto Multiplic < 10;
+
+    Para Multiplic de 1 até 10 Faça
+    Início
+        Result <- Num * Multiplic;
+        Escreva (Num, " x ", Multiplic, " = ", Result);
+    Fim
+
 Fim

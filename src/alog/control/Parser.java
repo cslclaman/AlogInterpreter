@@ -160,6 +160,20 @@ public class Parser {
                 funcoesEsperadas.clear();
                 funcoesEsperadas = funcoesBloco();
                 break;
+                
+            //Define estrutura Repetitiva "Enquanto-Faça"
+            case RES_REP_FACA:
+                instrucao = instrucaoRepeticaoFaca();
+                funcoesEsperadas.clear();
+                funcoesEsperadas = funcoesBloco();
+                break;
+                
+            //Define estrutura Repetitiva "Para-de-até-Faça"
+            case RES_REP_PARA:
+                instrucao = instrucaoRepeticaoPara();
+                funcoesEsperadas.clear();
+                funcoesEsperadas = funcoesBloco();
+                break;
         }
         
         return instrucao;
@@ -578,6 +592,132 @@ public class Parser {
         return repetitiva;
     }
     
+    private RepeticaoFaca instrucaoRepeticaoFaca(){
+        RepeticaoFaca repetitiva = new RepeticaoFaca();
+        
+        boolean go = true;
+        while (go && existeProxima()){
+            Token token = tokens.get(pos++);
+            if (!funcaoValida(token)){
+                repetitiva.invalidaInstrucao();
+                break;
+            }
+            
+            switch (token.getFuncaoToken()){
+                case RES_REP_FACA:
+                    repetitiva.setTokenFaca(token);
+                    funcoesEsperadas.clear();
+                    
+                    Parser parserInterno = new Parser(tokens);
+                    parserInterno.declVariaveis = declVariaveis;
+                    parserInterno.pos = pos;
+                    parserInterno.tipoUltimaInstrucao = repetitiva.getTipo();
+                    parserInterno.funcoesEsperadas = funcoesEstrutura();
+                    
+                    Instrucao instrucaoInterna = parserInterno.proxima();
+                    if (!instrucaoInterna.instrucaoValida()){
+                        erros.addAll(parserInterno.erros);
+                    } else {
+                        repetitiva.setInstrucao(instrucaoInterna);
+                    }
+                    
+                    pos = parserInterno.pos;
+                    declVariaveis = parserInterno.declVariaveis;
+                    
+                    funcoesEsperadas.add(FuncaoToken.RES_REP_ENQUANTO);
+                    break;
+                    
+                case RES_REP_ENQUANTO:
+                    repetitiva.setTokenEnquanto(token);
+                    repetitiva.setExpressao(instrucaoExpressao(FuncaoToken.DELIM_PONTO_VIRGULA));
+                    
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
+                    break;
+                    
+                case DELIM_PONTO_VIRGULA:
+                    repetitiva.addToken(token);
+                    funcoesEsperadas.clear();
+                    go = false;
+                    break;
+            }
+        }
+
+        return repetitiva;
+    }
+    
+    private RepeticaoPara instrucaoRepeticaoPara(){
+        RepeticaoPara repetitiva = new RepeticaoPara();
+        
+        boolean go = true;
+        while (go && existeProxima()){
+            Token token = tokens.get(pos++);
+            if (!funcaoValida(token)){
+                repetitiva.invalidaInstrucao();
+                break;
+            }
+            
+            switch (token.getFuncaoToken()){
+                case RES_REP_PARA:
+                    repetitiva.setTokenPara(token);
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                    break;
+                            
+                case _INDEF_ALFABETICO:
+                case _INDEF_ALFANUMERICO:
+                    if (declVariaveis.containsKey(token.getPalavra())){
+                        token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
+                        repetitiva.setContador(token);
+                    } else {
+                        repetitiva.addToken(token);
+                        erros.add(new Erro(TipoErro.ERRO, token, 
+                        String.format("Variável \"%s\" não declarada", token.getPalavra())));
+                        repetitiva.invalidaInstrucao();
+                    }
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.RES_COMUM_DE);
+                    break;
+                
+                case RES_COMUM_DE:
+                    token.setFuncaoToken(FuncaoToken.RES_REP_DE);
+                    repetitiva.addToken(token);
+                    repetitiva.setExpressaoDe(instrucaoExpressao(FuncaoToken.RES_REP_ATE));
+                    break;
+                    
+                case RES_REP_ATE:
+                    repetitiva.addToken(token);
+                    repetitiva.setExpressaoAte(instrucaoExpressao(FuncaoToken.RES_REP_FACA));
+                    break;
+                    
+                case RES_REP_FACA:
+                    repetitiva.addToken(token);
+                    funcoesEsperadas.clear();
+                    
+                    Parser parserInterno = new Parser(tokens);
+                    parserInterno.declVariaveis = declVariaveis;
+                    parserInterno.pos = pos;
+                    parserInterno.tipoUltimaInstrucao = repetitiva.getTipo();
+                    parserInterno.funcoesEsperadas = funcoesEstrutura();
+                    
+                    Instrucao instrucaoInterna = parserInterno.proxima();
+                    if (!instrucaoInterna.instrucaoValida()){
+                        erros.addAll(parserInterno.erros);
+                    } else {
+                        repetitiva.setInstrucao(instrucaoInterna);
+                    }
+                    
+                    pos = parserInterno.pos;
+                    declVariaveis = parserInterno.declVariaveis;
+                    go = false;
+                    break;
+            }
+        }
+
+        return repetitiva;
+    }
+    
     private Expressao instrucaoExpressao(FuncaoToken... condicoesParada) {
         boolean expressaoValida = true;
         Token token;
@@ -978,6 +1118,7 @@ public class Parser {
         //Repetições
         funcoes.add(FuncaoToken.RES_REP_PARA);
         funcoes.add(FuncaoToken.RES_REP_ENQUANTO);
+        funcoes.add(FuncaoToken.RES_REP_REPITA);
         funcoes.add(FuncaoToken.RES_REP_FACA);
         //Fechamento do bloco
         funcoes.add(FuncaoToken.RES_BLOCO_FIM);

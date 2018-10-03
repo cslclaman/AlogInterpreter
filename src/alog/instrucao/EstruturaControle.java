@@ -20,7 +20,7 @@ public abstract class EstruturaControle extends Instrucao {
     public void setExpressao (Expressao condicao) {
         this.condicao = condicao;
         tokens.addAll(condicao.listaTokens());
-        texto.append(condicao.toString());
+        texto.append(condicao.toString()).append(" ");
         if (!condicao.instrucaoValida()){
             invalidaInstrucao();
         }
@@ -29,7 +29,7 @@ public abstract class EstruturaControle extends Instrucao {
     public void setInstrucao(Instrucao instrucao) {
         this.instrucao = instrucao;
         tokens.addAll(instrucao.listaTokens());
-        texto.append("\n    ").append(instrucao.toString());
+        texto.append("\n    ").append(instrucao.toString()).append(" ");
         if (!instrucao.instrucaoValida()){
             invalidaInstrucao();
         }

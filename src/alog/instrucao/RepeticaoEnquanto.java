@@ -5,7 +5,6 @@
  */
 package alog.instrucao;
 
-import alog.expressao.Expressao;
 import alog.token.Token;
 
 /**
@@ -14,7 +13,6 @@ import alog.token.Token;
  */
 public class RepeticaoEnquanto extends EstruturaControle {
     private Token tokenEnquanto;
-    private Token tokenFaca;
     
     public RepeticaoEnquanto() {
         super();
@@ -26,9 +24,7 @@ public class RepeticaoEnquanto extends EstruturaControle {
         super.addToken(tokenEnquanto);
     }
 
-    public void setTokenFaca(Token tokenFaca) {
-        this.tokenFaca = tokenFaca;
-        super.addToken(tokenFaca);
+    public Token getTokenEnquanto() {
+        return tokenEnquanto;
     }
-
 }
