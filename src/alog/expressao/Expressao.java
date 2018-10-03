@@ -4,7 +4,6 @@ import alog.instrucao.Instrucao;
 import alog.instrucao.TipoInstrucao;
 import alog.model.TipoVariavel;
 import alog.token.Token;
-import java.util.LinkedList;
 
 /**
  * 
@@ -15,8 +14,8 @@ public abstract class Expressao extends Instrucao {
     protected TipoExpressao tipoExpressao;
     protected TipoVariavel tipoResultado;
     protected String resultado;
-    private Token parentesesAbre;
-    private Token parentesesFecha;
+    protected Token parentesesAbre;
+    protected Token parentesesFecha;
     
     protected Expressao() {
         super();
@@ -50,6 +49,8 @@ public abstract class Expressao extends Instrucao {
 
     public void setParentesesAbre(Token parentesesAbre) {
         this.parentesesAbre = parentesesAbre;
+        tokens.addFirst(parentesesAbre);
+        texto.insert(0, parentesesAbre.getPalavra() + " ");
     }
 
     public Token getParentesesFecha() {
@@ -58,17 +59,15 @@ public abstract class Expressao extends Instrucao {
 
     public void setParentesesFecha(Token parentesesFecha) {
         this.parentesesFecha = parentesesFecha;
+        tokens.addLast(parentesesFecha);
+        texto.append(parentesesFecha.getPalavra());
     }
 
     @Override
     public String toString() {
-        return texto.toString();
+        return getTexto();
     }
 
-    @Override
-    public String getTexto() {
-        return toString();
-    }
-    
+    public abstract String imprimeExpressao();
     
 }

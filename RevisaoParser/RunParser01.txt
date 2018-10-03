@@ -6,6 +6,6 @@ Início
         Escreva ("Maior de idade");
     Senão
         Escreva ("Menor de idade");
-    IdadeDias <- 365.25 * Idade;
+    IdadeDias <- (360 + 5 + 0.25) * Idade;
     Escreva(IdadeDias);
 Fim

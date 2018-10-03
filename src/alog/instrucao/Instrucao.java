@@ -76,7 +76,7 @@ public abstract class Instrucao {
      */
     @Override
     public String toString() {
-        return tipo + " - " + texto;
+        return tipo + " - " + getTexto();
     }
     
 }

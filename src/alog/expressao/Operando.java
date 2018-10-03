@@ -23,7 +23,9 @@ public class Operando extends Expressao {
     
     public void setOperando(Token token) {
         this.operando = token;
-        super.addToken(token);
+        this.texto.append(operando.getPalavra());
+        this.tokens.add(token);
+        
         switch (token.getFuncaoToken()) {
             case CONST_CARACTER:
                 tipoResultado = TipoVariavel.CARACTER;
@@ -41,7 +43,12 @@ public class Operando extends Expressao {
     }
     
     @Override
-    public String toString () {
-        return operando.getPalavra();
+    public String imprimeExpressao (){
+        return "< " + 
+                (parentesesAbre == null ? "" : "( ") +
+                operando.getPalavra() + 
+                (parentesesFecha == null ? "" : ")") +
+                " >";
     }
+    
 }

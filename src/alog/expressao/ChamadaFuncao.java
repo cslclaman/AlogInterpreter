@@ -44,7 +44,17 @@ public class ChamadaFuncao extends Operando {
     }
     
     @Override
-    public String toString () {
-        return texto.toString();
+    public String imprimeExpressao (){
+        String params = "";
+        for (Expressao ex : parametros) {
+            if (!params.isEmpty()) params += " , ";
+            params += ex.imprimeExpressao();
+        }
+        return "< " + 
+                (parentesesAbre == null ? "" : "( ") +
+                operando.getPalavra() + " ( " + params + ")" +
+                (parentesesFecha == null ? "" : " )") +
+                " >";
     }
+    
 }

@@ -11,13 +11,13 @@ import alog.token.Token;
  *
  * @author Caique Souza
  */
-public class SubExpressao extends Expressao {
+public class Operacao extends Expressao {
     
     private Expressao expressaoEsq;
     private Expressao expressaoDir;
     private Token operador;
 
-    public SubExpressao() {
+    public Operacao() {
         super();
         expressaoEsq = null;
         expressaoDir = null;
@@ -29,6 +29,7 @@ public class SubExpressao extends Expressao {
 
     public void setExpressaoEsq(Expressao expressaoEsq) {
         this.expressaoEsq = expressaoEsq;
+        defineTexto();
     }
 
     public Expressao getExpressaoDir() {
@@ -37,6 +38,7 @@ public class SubExpressao extends Expressao {
 
     public void setExpressaoDir(Expressao expressaoDir) {
         this.expressaoDir = expressaoDir;
+        defineTexto();
     }
 
     public Token getOperador() {
@@ -45,6 +47,7 @@ public class SubExpressao extends Expressao {
 
     public void setOperador(Token operador) {
         this.operador = operador;
+        defineTexto();
         switch (operador.getFuncaoToken()) {
             case OP_MAT_SOMA:
             case OP_MAT_SUBTRACAO:
@@ -71,12 +74,28 @@ public class SubExpressao extends Expressao {
                 break;
         }
     }
-
-    @Override
-    public String toString() {
-        return expressaoEsq.toString() + " "
-                + operador.getPalavra() + " "
-                + expressaoDir.toString();
+    
+    private void defineTexto(){
+        if (expressaoEsq != null && operador != null && expressaoDir != null) {
+            for (Token t : expressaoEsq.listaTokens()) {
+                super.addToken(t);
+            }
+            super.addToken(operador);
+            for (Token t : expressaoDir.listaTokens()) {
+                super.addToken(t);
+            }
+        }
     }
     
+    @Override
+    public String imprimeExpressao (){
+        return "< " + 
+                (parentesesAbre == null ? "" : "( ") +
+                expressaoEsq.imprimeExpressao() + 
+                " " + operador.getPalavra() + " " +
+                expressaoDir.imprimeExpressao() + 
+                (parentesesFecha == null ? "" : " )") +
+                " >";
+    }
+
 }
