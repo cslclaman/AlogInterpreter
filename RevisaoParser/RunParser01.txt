@@ -1,11 +1,18 @@
 Início
     Inteiro: Idade;
     Real: IdadeDias;
-    Leia(Idade);
-    Se Idade >= 18 Então
-        Escreva ("Maior de idade");
-    Senão
-        Escreva ("Menor de idade");
-    IdadeDias <- (360 + 5 + 0.25) * Idade;
-    Escreva(IdadeDias);
+    Caracter: Opcao;
+
+    Leia(Opcao);
+    Enquanto Opcao = "S" ou Opcao = "s" Faça
+    Início
+        Leia(Idade);
+        Se Idade >= 18 Então
+            Escreva ("Maior de idade");
+        Senão
+            Escreva ("Menor de idade");
+        IdadeDias <- (360 + 5 + 0.25) * Idade;
+        Escreva(IdadeDias);
+        Leia (Opcao);
+    Fim
 Fim

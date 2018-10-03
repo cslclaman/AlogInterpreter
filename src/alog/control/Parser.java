@@ -155,11 +155,11 @@ public class Parser {
                 break;
                 
             //Define estrutura Repetitiva "Enquanto-Faça"
-            /*case RES_REP_ENQUANTO:
-                instrucao = instrucaoRepetitivaEnquantoFaca();
+            case RES_REP_ENQUANTO:
+                instrucao = instrucaoRepeticaoEnquanto();
                 funcoesEsperadas.clear();
                 funcoesEsperadas = funcoesBloco();
-                break;*/
+                break;
         }
         
         return instrucao;
@@ -531,6 +531,51 @@ public class Parser {
         }
         
         return condicional;
+    }
+    
+    private RepeticaoEnquanto instrucaoRepeticaoEnquanto(){
+        RepeticaoEnquanto repetitiva = new RepeticaoEnquanto();
+        
+        boolean go = true;
+        while (go && existeProxima()){
+            Token token = tokens.get(pos++);
+            if (!funcaoValida(token)){
+                repetitiva.invalidaInstrucao();
+                break;
+            }
+            
+            switch (token.getFuncaoToken()){
+                case RES_REP_ENQUANTO:
+                    repetitiva.setTokenEnquanto(token);
+                    funcoesEsperadas.clear();
+                    repetitiva.setExpressao(instrucaoExpressao(FuncaoToken.RES_REP_FACA));
+                    break;
+                    
+                case RES_REP_FACA:
+                    repetitiva.addToken(token);
+                    funcoesEsperadas.clear();
+                    
+                    Parser parserInterno = new Parser(tokens);
+                    parserInterno.declVariaveis = declVariaveis;
+                    parserInterno.pos = pos;
+                    parserInterno.tipoUltimaInstrucao = repetitiva.getTipo();
+                    parserInterno.funcoesEsperadas = funcoesEstrutura();
+                    
+                    Instrucao instrucaoInterna = parserInterno.proxima();
+                    if (!instrucaoInterna.instrucaoValida()){
+                        erros.addAll(parserInterno.erros);
+                    } else {
+                        repetitiva.setInstrucao(instrucaoInterna);
+                    }
+                    
+                    pos = parserInterno.pos;
+                    declVariaveis = parserInterno.declVariaveis;
+                    go = false;
+                    break;
+            }
+        }
+        
+        return repetitiva;
     }
     
     private Expressao instrucaoExpressao(FuncaoToken... condicoesParada) {
