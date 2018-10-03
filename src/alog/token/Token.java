@@ -504,6 +504,11 @@ public class Token {
      */
     public void setFuncaoToken(FuncaoToken func){
         this.funcaoToken = func;
+        switch (func) {
+            case IDENT_NOME_FUNCAO:
+            case IDENT_NOME_ROTINA:
+                precedencia = PRECEDENCIA_FUNCAO;
+        }
     }
     
     /**

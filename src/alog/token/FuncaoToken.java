@@ -25,6 +25,7 @@ public enum FuncaoToken {
      * <li>{@link #IDENT_NOME_VARIAVEL} (<code>Inteiro: <u>Numero</u> ...</code>)</li>
      * <li>{@link #IDENT_NOME_FUNCAO} (<code>Função <u>CalcDobro</u> (...</code>)</li>
      * <li>{@link #IDENT_NOME_ROTINA} (<code>Rotina <u>ImprimeItem</u> ...</code>)</li>
+     * <li>{@link #IDENT_NOME_ALGORITMO} (<code>Algoritmo <u>ExercicioCondicional</u> ...</code>)</li>
      * </ul>
      */
     _INDEF_ALFABETICO ("Identificador Alfabético"),
@@ -35,6 +36,7 @@ public enum FuncaoToken {
      * <li>{@link #IDENT_NOME_VARIAVEL} (<code>Inteiro: <u>Cont01</u> ...</code>)</li>
      * <li>{@link #IDENT_NOME_FUNCAO} (<code>Função <u>Desconto7Porcento</u> (...</code>)</li>
      * <li>{@link #IDENT_NOME_ROTINA} (<code>Rotina <u>Gera2Via</u> ...</code>)</li>
+     * <li>{@link #IDENT_NOME_ALGORITMO} (<code>Algoritmo <u>Exercicio02a</u> ...</code>)</li>
      * </ul>
      */
     _INDEF_ALFANUMERICO ("Identificador Alfanumérico"),
@@ -154,13 +156,11 @@ public enum FuncaoToken {
     CONST_CARACTER ("Constante Caracter"),
     /**
      * Constante Inteira: Sequências de números [0-9] sem ponto decimal.
-     * Definida pelo Parser.
      * Exemplo: 1, 500
      */
     CONST_INTEIRA ("Constante Inteira"),
     /**
      * Constante Real: Sequências de números [0-9] com ponto decimal.
-     * Definida pelo Parser.
      * Exemplo: 0.5 ,  700.2
      */
     CONST_REAL ("Constante Real"),

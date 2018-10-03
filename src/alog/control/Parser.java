@@ -531,6 +531,7 @@ public class Parser {
         Token topo;
         LinkedList<Token> pilhaTokens = new LinkedList<>();
         LinkedList<Token> saida = new LinkedList<>();
+        HashMap<Token, ChamadaFuncao> mapaFuncoes = new HashMap<>();
         
         int balancParenteses = 0;
         funcoesEsperadas.clear();
@@ -541,8 +542,8 @@ public class Parser {
         funcoesEsperadas.add(FuncaoToken.CONST_REAL);
         //funcoesEsperadas.add(FuncaoToken.OP_MAT_SUBTRACAO);
         funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
-        //funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
-        //funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
+        funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
+        funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
                     
         while (existeProxima()){
             token = tokens.get(pos++);
@@ -622,6 +623,40 @@ public class Parser {
                     funcoesEsperadas.addAll(funcoesExpressaoLogica());
                     break;
                     
+                case LIB_MATH_POT:
+                case LIB_MATH_RAIZ:
+                    pos--;
+                    ChamadaFuncao chamadaFuncao = expressaoChamadaFuncao();
+                    mapaFuncoes.put(chamadaFuncao.getTokenNome(), chamadaFuncao);
+                    
+                    while (!pilhaTokens.isEmpty()) {
+                        topo = pilhaTokens.pop();
+                        if (topo.getFuncaoToken() == FuncaoToken.DELIM_PARENTESES_ABRE) {
+                            pilhaTokens.push(topo);
+                            break;
+                        } else {
+                            if (topo.getPrecedencia() < token.getPrecedencia()) {
+                                pilhaTokens.push(topo);
+                                break;
+                            } else {
+                                saida.add(topo);
+                            }
+                        }
+                    }
+                    pilhaTokens.push(token);
+                    
+                    for (FuncaoToken condicaoParada : condicoesParada) {
+                        funcoesEsperadas.add(condicaoParada);
+                    }
+                    if (balancParenteses > 0) {
+                        funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_FECHA);
+                    }
+                    funcoesEsperadas.addAll(funcoesExpressaoAritmetica());
+                    funcoesEsperadas.addAll(funcoesExpressaoRelacional());
+                    funcoesEsperadas.addAll(funcoesExpressaoLogica());
+                    
+                    break;
+                    
                 case OP_MAT_SOMA:
                 case OP_MAT_SUBTRACAO:
                 case OP_MAT_MULTIPLICACAO:
@@ -650,6 +685,8 @@ public class Parser {
                     funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
                     funcoesEsperadas.add(FuncaoToken.CONST_INTEIRA);
                     funcoesEsperadas.add(FuncaoToken.CONST_REAL);
+                    funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
+                    funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
                     break;
                     
                 case OP_REL_MAIOR:
@@ -683,8 +720,10 @@ public class Parser {
                     funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
                     funcoesEsperadas.add(FuncaoToken.CONST_INTEIRA);
                     funcoesEsperadas.add(FuncaoToken.CONST_REAL);
+                    funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
+                    funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
                     break;
-                
+                    
                 case DELIM_PARENTESES_FECHA:
                     topo = null;
                     while (!pilhaTokens.isEmpty()) {
@@ -732,6 +771,12 @@ public class Parser {
                     Operando operando = new Operando();
                     operando.setOperando(t);
                     pilhaExpressoes.push(operando);
+                    break;
+                
+                case LIB_MATH_POT:
+                case LIB_MATH_RAIZ:
+                    ChamadaFuncao chamadaFuncao = mapaFuncoes.get(t);
+                    pilhaExpressoes.push(chamadaFuncao);
                     break;
                     
                 case OP_MAT_SOMA:
@@ -802,6 +847,45 @@ public class Parser {
         }
         
         return expressao;
+    }
+    
+    private ChamadaFuncao expressaoChamadaFuncao(){
+        ChamadaFuncao chamadaFuncao = new ChamadaFuncao();
+        
+        boolean go = true;
+        while (go && existeProxima()){
+            Token token = tokens.get(pos++);
+            if (!funcaoValida(token)){
+                chamadaFuncao.invalidaInstrucao();
+                break;
+            }
+            
+            switch (token.getFuncaoToken()){
+                case LIB_MATH_POT:
+                case LIB_MATH_RAIZ:
+                //case IDENT_NOME_FUNCAO:
+                    chamadaFuncao.setTokenNome(token);
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
+                    break;
+                    
+                case DELIM_PARENTESES_ABRE:
+                case DELIM_VIRGULA:
+                    chamadaFuncao.addToken(token);
+                    funcoesEsperadas.clear();
+                    chamadaFuncao.addParametro(instrucaoExpressao(
+                            FuncaoToken.DELIM_VIRGULA, FuncaoToken.DELIM_PARENTESES_FECHA));
+                    break;
+                            
+                case DELIM_PARENTESES_FECHA:
+                    chamadaFuncao.addToken(token);
+                    go = false;
+                    funcoesEsperadas.clear();
+                    break;
+            }
+        }
+        
+        return chamadaFuncao;
     }
     
     // <editor-fold defaultstate="collapsed" desc="Funções esperadas no início de um algoritmo">

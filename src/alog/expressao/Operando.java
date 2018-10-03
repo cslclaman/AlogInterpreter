@@ -41,6 +41,10 @@ public class Operando extends Expressao {
                 break;
         }
     }
+
+    public Token getOperando() {
+        return operando;
+    }
     
     @Override
     public String imprimeExpressao (){

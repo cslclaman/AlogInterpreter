@@ -28,6 +28,10 @@ public class ChamadaFuncao extends Operando {
         super.setOperando(token);
     }
     
+    public Token getTokenNome() {
+        return super.getOperando();
+    }
+    
     public void addParametro(Expressao expressao) {
         parametros.add(expressao);
         for (Token token : expressao.listaTokens()){
