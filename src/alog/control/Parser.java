@@ -174,6 +174,13 @@ public class Parser {
                 funcoesEsperadas.clear();
                 funcoesEsperadas = funcoesBloco();
                 break;
+                
+            //Define estrutura Repetitiva "Para-de-até-Faça"
+            case RES_REP_REPITA:
+                instrucao = instrucaoRepeticaoRepita();
+                funcoesEsperadas.clear();
+                funcoesEsperadas = funcoesBloco();
+                break;
         }
         
         return instrucao;
@@ -633,6 +640,57 @@ public class Parser {
                     
                     funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken.DELIM_PONTO_VIRGULA);
+                    break;
+                    
+                case DELIM_PONTO_VIRGULA:
+                    repetitiva.addToken(token);
+                    funcoesEsperadas.clear();
+                    go = false;
+                    break;
+            }
+        }
+
+        return repetitiva;
+    }
+    
+    private RepeticaoRepita instrucaoRepeticaoRepita(){
+        RepeticaoRepita repetitiva = new RepeticaoRepita();
+        
+        boolean go = true;
+        while (go && existeProxima()){
+            Token token = tokens.get(pos++);
+            if (!funcaoValida(token)){
+                repetitiva.invalidaInstrucao();
+                break;
+            }
+            
+            switch (token.getFuncaoToken()){
+                case RES_REP_REPITA:
+                    repetitiva.setTokenRepita(token);
+                    funcoesEsperadas.clear();
+                    
+                    Parser parserInterno = new Parser(tokens);
+                    parserInterno.declVariaveis = declVariaveis;
+                    parserInterno.pos = pos;
+                    parserInterno.tipoUltimaInstrucao = repetitiva.getTipo();
+                    parserInterno.funcoesEsperadas = funcoesEstrutura();
+                    
+                    Instrucao instrucaoInterna = parserInterno.proxima();
+                    if (!instrucaoInterna.instrucaoValida()){
+                        erros.addAll(parserInterno.erros);
+                    } else {
+                        repetitiva.setInstrucao(instrucaoInterna);
+                    }
+                    
+                    pos = parserInterno.pos;
+                    declVariaveis = parserInterno.declVariaveis;
+                    
+                    funcoesEsperadas.add(FuncaoToken.RES_REP_ATE);
+                    break;
+                    
+                case RES_REP_ATE:
+                    repetitiva.setTokenAte(token);
+                    repetitiva.setExpressao(instrucaoExpressao(FuncaoToken.DELIM_PONTO_VIRGULA));
                     break;
                     
                 case DELIM_PONTO_VIRGULA:

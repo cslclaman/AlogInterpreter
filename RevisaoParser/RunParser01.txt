@@ -26,4 +26,13 @@ Início
         Escreva (Num, " x ", Multiplic, " = ", Result);
     Fim
 
+    Multiplic <- 1;
+    Repita
+    Início
+        Result <- Num * Multiplic;
+        Escreva (Num, " x ", Multiplic, " = ", Result);
+        Multiplic <- Multiplic + 1;
+    Fim
+    Até Multiplic > 10;
+
 Fim
