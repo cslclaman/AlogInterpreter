@@ -23,7 +23,7 @@ public class Token {
      */
     public static final int PRECEDENCIA_ARRAY = 10;
     /**
-     * Precedência de operação para quando o Token é um operador unário, como - ou + (não implementado ainda)
+     * Precedência de operação para quando o Token é um operador unário, como - ou +
      */
     public static final int PRECEDENCIA_OP_UNARIO = 9;
     /**
@@ -347,7 +347,7 @@ public class Token {
                         funcaoToken = FuncaoToken.RES_REP_PARA;
                         break;
                     case "de":
-                        funcaoToken = FuncaoToken.RES_COMUM_DE;
+                        funcaoToken = FuncaoToken._INDEFINIDO_RES_DE;
                         break;
                     case "ate":
                     case "até":
@@ -508,6 +508,11 @@ public class Token {
             case IDENT_NOME_FUNCAO:
             case IDENT_NOME_ROTINA:
                 precedencia = PRECEDENCIA_FUNCAO;
+                break;
+            case OP_SIG_NEGATIVO:
+            case OP_SIG_POSITIVO:
+                precedencia = PRECEDENCIA_OP_UNARIO;
+                break;
         }
     }
     

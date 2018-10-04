@@ -2,6 +2,7 @@ package alog.control;
 
 import alog.analise.Erro;
 import alog.analise.TipoErro;
+import alog.token.CategoriaToken;
 import alog.token.FuncaoToken;
 import alog.token.TipoToken;
 import alog.token.Token;
@@ -23,6 +24,7 @@ public class Scanner {
     private boolean next;
     private char[] texto;
     
+    private Token last;
     private LinkedList<Erro> erros;
 
     /**
@@ -39,6 +41,7 @@ public class Scanner {
         ordem = 0;
         next = len > 0;
         
+        last = null;
         erros = new LinkedList<>();
         if (len <= 0){
             erros.add(new Erro(TipoErro.ALERTA, ' ', 0, 0, 0, "Nenhum token encontrado"));
@@ -55,6 +58,7 @@ public class Scanner {
     
     /**
      * Retorna o próximo token encontrado, devidamente classificado.
+     * Caso não haja próximo token, retorna um token com palavra vazia e posição igual ao tamanho da entrada.
      * @return {@link alog.token.Token}
      */
     public Token proximo(){
@@ -225,10 +229,26 @@ public class Scanner {
             }
         }
         
+        switch (token.getFuncaoToken()){
+            case OP_MAT_SUBTRACAO:
+                if (last != null &&
+                    last.getFuncaoToken().getCategoria() == CategoriaToken.OPERADOR) {
+                    token.setFuncaoToken(FuncaoToken.OP_SIG_NEGATIVO);
+                }
+                break;
+            case OP_MAT_SOMA:
+                if (last != null &&
+                    last.getFuncaoToken().getCategoria() == CategoriaToken.OPERADOR) {
+                    token.setFuncaoToken(FuncaoToken.OP_SIG_POSITIVO);
+                }
+                break;
+        }
+        
         if (indice == len){
             next = false;
         }
         
+        last = token;
         return token;
     }
     
