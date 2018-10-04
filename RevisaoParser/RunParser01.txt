@@ -1,5 +1,5 @@
 Início
-    Inteiro: Result, Multiplic, Num;
+    Inteiro: Result, Multiplic, Num, Num2;
     
     Leia(Num);
     
@@ -29,6 +29,10 @@ Início
     Multiplic <- 1;
     Repita
     Início
+        Leia (Num2);
+        Se Num2 = Num Então
+            Num2 <- Num2 + (-1);
+        Num <- Num2;
         Result <- Num * Multiplic;
         Escreva (Num, " x ", Multiplic, " = ", Result);
         Multiplic <- Multiplic + 1;

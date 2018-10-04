@@ -7,6 +7,7 @@ import alog.expressao.Expressao;
 import alog.expressao.TokenDelimitador;
 import alog.expressao.Operando;
 import alog.expressao.Operacao;
+import alog.expressao.OperacaoUnaria;
 import alog.instrucao.*;
 import alog.token.FuncaoToken;
 import alog.instrucao.TipoInstrucao;
@@ -735,10 +736,10 @@ public class Parser {
                         repetitiva.invalidaInstrucao();
                     }
                     funcoesEsperadas.clear();
-                    funcoesEsperadas.add(FuncaoToken.RES_COMUM_DE);
+                    funcoesEsperadas.add(FuncaoToken._INDEFINIDO_RES_DE);
                     break;
                 
-                case RES_COMUM_DE:
+                case _INDEFINIDO_RES_DE:
                     token.setFuncaoToken(FuncaoToken.RES_REP_DE);
                     repetitiva.addToken(token);
                     repetitiva.setExpressaoDe(instrucaoExpressao(FuncaoToken.RES_REP_ATE));
@@ -786,15 +787,16 @@ public class Parser {
         
         int balancParenteses = 0;
         funcoesEsperadas.clear();
-        funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
         funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
         funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+        funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
         funcoesEsperadas.add(FuncaoToken.CONST_INTEIRA);
         funcoesEsperadas.add(FuncaoToken.CONST_REAL);
-        //funcoesEsperadas.add(FuncaoToken.OP_MAT_SUBTRACAO);
         funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
         funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
         funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
+        funcoesEsperadas.add(FuncaoToken.OP_SIG_NEGATIVO);
+        funcoesEsperadas.add(FuncaoToken.OP_SIG_POSITIVO);
                     
         while (existeProxima()){
             token = tokens.get(pos++);
@@ -905,7 +907,64 @@ public class Parser {
                     funcoesEsperadas.addAll(funcoesExpressaoAritmetica());
                     funcoesEsperadas.addAll(funcoesExpressaoRelacional());
                     funcoesEsperadas.addAll(funcoesExpressaoLogica());
+                    break;
                     
+                case OP_SIG_NEGATIVO:
+                case OP_SIG_POSITIVO:
+                    while (!pilhaTokens.isEmpty()) {
+                        topo = pilhaTokens.pop();
+                        if (topo.getFuncaoToken() == FuncaoToken.DELIM_PARENTESES_ABRE) {
+                            pilhaTokens.push(topo);
+                            break;
+                        } else {
+                            if (topo.getPrecedencia() < token.getPrecedencia()) {
+                                pilhaTokens.push(topo);
+                                break;
+                            } else {
+                                saida.add(topo);
+                            }
+                        }
+                    }
+                    pilhaTokens.push(token);
+                    
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                    funcoesEsperadas.add(FuncaoToken.CONST_INTEIRA);
+                    funcoesEsperadas.add(FuncaoToken.CONST_REAL);
+                    funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
+                    funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
+                    break;
+                
+                case OP_LOG_NAO:
+                    while (!pilhaTokens.isEmpty()) {
+                        topo = pilhaTokens.pop();
+                        if (topo.getFuncaoToken() == FuncaoToken.DELIM_PARENTESES_ABRE) {
+                            pilhaTokens.push(topo);
+                            break;
+                        } else {
+                            if (topo.getPrecedencia() < token.getPrecedencia()) {
+                                pilhaTokens.push(topo);
+                                break;
+                            } else {
+                                saida.add(topo);
+                            }
+                        }
+                    }
+                    pilhaTokens.push(token);
+                    
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.DELIM_PARENTESES_ABRE);
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                    funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
+                    funcoesEsperadas.add(FuncaoToken.CONST_INTEIRA);
+                    funcoesEsperadas.add(FuncaoToken.CONST_REAL);
+                    funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
+                    funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
+                    funcoesEsperadas.add(FuncaoToken.OP_SIG_NEGATIVO);
+                    funcoesEsperadas.add(FuncaoToken.OP_SIG_POSITIVO);
                     break;
                     
                 case OP_MAT_SOMA:
@@ -938,6 +997,8 @@ public class Parser {
                     funcoesEsperadas.add(FuncaoToken.CONST_REAL);
                     funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
                     funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
+                    funcoesEsperadas.add(FuncaoToken.OP_SIG_NEGATIVO);
+                    funcoesEsperadas.add(FuncaoToken.OP_SIG_POSITIVO);
                     break;
                     
                 case OP_REL_MAIOR:
@@ -973,6 +1034,8 @@ public class Parser {
                     funcoesEsperadas.add(FuncaoToken.CONST_REAL);
                     funcoesEsperadas.add(FuncaoToken.LIB_MATH_POT);
                     funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
+                    funcoesEsperadas.add(FuncaoToken.OP_SIG_NEGATIVO);
+                    funcoesEsperadas.add(FuncaoToken.OP_SIG_POSITIVO);
                     break;
                     
                 case DELIM_PARENTESES_FECHA:
@@ -1028,6 +1091,22 @@ public class Parser {
                 case LIB_MATH_RAIZ:
                     ChamadaFuncao chamadaFuncao = mapaFuncoes.get(t);
                     pilhaExpressoes.push(chamadaFuncao);
+                    break;
+                    
+                case OP_SIG_NEGATIVO:
+                case OP_SIG_POSITIVO:
+                case OP_LOG_NAO:
+                    OperacaoUnaria operacaoUnaria = new OperacaoUnaria();
+                    operacaoUnaria.setOperador(t);
+                    try {
+                        operacaoUnaria.setExpressao(pilhaExpressoes.pop());
+                    } catch (NoSuchElementException ex){
+                        erros.add(new Erro(TipoErro.ERRO, t, 
+                            "Erro ao montar expressão - operando não encontrado"));
+                        expressaoValida = false;
+                        operacaoUnaria.addToken(t);
+                    }
+                    pilhaExpressoes.push(operacaoUnaria);
                     break;
                     
                 case OP_MAT_SOMA:

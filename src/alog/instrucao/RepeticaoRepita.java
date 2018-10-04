@@ -17,7 +17,7 @@ public class RepeticaoRepita extends EstruturaControle {
 
     public RepeticaoRepita() {
         super();
-        this.tipo = TipoInstrucao.REPETICAO_FACA;
+        this.tipo = TipoInstrucao.REPETICAO_REPITA;
     }
 
     public Token getTokenRepita() {

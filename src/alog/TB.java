@@ -7,6 +7,8 @@ package alog;
 
 import alog.control.Parser;
 import alog.control.Scanner;
+import alog.instrucao.Atribuicao;
+import alog.instrucao.ChamadaRotina;
 import alog.instrucao.Instrucao;
 import alog.token.Token;
 import java.io.FileNotFoundException;
@@ -22,7 +24,12 @@ import java.util.List;
  */
 public class TB {
 
+    public final static boolean IMPRIME_TOKENS = true;
+    public final static boolean IMPRIME_INSTRUCOES = true;
+    public final static boolean IMPRIME_EXPRESSOES_ARVORE = false;
+    
     public static void main(String[] args) throws FileNotFoundException, IOException {
+        
         String path = String.format("%s%s%s%s%s",
                 System.getProperty("user.dir"),
                 System.getProperty("file.separator"),
@@ -68,9 +75,11 @@ public class TB {
         thisErros = 0;
         lastErros = 0;
         
-        /*for (Token t : tokens){
-            System.out.println("*** " + t);
-        }*/
+        if (IMPRIME_TOKENS) {
+            for (Token t : tokens){
+                System.out.println("*** " + t);
+            }
+        }
         
         System.out.println("Iniciando Parser");
         
@@ -91,10 +100,11 @@ public class TB {
             System.out.println("Parser sem erros de leitura");
         }
         
-        for (Instrucao i : instrucoes){
-            System.out.println("*** " + i.toString());
+        if (IMPRIME_INSTRUCOES) {
+            for (Instrucao i : instrucoes){
+                System.out.println("*** " + i.toString());
+            }
         }
-        
     }
     
 }
