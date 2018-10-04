@@ -24,8 +24,8 @@ import java.util.List;
  */
 public class TB {
 
-    public final static boolean IMPRIME_TOKENS = true;
-    public final static boolean IMPRIME_INSTRUCOES = true;
+    public final static boolean IMPRIME_TOKENS = false;
+    public final static boolean IMPRIME_INSTRUCOES = false;
     public final static boolean IMPRIME_EXPRESSOES_ARVORE = false;
     
     public static void main(String[] args) throws FileNotFoundException, IOException {

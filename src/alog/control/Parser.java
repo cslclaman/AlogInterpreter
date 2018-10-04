@@ -182,6 +182,14 @@ public class Parser {
                 funcoesEsperadas.clear();
                 funcoesEsperadas = funcoesBloco();
                 break;
+                
+            //Em caso de instrução ainda não implementada
+            default:
+                instrucao.addToken(token);
+                erros.add(new Erro(TipoErro.ERRO, token, 
+                            String.format("Início de instrução não reconhecido: \"%s\"", token.getPalavra())));
+                pos++;
+                break;
         }
         
         return instrucao;
@@ -824,6 +832,8 @@ public class Parser {
                     saida.add(token);
                     pilhaTokens.push(token);
                     balancParenteses ++;
+                    funcoesEsperadas.add(FuncaoToken.OP_SIG_NEGATIVO);
+                    funcoesEsperadas.add(FuncaoToken.OP_SIG_POSITIVO);
                     break;
                     
                 case CONST_CARACTER:

@@ -31,7 +31,7 @@ Início
     Início
         Leia (Num2);
         Se Num2 = Num Então
-            Num2 <- Num2 + (-1);
+            Num2 <- Num2 + - (-Num2 + +Num);
         Num <- Num2;
         Result <- Num * Multiplic;
         Escreva (Num, " x ", Multiplic, " = ", Result);

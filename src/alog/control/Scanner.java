@@ -136,8 +136,8 @@ public class Scanner {
                         contOper++;
                     }
                 } else {
-                    erros.add(new Erro(
-                            ch, linha, coluna, posicao, "inválido"));
+                    erros.add(new Erro(ch, linha, coluna, posicao, 
+                            String.format("Caracter inválido: %c (%d)", ch, (int)ch)));
                     token.atualizaPalavra(ch);
                     go = false;
                     indice++;
@@ -231,14 +231,22 @@ public class Scanner {
         
         switch (token.getFuncaoToken()){
             case OP_MAT_SUBTRACAO:
-                if (last != null &&
-                    last.getFuncaoToken().getCategoria() == CategoriaToken.OPERADOR) {
+                if (last != null && (
+                    last.getFuncaoToken().getCategoria() == CategoriaToken.OPERADOR ||
+                    last.getFuncaoToken() == FuncaoToken.DELIM_COLCHETES_ABRE ||
+                    last.getFuncaoToken() == FuncaoToken.DELIM_PARENTESES_ABRE ||
+                    last.getFuncaoToken() == FuncaoToken.DELIM_VIRGULA )
+                ) {
                     token.setFuncaoToken(FuncaoToken.OP_SIG_NEGATIVO);
                 }
                 break;
             case OP_MAT_SOMA:
-                if (last != null &&
-                    last.getFuncaoToken().getCategoria() == CategoriaToken.OPERADOR) {
+                if (last != null && (
+                    last.getFuncaoToken().getCategoria() == CategoriaToken.OPERADOR ||
+                    last.getFuncaoToken() == FuncaoToken.DELIM_COLCHETES_ABRE ||
+                    last.getFuncaoToken() == FuncaoToken.DELIM_PARENTESES_ABRE ||
+                    last.getFuncaoToken() == FuncaoToken.DELIM_VIRGULA )
+                ) {
                     token.setFuncaoToken(FuncaoToken.OP_SIG_POSITIVO);
                 }
                 break;

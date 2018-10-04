@@ -1,4 +1,4 @@
-﻿Início
+Início
     Real: X1, X2, Y1, Y2;
     Real: Res;
     
