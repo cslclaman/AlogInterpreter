@@ -5,63 +5,40 @@
  */
 package alog.control;
 
-import alog.instrucao.Bloco;
+import alog.analise.Erro;
 import alog.instrucao.Instrucao;
-import alog.token.FuncaoToken;
-import alog.instrucao.TipoInstrucao;
-import alog.token.Token;
+import alog.model.TipoDado;
+import alog.model.Variavel;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Analisador semântico que verifica a coerência das expressões criadas pelo Parser
  * @author Caique
  */
-public class Semantic {
-    private class ErroSemantico {
-        Instrucao expr;
-        String msgErro;
-
-        public ErroSemantico(Instrucao expr, String msgErro) {
-            this.expr = expr;
-            this.msgErro = msgErro;
-        }
-
-        @Override
-        public String toString() {
-            return "Expressão inválida na linha " + expr.getLinha() + ": " + msgErro;
-        }
-    }
+public class Verificador {
     
-    private ArrayList<ErroSemantico> erros;
+    private LinkedList<Erro> erros;
     private ArrayList<Instrucao> programa;
-    private HashMap <String, String> variaveis;
-    private HashMap <String, Integer> funcoes;
+    private HashMap <String, Variavel> variaveis;
+    private HashMap <String, TipoDado[] > funcoes;
     private int pos;
     
-    public Semantic(ArrayList<Instrucao> expressoes) {
-        programa = new ArrayList<>();
-        carregaExpressoes(expressoes);
+    public Verificador(List<Instrucao> programa) {
+        this.programa = new ArrayList<>(programa.size());
+        this.programa.addAll(programa);
         
-        erros = new ArrayList<>();
+        erros = new LinkedList<>();
         variaveis = new HashMap<>();
         funcoes = new HashMap<>();
-        funcoes.put("POT", 2);
-        funcoes.put("RAIZ", 1);
+        funcoes.put("pot", new TipoDado[]{TipoDado.REAL, TipoDado.REAL} );
+        funcoes.put("raiz", new TipoDado[]{TipoDado.REAL} );
         pos = 0;
     }
     
-    private void carregaExpressoes(ArrayList<Instrucao> expressoes){
-        for (Instrucao expr : expressoes){
-            if (expr.getTipo() == TipoInstrucao.BLOCO){
-                carregaExpressoes(((Bloco)expr).listExpressoes());
-            } else {
-                programa.add(expr);
-            }
-        }
-    }
-    
-    public boolean hasNext(){
+    public boolean existeProxima(){
         return pos < programa.size();
     }
     

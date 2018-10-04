@@ -6,7 +6,7 @@
 package alog.control;
 
 import alog.token.FuncaoToken;
-import alog.model.TipoVariavel;
+import alog.model.TipoDado;
 import alog.token.Token;
 import alog.model.Variavel;
 
@@ -165,42 +165,42 @@ public class Calculator {
             
             switch (operador.getFuncaoToken()){
                 case OP_REL_MAIOR:
-                    if (op1.getTipo() == TipoVariavel.CARACTER){
+                    if (op1.getTipo() == TipoDado.CARACTER){
                         result = op1.getValor().compareTo(op2.getValor()) > 0;
                     } else {
                         result = op1.getValorReal() > op2.getValorReal();
                     }
                     break;
                 case OP_REL_MAIOR_IGUAL:
-                    if (op1.getTipo() == TipoVariavel.CARACTER){
+                    if (op1.getTipo() == TipoDado.CARACTER){
                         result = op1.getValor().compareTo(op2.getValor()) >= 0;
                     } else {
                         result = op1.getValorReal() >= op2.getValorReal();
                     }
                     break;
                 case OP_REL_MENOR:
-                    if (op1.getTipo() == TipoVariavel.CARACTER){
+                    if (op1.getTipo() == TipoDado.CARACTER){
                         result = op1.getValor().compareTo(op2.getValor()) < 0;
                     } else {
                         result = op1.getValorReal() < op2.getValorReal();
                     }
                     break;
                 case OP_REL_MENOR_IGUAL:
-                    if (op1.getTipo() == TipoVariavel.CARACTER){
+                    if (op1.getTipo() == TipoDado.CARACTER){
                         result = op1.getValor().compareTo(op2.getValor()) <= 0;
                     } else {
                         result = op1.getValorReal() <= op2.getValorReal();
                     }
                     break;
                 case OP_REL_IGUAL:
-                    if (op1.getTipo() == TipoVariavel.CARACTER){
+                    if (op1.getTipo() == TipoDado.CARACTER){
                         result = op1.getValor().compareTo(op2.getValor()) == 0;
                     } else {
                         result = op1.getValorReal() == op2.getValorReal();
                     }
                     break;
                 case OP_REL_DIFERENTE:
-                    if (op1.getTipo() == TipoVariavel.CARACTER){
+                    if (op1.getTipo() == TipoDado.CARACTER){
                         result = op1.getValor().compareTo(op2.getValor()) != 0;
                     } else {
                         result = op1.getValorReal() != op2.getValorReal();
@@ -253,7 +253,7 @@ public class Calculator {
     private boolean defineOperacao(Variavel op1){
         switch (operador.getFuncaoToken()){
             case LIB_MATH_RAIZ:
-                if (op1.getTipo() == TipoVariavel.CARACTER){
+                if (op1.getTipo() == TipoDado.CARACTER){
                     System.err.println("Operação " + operador.getFuncaoToken()+ " inválida para tipo de dado Caracter");
                     return false;
                 } else {
@@ -273,11 +273,11 @@ public class Calculator {
             case OP_MAT_SOMA:
             case OP_MAT_SUBTRACAO:
             case OP_MAT_MULTIPLICACAO:
-                if (op1.getTipo() == TipoVariavel.CARACTER || op2.getTipo() == TipoVariavel.CARACTER){
+                if (op1.getTipo() == TipoDado.CARACTER || op2.getTipo() == TipoDado.CARACTER){
                     System.err.println("Operação " + operador.getFuncaoToken()+ " inválida para tipo de dado Caracter");
                     return false;
                 } else {
-                    if (op1.getTipo() == TipoVariavel.INTEIRO && op2.getTipo() == op1.getTipo()){
+                    if (op1.getTipo() == TipoDado.INTEIRO && op2.getTipo() == op1.getTipo()){
                         funcao = FuncaoToken.CONST_INTEIRA;
                     } else {
                         funcao = FuncaoToken.CONST_REAL;
@@ -286,11 +286,11 @@ public class Calculator {
                 break;
             case OP_MAT_DIV_INTEIRA:
             case OP_MAT_MOD:
-                if (op1.getTipo() == TipoVariavel.CARACTER || op2.getTipo() == TipoVariavel.CARACTER){
+                if (op1.getTipo() == TipoDado.CARACTER || op2.getTipo() == TipoDado.CARACTER){
                     System.err.println("Operação " + operador.getFuncaoToken()+ " inválida para tipo de dado Caracter");
                     return false;
                 } else {
-                    if (op1.getTipo() == TipoVariavel.INTEIRO && op2.getTipo() == op1.getTipo()){
+                    if (op1.getTipo() == TipoDado.INTEIRO && op2.getTipo() == op1.getTipo()){
                         funcao = FuncaoToken.CONST_INTEIRA;
                     } else {
                         System.err.println("Operação " + operador.getFuncaoToken()+ " inválida para tipo de dado Real");
@@ -299,7 +299,7 @@ public class Calculator {
                 }
                 break;
             case OP_MAT_DIV_REAL:
-                if (op1.getTipo() == TipoVariavel.CARACTER || op2.getTipo() == TipoVariavel.CARACTER){
+                if (op1.getTipo() == TipoDado.CARACTER || op2.getTipo() == TipoDado.CARACTER){
                     System.err.println("Operação " + operador.getFuncaoToken()+ " inválida para tipo de dado Caracter");
                     return false;
                 } else {
@@ -308,7 +308,7 @@ public class Calculator {
                 break;
                 
             case LIB_MATH_POT:
-                if (op1.getTipo() == TipoVariavel.CARACTER || op2.getTipo() == TipoVariavel.CARACTER){
+                if (op1.getTipo() == TipoDado.CARACTER || op2.getTipo() == TipoDado.CARACTER){
                     System.err.println("Operação " + operador.getFuncaoToken()+ " inválida para tipo de dado Caracter");
                     return false;
                 } else {
@@ -322,8 +322,8 @@ public class Calculator {
             case OP_REL_MENOR_IGUAL:
             case OP_REL_IGUAL:
             case OP_REL_DIFERENTE:
-                if ( (op1.getTipo() == TipoVariavel.CARACTER && op2.getTipo() != TipoVariavel.CARACTER) ||
-                     (op2.getTipo() == TipoVariavel.CARACTER && op1.getTipo() != TipoVariavel.CARACTER)
+                if ( (op1.getTipo() == TipoDado.CARACTER && op2.getTipo() != TipoDado.CARACTER) ||
+                     (op2.getTipo() == TipoDado.CARACTER && op1.getTipo() != TipoDado.CARACTER)
                         ){
                     System.err.println("Operação " + operador.getFuncaoToken()+ " inválida"
                             + " - não é possível comparar " + op1.getTipo() + " com " + op2.getTipo());
@@ -335,7 +335,7 @@ public class Calculator {
                 
             case OP_LOG_E:
             case OP_LOG_OU:
-                if ( op1.getTipo() != TipoVariavel.INTEIRO || op2.getTipo() != TipoVariavel.INTEIRO ){
+                if ( op1.getTipo() != TipoDado.INTEIRO || op2.getTipo() != TipoDado.INTEIRO ){
                     System.err.println("Operação " + operador.getFuncaoToken()+ " inválida"
                             + " - operações lógicas só são possíveis entre variáveis lógicas (inteiros 0 e 1)");
                 } else {

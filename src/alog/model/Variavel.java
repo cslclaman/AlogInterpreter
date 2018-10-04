@@ -10,13 +10,13 @@ package alog.model;
  * @author Caique Souza
  */
 public class Variavel {
-    private TipoVariavel tipo;
+    private TipoDado tipo;
     private String nome;
     //Substituir por implementação de subclasses
     private String valor;
     private boolean inicializada;
 
-    public Variavel(TipoVariavel tipo, String nome) {
+    public Variavel(TipoDado tipo, String nome) {
         this.tipo = tipo;
         this.nome = nome;
         this.valor = "";
@@ -31,7 +31,7 @@ public class Variavel {
         return nome;
     }
 
-    public TipoVariavel getTipo() {
+    public TipoDado getTipo() {
         return tipo;
     }
 
@@ -45,7 +45,7 @@ public class Variavel {
     }
     
     public int getValorInteiro() {
-        if (!inicializada || tipo != TipoVariavel.INTEIRO){
+        if (!inicializada || tipo != TipoDado.INTEIRO){
             return 0;
         } else {
             return Integer.parseInt(valor);
@@ -53,7 +53,7 @@ public class Variavel {
     }
     
     public double getValorReal() {
-        if (!inicializada || tipo == TipoVariavel.CARACTER){
+        if (!inicializada || tipo == TipoDado.CARACTER){
             return 0.0;
         } else {
             return Double.parseDouble(valor);

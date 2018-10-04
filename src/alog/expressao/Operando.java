@@ -5,7 +5,7 @@
  */
 package alog.expressao;
 
-import alog.model.TipoVariavel;
+import alog.model.TipoDado;
 import alog.token.Token;
 
 /**
@@ -28,15 +28,15 @@ public class Operando extends Expressao {
         
         switch (token.getFuncaoToken()) {
             case CONST_CARACTER:
-                tipoResultado = TipoVariavel.CARACTER;
+                tipoResultado = TipoDado.CARACTER;
                 resultado = token.getPalavra();
                 break;
             case CONST_INTEIRA:
-                tipoResultado = TipoVariavel.INTEIRO;
+                tipoResultado = TipoDado.INTEIRO;
                 resultado = token.getPalavra();
                 break;
             case CONST_REAL:
-                tipoResultado = TipoVariavel.REAL;
+                tipoResultado = TipoDado.REAL;
                 resultado = token.getPalavra();
                 break;
         }

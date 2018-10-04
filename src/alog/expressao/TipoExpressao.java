@@ -1,6 +1,6 @@
 package alog.expressao;
 
-import alog.model.TipoVariavel;
+import alog.model.TipoDado;
 
 /**
  *
@@ -67,14 +67,14 @@ public enum TipoExpressao {
      * um operando é o valor do próprio operando.
      * <br>Seu tipo pode ser:
      * <ul>
-     * <li><b>Variável</b> declarada, de tipo {@link TipoVariavel#CARACTER},
-     * {@link TipoVariavel#INTEIRO} ou {@link TipoVariavel#REAL}</li>
+     * <li><b>Variável</b> declarada, de tipo {@link TipoDado#CARACTER},
+     * {@link TipoDado#INTEIRO} ou {@link TipoDado#REAL}</li>
      * <li><b>Constante</b> numérica inteira ({@code 15}, {@code 2402}, {@code -7}),
      * numérica real ({@code 2.5}, {@code 0.00742}, {@code -3.75}) ou sequência literal
      * de caracteres ({@code "texto de exemplo"}, {@code "Caso de Teste #1:"})</li>
      * <li><b>Funções</b> matemáticas ou declaradas que retornem um resultado
-     * equivalente a um dos tipos de variáveis ({@link TipoVariavel#CARACTER},
-     * {@link TipoVariavel#INTEIRO} ou {@link TipoVariavel#REAL}).</li>
+     * equivalente a um dos tipos de variáveis ({@link TipoDado#CARACTER},
+     * {@link TipoDado#INTEIRO} ou {@link TipoDado#REAL}).</li>
      * </ul>
      */
     OPERANDO,

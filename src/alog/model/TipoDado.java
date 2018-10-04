@@ -11,7 +11,7 @@ import alog.token.Token;
  *
  * @author Caique Souza
  */
-public enum TipoVariavel {
+public enum TipoDado {
     /**
      * Tipo numérico Inteiro. Números positivos e negativos sem ponto decimal.
      * Mapeado internamente para o tipo {@link Long}
@@ -39,7 +39,7 @@ public enum TipoVariavel {
     
     private final String exibicao;
     
-    private TipoVariavel(String exibicao){
+    private TipoDado(String exibicao){
         this.exibicao = exibicao;
     }
     
@@ -48,7 +48,7 @@ public enum TipoVariavel {
         return exibicao;
     }
     
-    public static TipoVariavel mapTokenToVariavel (Token token){
+    public static TipoDado mapTokenToVariavel (Token token){
         switch (token.getFuncaoToken()){
             case RES_TIPO_CARACTER: return CARACTER;
             case RES_TIPO_INTEIRO:  return INTEIRO;

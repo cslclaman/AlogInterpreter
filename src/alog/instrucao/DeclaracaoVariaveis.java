@@ -1,6 +1,6 @@
 package alog.instrucao;
 
-import alog.model.TipoVariavel;
+import alog.model.TipoDado;
 import alog.model.Variavel;
 import alog.token.Token;
 import java.util.LinkedList;
@@ -13,7 +13,7 @@ import java.util.List;
 public class DeclaracaoVariaveis extends Instrucao {
 
     private Token tokenTipoVariavel;
-    private TipoVariavel tipoVariavel;
+    private TipoDado tipoVariavel;
     private LinkedList<Token> nomesVariaveis;
     
     /**
@@ -27,13 +27,13 @@ public class DeclaracaoVariaveis extends Instrucao {
 
     /**
      * Define o token que identifica qual o tipo da(s) variável(is) sendo criada(s).
-     * Esse token será mapeado para {@link TipoVariavel}
+     * Esse token será mapeado para {@link TipoDado}
      * @param token 
      */
     public void setTipoVariavel(Token token) {
         if (this.tokenTipoVariavel == null) {
             this.tokenTipoVariavel = token;
-            tipoVariavel = TipoVariavel.mapTokenToVariavel(token);
+            tipoVariavel = TipoDado.mapTokenToVariavel(token);
             addToken(token);
         }
     }
@@ -70,7 +70,7 @@ public class DeclaracaoVariaveis extends Instrucao {
      * Retorna o tipo da(s) variável(is) sendo criada(s).
      * @return 
      */
-    public TipoVariavel getTipoVariavel(){
+    public TipoDado getTipoVariavel(){
         return tipoVariavel;
     }
     
@@ -80,7 +80,7 @@ public class DeclaracaoVariaveis extends Instrucao {
      */
     public List<Variavel> getVariaveis(){
         LinkedList<Variavel> variaveis = new LinkedList<>();
-        TipoVariavel tipoVar = tipoVariavel;
+        TipoDado tipoVar = tipoVariavel;
         for (Token token : nomesVariaveis) {
             variaveis.add(new Variavel(tipoVar, token.getPalavra()));
         }

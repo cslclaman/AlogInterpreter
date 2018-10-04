@@ -27,7 +27,7 @@ import java.util.NoSuchElementException;
 public class Parser {
     private final List<Token> tokens;
     
-    private Map<String, TipoVariavel> declVariaveis;
+    private Map<String, TipoDado> declVariaveis;
     
     private LinkedList<FuncaoToken> funcoesEsperadas;
     private LinkedList<Erro> erros;

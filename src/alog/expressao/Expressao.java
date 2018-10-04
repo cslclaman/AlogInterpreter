@@ -2,7 +2,7 @@ package alog.expressao;
 
 import alog.instrucao.Instrucao;
 import alog.instrucao.TipoInstrucao;
-import alog.model.TipoVariavel;
+import alog.model.TipoDado;
 import alog.token.Token;
 
 /**
@@ -12,7 +12,7 @@ import alog.token.Token;
 public abstract class Expressao extends Instrucao {
 
     protected TipoExpressao tipoExpressao;
-    protected TipoVariavel tipoResultado;
+    protected TipoDado tipoResultado;
     protected String resultado;
     protected Token parentesesAbre;
     protected Token parentesesFecha;
@@ -27,11 +27,11 @@ public abstract class Expressao extends Instrucao {
         return tipoExpressao;
     }
 
-    public TipoVariavel getTipoResultado() {
+    public TipoDado getTipoResultado() {
         return tipoResultado;
     }
 
-    public void setTipoResultado(TipoVariavel tipoResultado) {
+    public void setTipoResultado(TipoDado tipoResultado) {
         this.tipoResultado = tipoResultado;
     }
 

@@ -8,7 +8,7 @@ package alog.control;
 import alog.instrucao.Bloco;
 import alog.instrucao.Instrucao;
 import alog.token.FuncaoToken;
-import alog.model.TipoVariavel;
+import alog.model.TipoDado;
 import alog.token.Token;
 import alog.model.Variavel;
 import java.util.HashMap;
@@ -93,16 +93,16 @@ public class Interpreter {
     }
     
     public boolean execCriacaoVariavel(Instrucao expressao){
-        TipoVariavel tipoVar;
+        TipoDado tipoVar;
         switch (expressao.getNextToken().getFuncaoToken()){
             case RES_TIPO_INTEIRO:
-                tipoVar = TipoVariavel.INTEIRO;
+                tipoVar = TipoDado.INTEIRO;
                 break;
             case RES_TIPO_REAL:
-                tipoVar = TipoVariavel.REAL;
+                tipoVar = TipoDado.REAL;
                 break;
             case RES_TIPO_CARACTER:
-                tipoVar = TipoVariavel.CARACTER;
+                tipoVar = TipoDado.CARACTER;
                 break;
             default:
                 return false;
@@ -363,21 +363,21 @@ public class Interpreter {
                     }
                     switch (variavel.getTipo()){
                         case INTEIRO:
-                            if (op1.getTipo() != TipoVariavel.INTEIRO){
+                            if (op1.getTipo() != TipoDado.INTEIRO){
                                 System.err.println("Atribuição inválida - Esperava " + variavel.getTipo() + ", encontrou " + op1.getTipo());
                                 return false;
                             }
                             variavel.setValor(op1.getValor());
                             break;
                         case REAL:
-                            if (op1.getTipo() != TipoVariavel.REAL && op1.getTipo() != TipoVariavel.INTEIRO){
+                            if (op1.getTipo() != TipoDado.REAL && op1.getTipo() != TipoDado.INTEIRO){
                                 System.err.println("Atribuição inválida - Esperava " + variavel.getTipo() + ", encontrou " + op1.getTipo());
                                 return false;
                             }
                             variavel.setValor(op1.getValor());
                             break;
                         case CARACTER:
-                            if (op1.getTipo() != TipoVariavel.CARACTER){
+                            if (op1.getTipo() != TipoDado.CARACTER){
                                 System.err.println("Atribuição inválida - Esperava " + variavel.getTipo() + ", encontrou " + op1.getTipo());
                                 return false;
                             }
@@ -586,7 +586,7 @@ public class Interpreter {
                 } 
                 Token t = pilha.pop();
                 Variavel r = retornaVariavel(t);
-                if (r == null || r.getTipo() != TipoVariavel.INTEIRO){
+                if (r == null || r.getTipo() != TipoDado.INTEIRO){
                     System.err.println("Erro na execução - variável para token " + t + " inválida");
                     return false;
                 }
@@ -608,15 +608,15 @@ public class Interpreter {
                 temp = variaveis.get(token.getPalavra());
                 break;
             case CONST_CARACTER:
-                temp = new Variavel(TipoVariavel.CARACTER, nomeVar);
+                temp = new Variavel(TipoDado.CARACTER, nomeVar);
                 temp.setValor(token.getPalavra().replace("\"", ""));
                 break;
             case CONST_INTEIRA:
-                temp = new Variavel(TipoVariavel.INTEIRO, nomeVar);
+                temp = new Variavel(TipoDado.INTEIRO, nomeVar);
                 temp.setValor(token.getPalavra());
                 break;
             case CONST_REAL:
-                temp = new Variavel(TipoVariavel.REAL, nomeVar);
+                temp = new Variavel(TipoDado.REAL, nomeVar);
                 temp.setValor(token.getPalavra());
                 break;
             default:
