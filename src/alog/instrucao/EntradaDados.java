@@ -44,5 +44,12 @@ public class EntradaDados extends Instrucao {
         }
         return super.instrucaoValida();
     }
-    
+
+    public Token getNome() {
+        return nome;
+    }
+
+    public LinkedList<Token> getParametros() {
+        return parametros;
+    }
 }

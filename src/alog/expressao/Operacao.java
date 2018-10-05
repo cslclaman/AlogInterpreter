@@ -55,7 +55,7 @@ public class Operacao extends Expressao {
             case OP_MAT_DIV_REAL:
             case OP_MAT_DIV_INTEIRA:
             case OP_MAT_MOD:
-                tipoExpressao = TipoExpressao.ARITMETICA;
+                tipoExpressao = TipoExpressao.OPERACAO_ARITMETICA;
                 break;
             case OP_REL_MAIOR:
             case OP_REL_MAIOR_IGUAL:
@@ -63,11 +63,11 @@ public class Operacao extends Expressao {
             case OP_REL_MENOR_IGUAL:
             case OP_REL_IGUAL:
             case OP_REL_DIFERENTE:
-                tipoExpressao = TipoExpressao.RELACIONAL;
+                tipoExpressao = TipoExpressao.OPERACAO_RELACIONAL;
                 break;
             case OP_LOG_E:
             case OP_LOG_OU:
-                tipoExpressao = TipoExpressao.LOGICA;
+                tipoExpressao = TipoExpressao.OPERACAO_LOGICA;
                 break;
             default:
                 tipoExpressao = TipoExpressao._INDEFINIDO;

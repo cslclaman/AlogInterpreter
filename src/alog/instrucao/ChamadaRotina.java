@@ -47,5 +47,9 @@ public class ChamadaRotina extends Instrucao {
         }
         return super.instrucaoValida();
     }
-    
+
+    public LinkedList<Expressao> getParametros() {
+        return parametros;
+    }
+
 }

@@ -21,6 +21,7 @@ public abstract class Expressao extends Instrucao {
         super();
         tipo = TipoInstrucao.EXPRESSAO;
         tipoExpressao = TipoExpressao._INDEFINIDO;
+        tipoResultado = null;
     }
 
     public TipoExpressao getTipoExpressao() {

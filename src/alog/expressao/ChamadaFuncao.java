@@ -5,7 +5,6 @@
  */
 package alog.expressao;
 
-import alog.instrucao.TipoInstrucao;
 import alog.token.Token;
 import java.util.LinkedList;
 
@@ -19,8 +18,7 @@ public class ChamadaFuncao extends Operando {
     
     public ChamadaFuncao() {
         super();
-        tipo = TipoInstrucao.CHAMADA_ROTINA;
-        tipoExpressao = TipoExpressao.OPERANDO;
+        tipoExpressao = TipoExpressao.OPERANDO_FUNCAO;
         parametros = new LinkedList<>();
     }
 

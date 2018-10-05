@@ -6,9 +6,11 @@
 package alog.control;
 
 import alog.analise.Erro;
-import alog.instrucao.Instrucao;
+import alog.expressao.*;
+import alog.instrucao.*;
 import alog.model.TipoDado;
 import alog.model.Variavel;
+import alog.token.Token;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -20,96 +22,120 @@ import java.util.List;
  */
 public class Verificador {
     
+    private class VariavelVerif {
+        int chamadas;
+        TipoDado tipo;
+        boolean inicializada;
+
+        public VariavelVerif(TipoDado tipo) {
+            this.tipo = tipo;
+            this.inicializada = false;
+            this.chamadas = 0;
+        }
+    }
+    
+    private class RotinaVerif {
+        int chamadas;
+        TipoDado[] parametros;
+
+        public RotinaVerif() {
+            this.chamadas = 0;
+        }
+        
+        public RotinaVerif(TipoDado[] parametros) {
+            this.parametros = parametros;
+            this.chamadas = 0;
+        }
+    }
+    
+    private class FuncaoVerif extends RotinaVerif {
+        TipoDado retorno; 
+        
+        public FuncaoVerif() {
+            super();
+        }
+        
+        public FuncaoVerif(TipoDado[] parametros) {
+            super(parametros);
+        }
+
+        public FuncaoVerif(TipoDado[] parametros, TipoDado retorno) {
+            super(parametros);
+            this.retorno = retorno;
+        }
+    }
+    
     private LinkedList<Erro> erros;
-    private ArrayList<Instrucao> programa;
-    private HashMap <String, Variavel> variaveis;
-    private HashMap <String, TipoDado[] > funcoes;
+    private List<Instrucao> programa;
+    private HashMap <String, VariavelVerif> variaveis;
+    private HashMap <String, FuncaoVerif> funcoes;
     private int pos;
+    private int len;
     
     public Verificador(List<Instrucao> programa) {
-        this.programa = new ArrayList<>(programa.size());
-        this.programa.addAll(programa);
+        this.programa = programa;
         
         erros = new LinkedList<>();
         variaveis = new HashMap<>();
         funcoes = new HashMap<>();
-        funcoes.put("pot", new TipoDado[]{TipoDado.REAL, TipoDado.REAL} );
-        funcoes.put("raiz", new TipoDado[]{TipoDado.REAL} );
+        
+        funcoes.put("pot", new FuncaoVerif(new TipoDado[]{TipoDado.REAL, TipoDado.REAL}, TipoDado.REAL));
+        funcoes.put("raiz", new FuncaoVerif(new TipoDado[]{TipoDado.REAL}, TipoDado.REAL));
+        
         pos = 0;
+        len = programa.size();
     }
     
-    public boolean existeProxima(){
-        return pos < programa.size();
-    }
-    
-    public void verifyNext(){
-        if (hasNext()){
-            Instrucao expressao = programa.get(pos++);
-            switch (expressao.getTipo()){
+    public List<Instrucao> verificaPrograma(){
+        while (pos < len) {
+            Instrucao instrucao = programa.get(pos++);
+            switch (instrucao.getTipo()) {
+                case BLOCO:
+                    Verificador verificador = new Verificador(programa);
+                    verificador.erros = this.erros;
+                    verificador.variaveis = this.variaveis;
+                    verificador.funcoes = this.funcoes;
+                    verificador.pos = this.pos;
+                    
+                    verificador.verificaPrograma();
+                    
+                    this.erros = verificador.erros;
+                    this.variaveis = verificador.variaveis;
+                    this.funcoes = verificador.funcoes;
+                    this.pos = verificador.pos;
+                    
+                    break;
+                    
                 case DECLARACAO_VARIAVEL:
-                    String tipoVar = "";
-                    for (Token t : expressao.listTokens()){
-                        if (t.getFuncaoToken() == FuncaoToken.RES_TIPO_CARACTER ||
-                            t.getFuncaoToken() == FuncaoToken.RES_TIPO_INTEIRO ||
-                            t.getFuncaoToken() == FuncaoToken.RES_TIPO_REAL) {
-                            tipoVar = t.getPalavra().toUpperCase();
-                            continue;
-                        }
-                        String nomeVar = t.getPalavra();
-                        if (variaveis.containsKey(nomeVar)){
-                            erros.add(new ErroSemantico(expressao, "Variável já declarada: " + variaveis.get(nomeVar) + " " + nomeVar));
-                        } else {
-                            variaveis.put(nomeVar, tipoVar);
-                        }
+                    DeclaracaoVariaveis declaracaoVariaveis = (DeclaracaoVariaveis)instrucao;
+                    for (Variavel variavel : declaracaoVariaveis.getVariaveis()) {
+                        variaveis.put(variavel.getNome(), new VariavelVerif(variavel.getTipo()));
                     }
                     break;
+                    
                 case ENTRADA_DE_DADOS:
-                    for (Token t : expressao.listTokens()){
-                        String nome = t.getPalavra();
-                        switch (t.getFuncaoToken()){
-                            case IDENT_NOME_VARIAVEL:
-                                if (!variaveis.containsKey(nome)){
-                                    erros.add(new ErroSemantico(expressao, "Variável não declarada: " + nome));
-                                }
-                                break;
-                            default:
-                                break;
-                        }
+                    EntradaDados entradaDados = (EntradaDados)instrucao;
+                    for (Token token : entradaDados.getParametros()) {
+                        VariavelVerif var = variaveis.get(token.getPalavra());
+                        var.inicializada = true;
+                        variaveis.put(token.getPalavra(), var);
                     }
                     break;
                     
-                case OPERACAO_ARITMETICA:
-                case ATRIBUICAO:
-                case OPERACAO_LOGICA:
                 case SAIDA_DE_DADOS:
-                case CHAMADA_FUNCAO:
-                    int paramEsperado = 0;
-                    int paramEncontrado = 0;
-                    for (Token t : expressao.listTokens()){
-                        String nome = t.getPalavra();
-                        switch (t.getFuncaoToken()){
-                            case LIB_MATH_POT:
-                            case LIB_MATH_RAIZ:
-                                paramEsperado = funcoes.get(nome.toUpperCase());
-                                break;
-                            case IDENT_NOME_VARIAVEL:
-                                if (!variaveis.containsKey(nome)){
-                                    erros.add(new ErroSemantico(expressao, "Variável não declarada: " + nome));
-                                }
-                                break;
-                            case DELIM_VIRGULA:
-                            case DELIM_PARENTESES_FECHA:
-                                paramEncontrado ++;
-                                break;
-                            default:
-                                break;
-                        }
+                    SaidaDados saidaDados = (SaidaDados)instrucao;
+                    for (Expressao expressao : saidaDados.getParametros()) {
+                        
                     }
-                    break;
-                    
-                default:
                     break;
             }
+        }
+    }
+    
+    private Expressao verificaExpressao(Expressao expressao) {
+        switch (expressao.getTipoExpressao()) {
+            case OPERACAO_UNARIA:
+                
         }
     }
     

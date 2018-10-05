@@ -19,6 +19,7 @@ public class OperacaoUnaria extends Expressao {
     public OperacaoUnaria() {
         super();
         expressao = null;
+        tipoExpressao = TipoExpressao.OPERACAO_UNARIA;
     }
 
     public Expressao getExpressao() {
@@ -40,10 +41,10 @@ public class OperacaoUnaria extends Expressao {
         switch (operador.getFuncaoToken()) {
             case OP_SIG_NEGATIVO:
             case OP_SIG_POSITIVO:
-                tipoExpressao = TipoExpressao.ARITMETICA;
+                tipoExpressao = TipoExpressao.OPERACAO_ARITMETICA;
                 break;
             case OP_LOG_NAO:
-                tipoExpressao = TipoExpressao.LOGICA;
+                tipoExpressao = TipoExpressao.OPERACAO_LOGICA;
                 break;
             default:
                 tipoExpressao = TipoExpressao._INDEFINIDO;

@@ -18,7 +18,6 @@ public class Operando extends Expressao {
     
     public Operando() {
         super();
-        tipoExpressao = TipoExpressao.OPERANDO;
     }
     
     public void setOperando(Token token) {
@@ -28,16 +27,22 @@ public class Operando extends Expressao {
         
         switch (token.getFuncaoToken()) {
             case CONST_CARACTER:
+                tipoExpressao = TipoExpressao.OPERANDO_CONSTANTE;
                 tipoResultado = TipoDado.CARACTER;
                 resultado = token.getPalavra();
                 break;
             case CONST_INTEIRA:
+                tipoExpressao = TipoExpressao.OPERANDO_CONSTANTE;
                 tipoResultado = TipoDado.INTEIRO;
                 resultado = token.getPalavra();
                 break;
             case CONST_REAL:
+                tipoExpressao = TipoExpressao.OPERANDO_CONSTANTE;
                 tipoResultado = TipoDado.REAL;
                 resultado = token.getPalavra();
+                break;
+            case IDENT_NOME_VARIAVEL:
+                tipoExpressao = TipoExpressao.OPERANDO_VARIAVEL;
                 break;
         }
     }
