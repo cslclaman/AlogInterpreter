@@ -66,6 +66,7 @@ public class Scanner extends Verificator{
         int contNum = 0; // Contagem de caracteres numéricos
         int contDelim = 0; // Contagem de caracteres símbolos delimitadores
         int contOper = 0; // Contagem de caracteres símbolos operadores
+        int contInv = 0; // Contagem de caracteres inválidos
         
         boolean literal = false;
         boolean go = true;
@@ -142,6 +143,7 @@ public class Scanner extends Verificator{
                     indice++;
                     posicao++;
                     coluna++;
+                    contInv ++;
                 }
             }
         }
@@ -178,55 +180,59 @@ public class Scanner extends Verificator{
                     break;
             }
         }
-        if (contLit > 0){
-            token.setTipoToken(TipoToken.LITERAL);
+        if (contInv > 0) {
+            token.setTipoToken(TipoToken.INDEFINIDO);
         } else {
-            if (contAlpha > 0){
-                if (contNum > 0) {
-                    token.setTipoToken(TipoToken.ALFANUMERICO);
-                } else {
-                    token.setTipoToken(TipoToken.ALFABETICO);
-                }
+            if (contLit > 0){
+                token.setTipoToken(TipoToken.LITERAL);
             } else {
-                if (contNum > 0){
-                    Scanner scannerInterno = new Scanner(new String(texto));
-                    scannerInterno.indice = this.indice;
-                    scannerInterno.posicao = this.posicao;
-                    scannerInterno.linha = this.linha;
-                    scannerInterno.coluna = this.coluna;
-                    scannerInterno.ordem = this.ordem;
-                    
-                    Token prox1 = scannerInterno.proximo();
-                    Token prox2 = scannerInterno.proximo();
-                    if (prox1.getFuncaoToken() == FuncaoToken.DELIM_PONTO) {
-                        token.atualizaPalavra(prox1.getPalavra());
-                        token.atualizaPalavra(prox2.getPalavra());
-                        this.indice = scannerInterno.indice;
-                        this.posicao = scannerInterno.posicao;
-                        this.linha = scannerInterno.linha;
-                        this.coluna = scannerInterno.coluna;
-                        this.ordem = scannerInterno.ordem;
-                        if (prox2.getFuncaoToken() == FuncaoToken.CONST_INTEIRA){
-                            token.setTipoToken(TipoToken.NUMERICO);
-                        } else {
-                            token.setTipoToken(TipoToken.INDEFINIDO);
-                        }
+                if (contAlpha > 0){
+                    if (contNum > 0) {
+                        token.setTipoToken(TipoToken.ALFANUMERICO);
                     } else {
-                        token.setTipoToken(TipoToken.NUMERICO);
+                        token.setTipoToken(TipoToken.ALFABETICO);
                     }
                 } else {
-                    if (contDelim > 0){
-                        token.setTipoToken(TipoToken.DELIMITADOR);
-                    } else {
-                        if (contOper > 0){
-                            token.setTipoToken(TipoToken.OPERADOR);
+                    if (contNum > 0){
+                        Scanner scannerInterno = new Scanner(new String(texto));
+                        scannerInterno.indice = this.indice;
+                        scannerInterno.posicao = this.posicao;
+                        scannerInterno.linha = this.linha;
+                        scannerInterno.coluna = this.coluna;
+                        scannerInterno.ordem = this.ordem;
+
+                        Token prox1 = scannerInterno.proximo();
+                        Token prox2 = scannerInterno.proximo();
+                        if (prox1.getFuncaoToken() == FuncaoToken.DELIM_PONTO) {
+                            token.atualizaPalavra(prox1.getPalavra());
+                            token.atualizaPalavra(prox2.getPalavra());
+                            this.indice = scannerInterno.indice;
+                            this.posicao = scannerInterno.posicao;
+                            this.linha = scannerInterno.linha;
+                            this.coluna = scannerInterno.coluna;
+                            this.ordem = scannerInterno.ordem;
+                            if (prox2.getFuncaoToken() == FuncaoToken.CONST_INTEIRA){
+                                token.setTipoToken(TipoToken.NUMERICO);
+                            } else {
+                                token.setTipoToken(TipoToken.INDEFINIDO);
+                            }
                         } else {
-                            token.setTipoToken(TipoToken.INDEFINIDO);
+                            token.setTipoToken(TipoToken.NUMERICO);
+                        }
+                    } else {
+                        if (contDelim > 0){
+                            token.setTipoToken(TipoToken.DELIMITADOR);
+                        } else {
+                            if (contOper > 0){
+                                token.setTipoToken(TipoToken.OPERADOR);
+                            } else {
+                                token.setTipoToken(TipoToken.INDEFINIDO);
+                            }
                         }
                     }
                 }
             }
-        }
+        } 
         
         switch (token.getFuncaoToken()){
             case OP_MAT_SUBTRACAO:
