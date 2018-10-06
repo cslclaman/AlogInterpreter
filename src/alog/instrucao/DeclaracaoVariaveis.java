@@ -73,6 +73,10 @@ public class DeclaracaoVariaveis extends Instrucao {
     public TipoDado getTipoVariavel(){
         return tipoVariavel;
     }
+
+    public LinkedList<Token> getTokensNomesVariaveis() {
+        return nomesVariaveis;
+    }
     
     /**
      * Retorna uma lista de {@link Variavel}.
