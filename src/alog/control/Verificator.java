@@ -16,6 +16,10 @@ import java.util.NoSuchElementException;
  * @author Caique Souza
  */
 public abstract class Verificator {
+
+    /**
+     * Lista de {@link Erro}s.
+     */
     protected LinkedList<Erro> erros;
     
     /**
@@ -35,6 +39,7 @@ public abstract class Verificator {
     
     /**
      * Retorna número de erros encontrados ou, mais especificamente, contidos na lista.
+     * Note que ele conta todos os erros encontrados, independente do tipo.
      * @return Número de erros encontrados.
      */
     public int getNumErros(){
@@ -42,13 +47,34 @@ public abstract class Verificator {
     }
     
     /**
-     * Retorna os erros encontrados.
+     * Retorna número de erros encontrados ou, mais especificamente, contidos na lista.
+     * Esse método retorna apenas os erros com prioridade igual ou acima a do nível informado.
+     * @param nivel Filtragem.
+     * @return Número de erros encontrados.
+     */
+    public int getNumErros(TipoErro nivel){
+        int nerr = 0;
+        for (Erro erro : erros) {
+            if (erro.getTipo().getNivel() <= nivel.getNivel()) {
+                nerr ++;
+            }
+        }
+        return nerr;
+    }
+    
+    /**
+     * Retorna todos os erros encontrados, independente de prioridade.
      * @return Lista com mensagens ou lista vazia caso não tenham erros
      */
     public List<Erro> getErros(){
-        return getErros(TipoErro.getDefault());
+        return getErros(TipoErro.getMax());
     }
-            
+          
+     /**
+     * Retorna os erros encontrados que tenham prioridade superior ou igual ao nível informado.
+     * @param nivel Filtragem
+     * @return Lista com mensagens ou lista vazia caso não tenham erros
+     */
     public List<Erro> getErros(TipoErro nivel){
         LinkedList<Erro> retorno = new LinkedList<>();
         for (Erro erro : erros) {
@@ -60,13 +86,19 @@ public abstract class Verificator {
     }
     
     /**
-     * Retorna lista com mensagens de erro que ocorreram durante a análise.
+     * Retorna lista com mensagens de todos os erros encontrados durante a análise.
      * @return Lista com mensagens ou lista vazia caso não tenham erros
      */
     public String printErros(){
-        return printErros(TipoErro.getDefault());
+        return printErros(TipoErro.getMax());
     }
     
+    /**
+     * Retorna lista com mensagens dos erros encontrados durante a análise
+     * que tenham prioridade maior ou igual ao nível informado.
+     * @param nivel Filtragem
+     * @return Lista com mensagens ou lista vazia caso não tenham erros
+     */
     public String printErros(TipoErro nivel){
         StringBuilder msg = new StringBuilder();
         for (Erro erro : erros){
@@ -80,6 +112,10 @@ public abstract class Verificator {
         return msg.toString();
     }
     
+    /**
+     * Retorna o último erro lançado, ou <code>null</code> caso não tenham erros.
+     * @return 
+     */
     public Erro getUltimoErro(){
         try {
             return erros.getLast();
@@ -88,6 +124,11 @@ public abstract class Verificator {
         }
     }
     
+    /**
+     * Retorna o erro na posição informada, ou <code>null</code> caso não tenham erros.
+     * @param index Índice do erro na lista.
+     * @return erro no índice ou null se não houver erros.
+     */
     public Erro getErroAt(int index) {
         if (erros.isEmpty()) {
             return null;

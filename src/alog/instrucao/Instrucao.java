@@ -38,7 +38,7 @@ public abstract class Instrucao {
 
     /**
      * Retorna uma lista com todos os Tokens que a Instrução armazena.
-     * @return 
+     * @return Lista de tokens.
      */
     public List<Token> listaTokens(){
         return tokens;
@@ -46,8 +46,7 @@ public abstract class Instrucao {
     
     /**
      * Adiciona um token genérico à lista de tokens da instrução.
-     * A instrução pode ou não checar o tipo do token sendo adicionado.
-     * @param token 
+     * @param token Token a adicionar na instrução
      */
     public void addToken(Token token) {
         tokens.add(token);
@@ -57,7 +56,7 @@ public abstract class Instrucao {
     /**
      * Retorna se a instrução é válida e executável.
      * Note que validade se refere à análise sintática, mas não previne erros em tempo de execução.
-     * @return 
+     * @return Se tipo de instrução não é inválido
      */
     public boolean instrucaoValida(){
         return tipo != TipoInstrucao._INVALIDO;

@@ -28,7 +28,7 @@ public class DeclaracaoVariaveis extends Instrucao {
     /**
      * Define o token que identifica qual o tipo da(s) variável(is) sendo criada(s).
      * Esse token será mapeado para {@link TipoDado}
-     * @param token 
+     * @param token Token que representa o tipo de variável
      */
     public void setTipoVariavel(Token token) {
         if (this.tokenTipoVariavel == null) {
@@ -40,7 +40,7 @@ public class DeclaracaoVariaveis extends Instrucao {
     
     /**
      * Adiciona um token que representa um nome de variável sendo declarada.
-     * @param token 
+     * @param token Token que representa um nome de variável.
      */
     public void addNomeVariavel(Token token) {
         if (tokenTipoVariavel != null) {
@@ -56,7 +56,7 @@ public class DeclaracaoVariaveis extends Instrucao {
 
     /**
      * Valida se foi definido um tipo válido e se há pelo menos um nome de variável informado.
-     * @return 
+     * @return Se a instrução é válida.
      */
     @Override
     public boolean instrucaoValida() {

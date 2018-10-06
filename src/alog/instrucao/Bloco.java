@@ -24,8 +24,8 @@ public class Bloco extends Instrucao {
     }
 
     /**
-     * Adiciona uma instrução previamente parseada ao bloco.
-     * @param instrucao 
+     * Adiciona uma instrução previamente analisada ao bloco.
+     * @param instrucao Instrução a adicionar
      */
     public void addInstrucao(Instrucao instrucao){
         instrucoes.add(instrucao);
@@ -40,7 +40,7 @@ public class Bloco extends Instrucao {
 
     /**
      * Lista todas as instruções contidas no bloco.
-     * @return 
+     * @return Lista de instruções
      */
     public List<Instrucao> listaInstrucoes(){
         return instrucoes;
@@ -48,7 +48,7 @@ public class Bloco extends Instrucao {
 
     /**
      * Retorna se o bloco possui início, fim e pelo menos uma instrução válida
-     * @return 
+     * @return se o bloco é válido
      */
     @Override
     public boolean instrucaoValida() {

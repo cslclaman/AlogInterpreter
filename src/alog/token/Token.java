@@ -130,7 +130,7 @@ public class Token {
 
     /**
      * Redefine a palavra do Token e seu tamanho. O tamanho é obtido pelo método {@link java.lang.String#length() }.
-     * @param palavra 
+     * @param palavra Texto a redefinir a palavra do token.
      */
     public void setPalavra(String palavra) {
         this.palavra = palavra;
@@ -140,7 +140,7 @@ public class Token {
     /**
      * Retorna a ordem em que o Token está na lista de tokens do programa, iniciada em 0 (zero).
      * Exemplo: Num programa {@code Leia(X); } a ordem é a seguinte:
-     *  <table>
+     *  <table summary="Lista de tokens em ordem">
      *  <tr>
      *      <th>Token</th><th>Tipo</th><th>Ordem</th>
      *  </tr>
@@ -158,8 +158,8 @@ public class Token {
 
     /**
      * Define a ordem do token num determinado programa. 
-     * Em geral, esse método só é (ou deveria ser somente) usado pelo {@link alog.control.Parser }.
-     * @param ordem 
+     * Em geral, esse método só é (ou deveria ser somente) usado pelo {@link alog.control.Scanner }.
+     * @param ordem Ordem a definir
      */
     public void setOrdem(int ordem) {
         this.ordem = ordem;
@@ -175,8 +175,8 @@ public class Token {
 
     /**
      * Define a linha em que o token está no programa. 
-     * Em geral, esse método só é (ou deveria ser somente) usado pelo {@link alog.control.Parser }.
-     * @param lin
+     * Em geral, esse método só é (ou deveria ser somente) usado pelo {@link alog.control.Scanner }.
+     * @param lin Número da linha
      */
     public void setLinha(int lin) {
         this.lin = lin;
@@ -192,8 +192,8 @@ public class Token {
 
     /**
      * Define a coluna do programa onde a palavra do token começa. 
-     * Em geral, esse método só é (ou deveria ser somente) usado pelo {@link alog.control.Parser }.
-     * @param col
+     * Em geral, esse método só é (ou deveria ser somente) usado pelo {@link alog.control.Scanner }.
+     * @param col Número da coluna
      */
     public void setColuna(int col) {
         this.col = col;
@@ -211,8 +211,8 @@ public class Token {
 
     /**
      * Define a posição (índice de caracter) no programa (como array de char) onde a palavra do token começa.
-     * Em geral, esse método só é (ou deveria ser somente) usado pelo {@link alog.control.Parser }.
-     * @param posicao
+     * Em geral, esse método só é (ou deveria ser somente) usado pelo {@link alog.control.Scanner }.
+     * @param posicao Posição a definir
      */
     public void setPosicao(int posicao) {
         this.posicao = posicao;
@@ -220,7 +220,7 @@ public class Token {
 
     /**
      * Retorna o tamanho da palavra do token (em nº de caracteres)
-     * @return 
+     * @return número de caracteres da palavra do token.
      */
     public int getTamanho() {
         return tamanho;
@@ -228,7 +228,7 @@ public class Token {
 
     /**
      * Retorna a precedência de operação do Token (ou {@link #PRECEDENCIA_INDEFINIDA} caso não seja necessário).
-     * <table border="1">
+     * <table summary="Lista de precedências de tokens e sua ordem" border="1">
      * <tr><th>Tipo</th><th>Precedência</th><th>Tokens</th><th>Observações</th></tr>
      * <tr><td>{@link #PRECEDENCIA_FUNCAO}</td><td>10</td><td>Leia Escreva Pot Raiz</td><td>Também usado para identificadores de funções/rotinas declaradas</td></tr>
      * <tr><td>{@link #PRECEDENCIA_ARRAY}</td><td>10</td><td>[]</td><td>Acesso a um item de um array</td></tr>
@@ -251,7 +251,7 @@ public class Token {
     
     /**
      * Retorna o {@link TipoToken} desse Token.
-     * @return 
+     * @return Tipo do token.
      */
     public TipoToken getTipoToken() {
         return tipoToken;
@@ -260,7 +260,7 @@ public class Token {
     /**
      * Define o tipo do token.
      * Também define a {@link FuncaoToken} ao verificar se a palavra do Token é uma palavra reservada ou operador.
-     * @param tipoToken 
+     * @param tipoToken Tipo do Token ao definir.
      */
     public void setTipoToken(TipoToken tipoToken) {
         this.tipoToken = tipoToken;
@@ -500,7 +500,7 @@ public class Token {
     
     /**
      * Define manualmente a função do token. 
-     * @param func 
+     * @param func A função do token a definir.
      */
     public void setFuncaoToken(FuncaoToken func){
         this.funcaoToken = func;

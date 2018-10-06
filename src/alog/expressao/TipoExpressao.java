@@ -14,11 +14,11 @@ public enum TipoExpressao {
     _INDEFINIDO,
     
     /**
-     * Expressão com um {@link #OPERANDO} unário e uma subexpressão.
+     * Expressão com um operador unário e uma subexpressão.
      * <br>Exemplos:
      * <ul>
      * <li>Símbolos de alteração de sinal (positivo/negativo) em expressões (ex. <code><b>+</b>2</code> ou <code><b>-</b> (1 + 1)</code>)
-     * <li>Operador lógico inversor NÃO (ex. <code><b>Não</b> 2 > 5</code> )
+     * <li>Operador lógico inversor NÃO (ex. <code><b>Não</b> 2 &gt; 5</code> )
      * </ul>
      * Um operador unário retorna o mesmo tipo de resultado que a expressão que o segue,
      * porém com inversão em seu resultado.
@@ -26,7 +26,7 @@ public enum TipoExpressao {
     OPERACAO_UNARIA,
     
     /**
-     * Expressão com {@link #OPERANDO}s numéricos que retorna um valor numérico.
+     * Expressão com operandos numéricos que retorna um valor numérico.
      * <br>Exemplos:
      * <ul>
      * <li>Expressões matemáticas (ex. <code>2 + 2</code> ou <code>2 * (1 + 1)</code>, ambas retornam <code>4</code>)</li>
@@ -40,7 +40,7 @@ public enum TipoExpressao {
     OPERACAO_ARITMETICA,
     
     /**
-     * Expressão com {@link #OPERANDO}s numéricos ou caracter que retornam um valor lógico.
+     * Expressão com operandos numéricos ou caracter que retornam um valor lógico.
      * <br>Exemplos:
      * <ul>
      * <li>Comparação de igualdade entre números ou expressões aritméticas (ex. <code>2 = 2</code>, retorna <code>verdadeiro</code>
@@ -61,7 +61,7 @@ public enum TipoExpressao {
      * Expressão com operandos lógicos que retornam um valor lógico.
      * <br>Exemplos:
      * <ul>
-     * <li>Comparação lógica E (ex. <code>1 = 1 E 2 < 4</code>, retorna <code>verdadeiro</code> ou 
+     * <li>Comparação lógica E (ex. <code>1 = 1 E 2 &lt; 4</code>, retorna <code>verdadeiro</code> ou 
      * <code>"a" &lt;&gt; "b" E "a" &lt;&gt; "a"</code>, retorna <code>falso</code>)
      * <li>Comparação lógica OU (ex. <code>1 = 1 OU 1 = 2</code>, retorna <code>verdadeiro</code>
      * </ul>
