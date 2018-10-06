@@ -2,12 +2,7 @@ package alog.control;
 
 import alog.analise.Erro;
 import alog.analise.TipoErro;
-import alog.expressao.ChamadaFuncao;
-import alog.expressao.Expressao;
-import alog.expressao.TokenDelimitador;
-import alog.expressao.Operando;
-import alog.expressao.Operacao;
-import alog.expressao.OperacaoUnaria;
+import alog.expressao.*;
 import alog.instrucao.*;
 import alog.token.FuncaoToken;
 import alog.instrucao.TipoInstrucao;
@@ -23,23 +18,23 @@ import java.util.NoSuchElementException;
  * Analisador sintático que verifica uma sequência de tokens e retorna expressões executáveis.
  * @author Caique
  */
-public class Parser {
+public class Parser extends Verificator {
     private final List<Token> tokens;
     
     private Map<String, TipoDado> declVariaveis;
     
     private LinkedList<FuncaoToken> funcoesEsperadas;
-    private LinkedList<Erro> erros;
     private TipoInstrucao tipoUltimaInstrucao;
     private int pos;
     private int size;
     private boolean fimAtingido;
     
     public Parser (List<Token> tokens){
+        super();
+        
         this.tokens = tokens;
         this.size = tokens.size();
         declVariaveis = new HashMap<>();
-        erros = new LinkedList<>();
         funcoesEsperadas = new LinkedList<>();
         tipoUltimaInstrucao = TipoInstrucao._INDEFINIDO;
         
@@ -202,45 +197,6 @@ public class Parser {
         return lista;
     }
     
-    public int getNumErros(){
-        return erros.size();
-    }
-    
-    public String imprimeErros(){
-        StringBuilder msg = new StringBuilder();
-        for (Erro err : erros){
-            if (msg.length() > 0){
-                msg.append("\n");
-            }
-            msg.append(err.toString());
-        }
-        return msg.toString();
-    }
-    
-    public Token getTokenUltimoErro(){
-        return erros.isEmpty() ? null : erros.get(erros.size() - 1).getToken();
-    }
-    
-    public String getMsgUltimoErro(){
-        return erros.isEmpty() ? "" : erros.get(erros.size() - 1).getErro();
-    }
-    
-    public List<Token> getTokensErros(){
-        LinkedList<Token> errToken = new LinkedList<>();
-        for (Erro err : erros){
-            errToken.add(err.getToken());
-        }
-        return errToken;
-    }
-    
-    public List<String> getListaErros(){
-        LinkedList<String> err = new LinkedList<>();
-        for (Erro e : erros){
-            err.add(e.toString());
-        }
-        return err;
-    }
-    
     private boolean funcaoValida(Token token){
         if (!funcoesEsperadas.contains(token.getFuncaoToken())){
             String msgErro = "Encontrou " + token.getFuncaoToken() + ", mas esperava:";
@@ -298,7 +254,6 @@ public class Parser {
             Token token = tokens.get(pos++);
             if (!funcaoValida(token)){
                 declaracaoVariaveis.invalidaInstrucao();
-                break;
             }
             
             switch (token.getFuncaoToken()){
@@ -348,6 +303,10 @@ public class Parser {
                     declaracaoVariaveis.addToken(token);
                     go = false;
                     break;
+                    
+                default:
+                    declaracaoVariaveis.addToken(token);
+                    break;
             }
                     
         }
@@ -363,7 +322,6 @@ public class Parser {
             Token token = tokens.get(pos++);
             if (!funcaoValida(token)){
                 entradaDados.invalidaInstrucao();
-                break;
             }
             
             switch (token.getFuncaoToken()){
@@ -408,6 +366,10 @@ public class Parser {
                     go = false;
                     funcoesEsperadas.clear();
                     break;
+                    
+                default:
+                    entradaDados.addToken(token);
+                    break;
             }
                     
         }
@@ -423,7 +385,6 @@ public class Parser {
             Token token = tokens.get(pos++);
             if (!funcaoValida(token)){
                 saidaDados.invalidaInstrucao();
-                break;
             }
             
             switch (token.getFuncaoToken()){
@@ -452,6 +413,10 @@ public class Parser {
                     go = false;
                     funcoesEsperadas.clear();
                     break;
+                    
+                default:
+                    saidaDados.addToken(token);
+                    break;
             }
                     
         }
@@ -467,7 +432,6 @@ public class Parser {
             Token token = tokens.get(pos++);
             if (!funcaoValida(token)){
                 atribuicao.invalidaInstrucao();
-                break;
             }
             
             switch (token.getFuncaoToken()){
@@ -487,6 +451,10 @@ public class Parser {
                     atribuicao.addToken(token);
                     go = false;
                     funcoesEsperadas.clear();
+                    break;
+                    
+                default:
+                    atribuicao.addToken(token);
                     break;
             }
         }
@@ -1112,8 +1080,8 @@ public class Parser {
                     } catch (NoSuchElementException ex){
                         erros.add(new Erro(TipoErro.ERRO, t, 
                             "Erro ao montar expressão - operando não encontrado"));
-                        erros.add(new Erro(TipoErro.DEVEL, t, 
-                            "Pilha sem elemento p/ gerar operação unária: " + ex.getMessage()));
+                        erros.add(new Erro(TipoErro.DEVEL, t, String.format(
+                            "Pilha sem elemento p/ gerar operação unária: %s - %s",ex.getClass().getName(), ex.getMessage())));
                         expressaoValida = false;
                         operacaoUnaria.addToken(t);
                     }
@@ -1146,8 +1114,8 @@ public class Parser {
                         erros.add(new Erro(TipoErro.ERRO, t, 
                             "Erro ao montar expressão - operando não encontrado"));
                         erros.add(new Erro(TipoErro.DEVEL, t, String.format(
-                            "Pilha sem %do elemento p/ gerar operação binária: %s",
-                                devCount + 1, ex.getMessage())));
+                            "Pilha sem %do elemento p/ gerar operação binária: %s - %s",
+                                devCount + 1, ex.getClass().getName(), ex.getMessage())));
                         expressaoValida = false;
                         subExpressao.addToken(t);
                     }
@@ -1171,19 +1139,22 @@ public class Parser {
                             erros.add(new Erro(TipoErro.ALERTA, t, 
                                 "Alerta ao montar expressão - não pôde encontrar parênteses"));
                             erros.add(new Erro(TipoErro.DEVEL, t, String.format(
-                                "Pilha sem elemento Abre Parênteses: %s", ex.getMessage())));
+                                "Pilha sem elemento Abre Parênteses: %s - %s",
+                                    ex.getClass().getName(), ex.getMessage())));
                         } catch (ClassCastException ex) {
                             erros.add(new Erro(TipoErro.ALERTA, t, 
                                 "Alerta ao montar expressão - não pôde encontrar parênteses"));
                             erros.add(new Erro(TipoErro.DEVEL, t, String.format(
-                                "Pilha sem elemento de abertura de parênteses: %s", ex.getMessage())));
+                                "Pilha sem elemento de abertura de parênteses: %s - %s",
+                                    ex.getClass().getName(), ex.getMessage())));
                         }
                         pilhaExpressoes.push(parenteseada);
                     } catch (NoSuchElementException ex){
                         erros.add(new Erro(TipoErro.ERRO, t, 
                             "Erro ao montar expressão - operando não encontrado"));
                         erros.add(new Erro(TipoErro.DEVEL, t, String.format(
-                            "Pilha sem expressão a colocar parênteses: %s", ex.getMessage())));
+                            "Pilha sem expressão a colocar parênteses: %s - %s", 
+                                ex.getClass().getName(), ex.getMessage())));
                     }
                     break;
             }
@@ -1195,7 +1166,7 @@ public class Parser {
             erros.add(new Erro(TipoErro.ERRO, tokens.get(pos-1), 
                 "Erro ao finalizar expressão - última operação inválida ou nula"));
             erros.add(new Erro(TipoErro.DEVEL, tokens.get(pos-1), String.format(
-                "Pilha vazia ao finalizar: %s", ex.getMessage())));
+                "Pilha vazia ao finalizar: %s - %s", ex.getClass().getName(), ex.getMessage())));
             expressaoValida = false;
             expressao = new Operando();
         }

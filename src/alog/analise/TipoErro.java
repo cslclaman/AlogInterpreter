@@ -33,6 +33,15 @@ public enum TipoErro {
     DEVEL ("Devel", 4);
     
     
+    public static TipoErro getDefault() {
+        return ALERTA;
+    }
+    
+    public static TipoErro getMax() {
+        return DEVEL;
+    }
+    
+    
     private final String nome;
     private final int nivel;
 

@@ -1,10 +1,11 @@
 Início
-    Inteiro: Num1, Num2, Num3, Num4, Num5;
+    Inteiro: Num1, Num2, Num3, Num4, Num5, Num6;
     Caracter: Carac1, Carac2;
     Leia (Num1);
     Num2 <- Num1 = "batata";
     Carac1 <- Carac2;
     Num3 <- Carac1;
-    Num4 <- Raiz(4, 2);
-    Escreva (Num1, Num2, Num3, Num4, Carac1, Carac2);
+    Num4 <- Raiz(2, 4);
+    Num5 <- Raiz("a");
+    Escreva (Num1, Num2, Num3, Num4, Num5, Carac1, Carac2);
 Fim

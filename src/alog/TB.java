@@ -23,7 +23,7 @@ import java.util.List;
 public class TB {
 
     public final static boolean IMPRIME_TOKENS = false;
-    public final static boolean IMPRIME_INSTRUCOES = false;
+    public final static boolean IMPRIME_INSTRUCOES = true;
     public final static boolean IMPRIME_EXPRESSOES_ARVORE = false;
     
     public static void main(String[] args) throws FileNotFoundException, IOException {
@@ -96,7 +96,7 @@ public class TB {
             thisErros = parser.getNumErros();
             if (thisErros > lastErros){
                 for (int e = lastErros; e < thisErros; e++){
-                    System.out.println(parser.getErros().get(e).toString());
+                    System.out.println(parser.getErroAt(e).toString());
                 }
                 lastErros = thisErros;
             }
@@ -112,7 +112,7 @@ public class TB {
         } else {
             if (thisErros > lastErros){
                 for (int e = lastErros; e < thisErros; e++){
-                    System.out.println(parser.getErros().get(e).toString());
+                    System.out.println(parser.getErroAt(e).toString());
                 }
             }
         }

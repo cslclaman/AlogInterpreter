@@ -46,7 +46,7 @@ public abstract class Verificator {
      * @return Lista com mensagens ou lista vazia caso não tenham erros
      */
     public List<Erro> getErros(){
-        return getErros(TipoErro.ALERTA);
+        return getErros(TipoErro.getDefault());
     }
             
     public List<Erro> getErros(TipoErro nivel){
@@ -64,7 +64,7 @@ public abstract class Verificator {
      * @return Lista com mensagens ou lista vazia caso não tenham erros
      */
     public String printErros(){
-        return printErros(TipoErro.ALERTA);
+        return printErros(TipoErro.getDefault());
     }
     
     public String printErros(TipoErro nivel){
@@ -85,6 +85,22 @@ public abstract class Verificator {
             return erros.getLast();
         } catch (NoSuchElementException ex) {
             return null;
+        }
+    }
+    
+    public Erro getErroAt(int index) {
+        if (erros.isEmpty()) {
+            return null;
+        } else {
+            if (index < 0) {
+                return erros.get(0);
+            } else {
+                if (index > getNumErros() - 1) {
+                    return erros.get(getNumErros() - 1);
+                } else {
+                    return erros.get(index);
+                }
+            } 
         }
     }
 }
