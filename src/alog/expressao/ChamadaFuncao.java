@@ -58,5 +58,12 @@ public class ChamadaFuncao extends Operando {
                 (parentesesFecha == null ? "" : " )") +
                 " >";
     }
+
+    public LinkedList<Expressao> getParametros() {
+        return parametros;
+    }
     
+    public int getNumParametros () {
+        return parametros.size();
+    }
 }
