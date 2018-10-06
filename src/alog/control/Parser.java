@@ -13,7 +13,6 @@ import alog.token.FuncaoToken;
 import alog.instrucao.TipoInstrucao;
 import alog.model.*;
 import alog.token.Token;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -80,7 +79,7 @@ public class Parser {
             case RES_BLOCO_INICIO:
                 instrucao = instrucaoBloco();
                 if (((Bloco)instrucao).listaInstrucoes().isEmpty()) {
-                    erros.add(new Erro(TipoErro.ERRO, ((Bloco)instrucao).getInicio(),
+                    erros.add(new Erro(TipoErro.ALERTA, ((Bloco)instrucao).getInicio(),
                         "Bloco vazio declarado"));
                 }
                 
@@ -141,7 +140,7 @@ public class Parser {
                     funcoesEsperadas = funcoesBloco();
                 } else {
                     erros.add(new Erro(TipoErro.ERRO, token, 
-                            String.format("Variável, função ou rotina \"%s\" não declarada", token.getPalavra())));
+                            String.format("Variável \"%s\" não declarada", token.getPalavra())));
                     
                     pos++;
                     instrucao.addToken(token);
@@ -1113,6 +1112,8 @@ public class Parser {
                     } catch (NoSuchElementException ex){
                         erros.add(new Erro(TipoErro.ERRO, t, 
                             "Erro ao montar expressão - operando não encontrado"));
+                        erros.add(new Erro(TipoErro.DEVEL, t, 
+                            "Pilha sem elemento p/ gerar operação unária: " + ex.getMessage()));
                         expressaoValida = false;
                         operacaoUnaria.addToken(t);
                     }
@@ -1135,12 +1136,18 @@ public class Parser {
                 case OP_LOG_OU:
                     Operacao subExpressao = new Operacao();
                     subExpressao.setOperador(t);
+                    int devCount = 0;
                     try {
                         subExpressao.setExpressaoDir(pilhaExpressoes.pop());
+                        devCount ++;
                         subExpressao.setExpressaoEsq(pilhaExpressoes.pop());
+                        devCount ++;
                     } catch (NoSuchElementException ex){
                         erros.add(new Erro(TipoErro.ERRO, t, 
                             "Erro ao montar expressão - operando não encontrado"));
+                        erros.add(new Erro(TipoErro.DEVEL, t, String.format(
+                            "Pilha sem %do elemento p/ gerar operação binária: %s",
+                                devCount + 1, ex.getMessage())));
                         expressaoValida = false;
                         subExpressao.addToken(t);
                     }
@@ -1156,13 +1163,27 @@ public class Parser {
                 case DELIM_PARENTESES_FECHA:
                     try {
                         Expressao parenteseada = pilhaExpressoes.pop();
-                        TokenDelimitador abrePar = (TokenDelimitador)pilhaExpressoes.pop();
-                        parenteseada.setParentesesAbre(abrePar.getDelimitador());
-                        parenteseada.setParentesesFecha(t);
+                        try {
+                            TokenDelimitador abrePar = (TokenDelimitador)pilhaExpressoes.pop();
+                            parenteseada.setParentesesAbre(abrePar.getDelimitador());
+                            parenteseada.setParentesesFecha(t);
+                        } catch (NoSuchElementException ex){
+                            erros.add(new Erro(TipoErro.ALERTA, t, 
+                                "Alerta ao montar expressão - não pôde encontrar parênteses"));
+                            erros.add(new Erro(TipoErro.DEVEL, t, String.format(
+                                "Pilha sem elemento Abre Parênteses: %s", ex.getMessage())));
+                        } catch (ClassCastException ex) {
+                            erros.add(new Erro(TipoErro.ALERTA, t, 
+                                "Alerta ao montar expressão - não pôde encontrar parênteses"));
+                            erros.add(new Erro(TipoErro.DEVEL, t, String.format(
+                                "Pilha sem elemento de abertura de parênteses: %s", ex.getMessage())));
+                        }
                         pilhaExpressoes.push(parenteseada);
-                    } catch (NoSuchElementException | ClassCastException ex){
-                        erros.add(new Erro(TipoErro.ALERTA, t, 
-                            "Alerta ao montar expressão - não pôde encontrar parênteses"));
+                    } catch (NoSuchElementException ex){
+                        erros.add(new Erro(TipoErro.ERRO, t, 
+                            "Erro ao montar expressão - operando não encontrado"));
+                        erros.add(new Erro(TipoErro.DEVEL, t, String.format(
+                            "Pilha sem expressão a colocar parênteses: %s", ex.getMessage())));
                     }
                     break;
             }
@@ -1173,6 +1194,8 @@ public class Parser {
         } catch (NoSuchElementException ex){
             erros.add(new Erro(TipoErro.ERRO, tokens.get(pos-1), 
                 "Erro ao finalizar expressão - última operação inválida ou nula"));
+            erros.add(new Erro(TipoErro.DEVEL, tokens.get(pos-1), String.format(
+                "Pilha vazia ao finalizar: %s", ex.getMessage())));
             expressaoValida = false;
             expressao = new Operando();
         }
