@@ -7,8 +7,6 @@ package alog;
 
 import alog.control.Parser;
 import alog.control.Scanner;
-import alog.instrucao.Atribuicao;
-import alog.instrucao.ChamadaRotina;
 import alog.instrucao.Instrucao;
 import alog.token.Token;
 import java.io.FileNotFoundException;
@@ -35,7 +33,8 @@ public class TB {
                 System.getProperty("file.separator"),
                 "RevisaoParser",
                 System.getProperty("file.separator"),
-                "RunParser01.txt"
+                "RunFE_2_3.txt"
+                //"RunParser01.txt"
         );
         FileReader fr = new FileReader(path);
         
@@ -56,41 +55,48 @@ public class TB {
         Scanner scanner = new Scanner(codigo);
         List<Token> tokens = new ArrayList<>();
         while (scanner.existeProximo()){
-            tokens.add(scanner.proximo());
+            Token token = scanner.proximo();
+            if (IMPRIME_TOKENS) {
+                System.out.println("*** " + token);
+            }
+            tokens.add(token);
             thisErros = scanner.getNumErros();
             if (thisErros > lastErros){
                 for (int e = lastErros; e < thisErros; e++){
-                    System.out.println(scanner.getListaErros().get(e));
+                    System.out.println(scanner.getErros().get(e).toString());
                 }
                 lastErros = thisErros;
             }
         }
         
-        if (scanner.getNumErros() == 0){
+        thisErros = scanner.getNumErros();
+        if (thisErros == 0){
             System.out.println("Scanner sem erros de leitura");
         } else {
-            System.out.println(scanner.imprimeErros());
+            if (thisErros > lastErros){
+                for (int e = lastErros; e < thisErros; e++){
+                    System.out.println(scanner.getErros().get(e).toString());
+                }
+            }
         }
         
         thisErros = 0;
         lastErros = 0;
-        
-        if (IMPRIME_TOKENS) {
-            for (Token t : tokens){
-                System.out.println("*** " + t);
-            }
-        }
         
         System.out.println("Iniciando Parser");
         
         Parser parser = new Parser(tokens);
         List<Instrucao> instrucoes = new LinkedList<>();
         while (parser.existeProxima()){
-            instrucoes.add(parser.proxima());
+            Instrucao instrucao = parser.proxima();
+            instrucoes.add(instrucao);
+            if (IMPRIME_INSTRUCOES) {
+                System.out.println("*** " + instrucao.toString());
+            }
             thisErros = parser.getNumErros();
             if (thisErros > lastErros){
                 for (int e = lastErros; e < thisErros; e++){
-                    System.out.println(parser.getListaErros().get(e));
+                    System.out.println(parser.getErros().get(e).toString());
                 }
                 lastErros = thisErros;
             }
@@ -100,11 +106,15 @@ public class TB {
             System.out.println("Parser sem erros de leitura");
         }
         
-        if (IMPRIME_INSTRUCOES) {
-            for (Instrucao i : instrucoes){
-                System.out.println("*** " + i.toString());
+        thisErros = parser.getNumErros();
+        if (thisErros == 0){
+            System.out.println("Parser sem erros de leitura");
+        } else {
+            if (thisErros > lastErros){
+                for (int e = lastErros; e < thisErros; e++){
+                    System.out.println(parser.getErros().get(e).toString());
+                }
             }
         }
     }
-    
 }

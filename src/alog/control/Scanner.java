@@ -13,7 +13,7 @@ import java.util.List;
  * Classe de scanner que realiza análise léxica em um código e retorna os tokens por meio de um iterador.
  * @author Caique
  */
-public class Scanner {
+public class Scanner extends Verificator{
     
     private int indice;
     private int posicao;
@@ -25,13 +25,13 @@ public class Scanner {
     private char[] texto;
     
     private Token last;
-    private LinkedList<Erro> erros;
 
     /**
      * Constrói uma nova instância do Scanner a partir de uma String de código-fonte.
      * @param texto Código a ser escaneado
      */
     public Scanner(String texto) {
+        super();
         this.texto = texto.toCharArray();
         len = texto.length();
         indice = 0;
@@ -42,9 +42,8 @@ public class Scanner {
         next = len > 0;
         
         last = null;
-        erros = new LinkedList<>();
         if (len <= 0){
-            erros.add(new Erro(TipoErro.ALERTA, ' ', 0, 0, 0, "Nenhum token encontrado"));
+            erros.add(new Erro(TipoErro.ERRO, ' ', 0, 0, 0, "Nenhum token encontrado"));
         }
     }
     
@@ -136,7 +135,7 @@ public class Scanner {
                         contOper++;
                     }
                 } else {
-                    erros.add(new Erro(ch, linha, coluna, posicao, 
+                    erros.add(new Erro(TipoErro.ALERTA, ch, linha, coluna, posicao, 
                             String.format("Caracter inválido: %c (%d)", ch, (int)ch)));
                     token.atualizaPalavra(ch);
                     go = false;
@@ -274,54 +273,6 @@ public class Scanner {
             list.add(proximo);
         }
         return list;
-    }
-    
-    /**
-     * Retorna número de erros de análise léxica.
-     * @return 
-     */
-    public int getNumErros(){
-        return erros.size();
-    }
-    
-    /**
-     * Retorna lista com mensagens de erro que ocorreram durante a análise.
-     * @return Lista com mensagens ou lista vazia caso não tenham erros
-     */
-    public List<String> getListaErros(){
-        LinkedList<String> err = new LinkedList<>();
-        for (Erro e : erros){
-            err.add(e.toString());
-        }
-        return err;
-    }
-    
-    /**
-     * Retorna lista com mensagens de erro que ocorreram durante a análise.
-     * @return Lista com mensagens ou lista vazia caso não tenham erros
-     */
-    public String imprimeErros(){
-        StringBuilder msg = new StringBuilder();
-        for (Erro err : erros){
-            if (msg.length() > 0){
-                msg.append("\n");
-            }
-            msg.append(err.toString());
-        }
-        return msg.toString();
-    }
-    
-    /**
-     * Retorna lista com mensagens de erro que ocorreram durante a análise.
-     * @return Lista com mensagens ou lista vazia caso não tenham erros
-     */
-    public List<Token> retornaErros () {
-        LinkedList<Token> tokens = new LinkedList<>();
-        for (Erro err : erros){
-            Token t = err.getToken();
-            tokens.add(t);
-        }
-        return tokens;
     }
     
     /**

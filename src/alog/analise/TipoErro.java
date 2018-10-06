@@ -30,7 +30,7 @@ public enum TipoErro {
     /**
      * Informação que só deveria ser exibida ao desenvolvedor.
      */
-    DEVEL ("Devel.", 4);
+    DEVEL ("Devel", 4);
     
     
     private final String nome;
@@ -39,6 +39,14 @@ public enum TipoErro {
     private TipoErro(String nome, int nivel) {
         this.nivel = nivel;
         this.nome = nome;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public int getNivel() {
+        return nivel;
     }
     
     @Override

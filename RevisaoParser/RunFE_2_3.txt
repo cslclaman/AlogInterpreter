@@ -1,0 +1,5 @@
+Início
+    Inteiro: Endereço, NFilhos;
+    Caracter: Idade, X;
+    Real: Cruzeiro$, Xpto, C, Peso, 0UT;
+Fim
