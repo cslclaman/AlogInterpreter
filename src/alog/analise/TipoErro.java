@@ -10,19 +10,39 @@ package alog.analise;
  * @author Caique Souza
  */
 public enum TipoErro {
+    
     /**
-     * Informação básica que não indica nenhum problema de análise.
+     * Erro de análise que impede que o código seja executado totalmente.
      */
-    INFO,
+    ERRO ("Erro", 1),
     
     /**
      * Alertas que podem causar resultados incorretos ou comandos ignorados,
      * mas não impedem a execução do código como um todo.
      */
-    ALERTA,
+    ALERTA ("Alerta", 2),
     
     /**
-     * Erro de análise que impede que o código seja executado totalmente.
+     * Informação básica que não indica nenhum problema de análise.
      */
-    ERRO,
+    INFO ("Info", 3),
+    
+    /**
+     * Informação que só deveria ser exibida ao desenvolvedor.
+     */
+    DEVEL ("Devel.", 4);
+    
+    
+    private final String nome;
+    private final int nivel;
+
+    private TipoErro(String nome, int nivel) {
+        this.nivel = nivel;
+        this.nome = nome;
+    }
+    
+    @Override
+    public String toString() {
+        return nome.toUpperCase();
+    }
 }
