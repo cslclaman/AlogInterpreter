@@ -10,10 +10,12 @@ import alog.control.PreProcessor;
 import alog.control.Scanner;
 import alog.instrucao.Instrucao;
 import alog.token.Token;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,10 +26,11 @@ import java.util.List;
  */
 public class TC {
 
-    public final static boolean IMPRIME_ERROS_SCANNER = true;
-    public final static boolean IMPRIME_ERROS_PARSER = false;
+    public final static boolean IMPRIME_ERROS_SCANNER = false;
+    public final static boolean IMPRIME_ERROS_PARSER = true;
     public final static boolean IMPRIME_ERROS_PREPROCESSOR = false;
     public final static boolean IMPRIME_TEMPO_PARCIAL = true;
+    public final static String CHARACTER_ENCODING = "UTF-8";
     
     public static void main(String[] args) throws FileNotFoundException, IOException {
         
@@ -40,7 +43,7 @@ public class TC {
                 System.getProperty("file.separator")
         );
         File pasta = new File(path);
-        int pos = 1;
+        int pos = 0;
         
         int errScanner = 0;
         int errParser = 0;
@@ -50,17 +53,17 @@ public class TC {
             
             long tempo = System.currentTimeMillis();
             
-            System.out.printf("\nArquivo %d: %s\n", pos++, arquivo.getName());
+            System.out.printf("\nArquivo %d: %s\n", ++pos, arquivo.getName());
             
-            FileReader fr = new FileReader(arquivo);
-            StringBuilder sb = new StringBuilder();
-            int c = fr.read();
-            while (c != -1) {
-                sb.append((char)c);
-                c = fr.read();
+            StringBuilder codigofonte = new StringBuilder();
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(arquivo), CHARACTER_ENCODING));
+            String texto;
+            while ((texto = br.readLine()) != null){
+                codigofonte.append(texto);
+                codigofonte.append("\n");
             }
-            String codigo = sb.toString();
-
+            String codigo = codigofonte.toString();
+            
             Scanner scanner = new Scanner(codigo);
             List<Token> tokens = new ArrayList<>();
             while (scanner.existeProximo()){
@@ -111,11 +114,12 @@ public class TC {
             
         }
         
-        System.out.println("\nArquivos com erro no Scanner: " + errScanner);
-        System.out.println("Arquivos com erro no Parser: " + errParser);
-        System.out.println("Arquivos com erro de pré-processamento: " + errPreProc);
-        System.out.println("Tempo total decorrido: " + media + "ms");
-        System.out.println("Média de tempo por algoritmo: " + media / (pos-1) + "ms");
+        System.out.println("\nTotal de arquivos processados:     " + pos);
+        System.out.println("Arquivos com erro no Scanner:      " + errScanner);
+        System.out.println("Arquivos com erro no Parser:       " + errParser);
+        System.out.println("Arquivos com erro no PreProcessor: " + errPreProc);
+        System.out.println("Tempo total decorrido:             " + media + "ms");
+        System.out.println("Média de tempo por algoritmo:      " + media /pos + "ms");
     }
     
 }

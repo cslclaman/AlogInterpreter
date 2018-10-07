@@ -110,6 +110,16 @@ public class PreProcessor extends Verificator {
     }
     
     private void verificaInstrucao(Instrucao instrucao) {
+        if (instrucao == null) {
+            erros.add(new Erro(TipoErro.DEVEL, ' ', 1, 1, 1, 
+                "Instrução nula"));
+            return;
+        }
+        if (!instrucao.isValida()) {
+            erros.add(new Erro(TipoErro.DEVEL, instrucao.listaTokens().get(0), 
+                "Instrução \"" + instrucao.getTipo() + "\" inválida/incorreta"));
+            return;
+        }
         switch (instrucao.getTipo()) {
             case BLOCO:
                 verificaBloco(instrucao);

@@ -494,9 +494,7 @@ public class Parser extends Verificator {
                     
                     Instrucao instrucaoInterna = parserInterno.proxima();
                     erros.addAll(parserInterno.erros);
-                    if (instrucaoInterna.isValida()){
-                        condicional.setInstrucaoSe(instrucaoInterna);
-                    }
+                    condicional.setInstrucaoSe(instrucaoInterna);
                     
                     pos = parserInterno.pos;
                     declVariaveis = parserInterno.declVariaveis;
@@ -519,9 +517,7 @@ public class Parser extends Verificator {
 
                 Instrucao instrucaoInterna = parserInterno.proxima();
                 erros.addAll(parserInterno.erros);
-                if (instrucaoInterna.isValida()){
-                    condicional.setInstrucaoSenao(instrucaoInterna);
-                }
+                condicional.setInstrucaoSenao(instrucaoInterna);
                 
                 pos = parserInterno.pos;
                 declVariaveis = parserInterno.declVariaveis;
@@ -561,10 +557,8 @@ public class Parser extends Verificator {
                     
                     Instrucao instrucaoInterna = parserInterno.proxima();
                     erros.addAll(parserInterno.erros);
-                    if (instrucaoInterna.isValida()){
-                        repetitiva.setInstrucao(instrucaoInterna);
-                    }
-                    
+                    repetitiva.setInstrucao(instrucaoInterna);
+
                     pos = parserInterno.pos;
                     declVariaveis = parserInterno.declVariaveis;
                     go = false;
@@ -599,9 +593,7 @@ public class Parser extends Verificator {
                     
                     Instrucao instrucaoInterna = parserInterno.proxima();
                     erros.addAll(parserInterno.erros);
-                    if (instrucaoInterna.isValida()){
-                        repetitiva.setInstrucao(instrucaoInterna);
-                    }
+                    repetitiva.setInstrucao(instrucaoInterna);
                     
                     pos = parserInterno.pos;
                     declVariaveis = parserInterno.declVariaveis;
@@ -652,9 +644,7 @@ public class Parser extends Verificator {
                     
                     Instrucao instrucaoInterna = parserInterno.proxima();
                     erros.addAll(parserInterno.erros);
-                    if (instrucaoInterna.isValida()){
-                        repetitiva.setInstrucao(instrucaoInterna);
-                    }
+                    repetitiva.setInstrucao(instrucaoInterna);
                     
                     pos = parserInterno.pos;
                     declVariaveis = parserInterno.declVariaveis;
