@@ -1,5 +1,6 @@
 package alog.instrucao;
 
+import alog.token.FuncaoToken;
 import alog.token.Token;
 import java.util.LinkedList;
 import java.util.List;
@@ -53,6 +54,28 @@ public abstract class Instrucao {
     public final void addToken(Token token) {
         tokens.add(token);
         texto.append(token.getPalavra()).append(" ");
+    }
+    
+    /**
+     * Retorna a expressão dentro de um Token de tipo "INVÁLIDO".
+     * Deve ser usado apenas para fins de exibição e depuração.
+     * @return Token com palavra igual ao do texto da expressão.
+     */
+    public final Token getAsToken () {
+        Token t = tokens.getFirst();
+        Token novo = new Token(t.getLinha(), t.getColuna(), t.getPosicao(), t.getOrdem());
+        t.setFuncaoToken(FuncaoToken._INVALIDO);
+        int pos = t.getPosicao();
+        
+        for (Token token : tokens) {
+            pos += novo.getTamanho();
+            for (int p2 = pos; p2 < token.getPosicao(); p2++) {
+                novo.atualizaPalavra(" ");
+            }
+            novo.atualizaPalavra(token.getPalavra());
+        }
+        
+        return novo;
     }
     
     /**
