@@ -7,6 +7,7 @@ package alog;
 
 import alog.control.Parser;
 import alog.control.Scanner;
+import alog.control.PreProcessor;
 import alog.instrucao.Instrucao;
 import alog.token.Token;
 import java.io.FileNotFoundException;
@@ -23,7 +24,7 @@ import java.util.List;
 public class TB {
 
     public final static boolean IMPRIME_TOKENS = false;
-    public final static boolean IMPRIME_INSTRUCOES = true;
+    public final static boolean IMPRIME_INSTRUCOES = false;
     public final static boolean IMPRIME_EXPRESSOES_ARVORE = false;
     
     public static void main(String[] args) throws FileNotFoundException, IOException {
@@ -33,7 +34,8 @@ public class TB {
                 System.getProperty("file.separator"),
                 "RevisaoParser",
                 System.getProperty("file.separator"),
-                "RunFE_2_3.txt"
+                //"RunFE_2_3.txt"
+                "RunParser02.txt"
                 //"RunParser01.txt"
         );
         FileReader fr = new FileReader(path);
@@ -102,10 +104,6 @@ public class TB {
             }
         }
         
-        if (thisErros == 0){
-            System.out.println("Parser sem erros de leitura");
-        }
-        
         thisErros = parser.getNumErros();
         if (thisErros == 0){
             System.out.println("Parser sem erros de leitura");
@@ -113,6 +111,27 @@ public class TB {
             if (thisErros > lastErros){
                 for (int e = lastErros; e < thisErros; e++){
                     System.out.println(parser.getErroAt(e).toString());
+                }
+            }
+        }
+        
+        thisErros = 0;
+        lastErros = 0;
+        
+        System.out.println("Iniciando Pré processador");
+        
+        PreProcessor verificador = new PreProcessor(instrucoes);
+        List<Instrucao> instrucoes2 = new LinkedList<>();
+        
+        verificador.verificaPrograma();
+        
+        thisErros = verificador.getNumErros();
+        if (thisErros == 0){
+            System.out.println("Programa impecavelmente perfeito");
+        } else {
+            if (thisErros > lastErros){
+                for (int e = lastErros; e < thisErros; e++){
+                    System.out.println(verificador.getErroAt(e).toString());
                 }
             }
         }
