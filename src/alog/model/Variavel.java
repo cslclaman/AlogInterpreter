@@ -12,7 +12,6 @@ package alog.model;
 public class Variavel {
     private TipoDado tipo;
     private String nome;
-    //Substituir por implementação de subclasses
     private String valor;
     private boolean inicializada;
 
@@ -39,24 +38,32 @@ public class Variavel {
         this.valor = valor;
         this.inicializada = true;
     }
+    
+    public void setValorInteiro(long valor) {
+        setValor(String.valueOf(valor));
+    }
+    
+    public void setValorReal(double valor) {
+        setValor(String.valueOf(valor));
+    }
 
     public String getValor() {
         return valor;
     }
     
-    public int getValorInteiro() {
-        if (!inicializada || tipo != TipoDado.INTEIRO){
-            return 0;
+    public long getValorInteiro() {
+        if (inicializada && tipo == TipoDado.INTEIRO){
+            return Long.parseLong(valor);
         } else {
-            return Integer.parseInt(valor);
+            return 0L;
         }
     }
     
     public double getValorReal() {
-        if (!inicializada || tipo == TipoDado.CARACTER){
-            return 0.0;
-        } else {
+        if (inicializada && tipo == TipoDado.REAL){
             return Double.parseDouble(valor);
+        } else {
+            return 0.0;
         }
     }
     
