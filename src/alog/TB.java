@@ -26,8 +26,14 @@ public class TB {
     public final static boolean IMPRIME_TOKENS = false;
     public final static boolean IMPRIME_INSTRUCOES = false;
     public final static boolean IMPRIME_EXPRESSOES_ARVORE = false;
+    public final static boolean CALCULO_TEMPO_DECORRIDO = true;
     
     public static void main(String[] args) throws FileNotFoundException, IOException {
+        
+        long tempo = 0;
+        long tempoScanner = 0;
+        long tempoParser = 0;
+        long tempoPreProcessor = 0;
         
         String path = String.format("%s%s%s%s%s",
                 System.getProperty("user.dir"),
@@ -35,7 +41,7 @@ public class TB {
                 "RevisaoParser",
                 System.getProperty("file.separator"),
                 //"RunFE_2_3.txt"
-                "RunParser02.txt"
+                "RunParser01.txt"
                 //"RunParser01.txt"
         );
         FileReader fr = new FileReader(path);
@@ -48,6 +54,8 @@ public class TB {
         }
         
         String codigo = sb.toString();
+        
+        tempoScanner = System.currentTimeMillis();
         
         int lastErros = 0;
         int thisErros = 0;
@@ -82,10 +90,14 @@ public class TB {
             }
         }
         
+        tempo = System.currentTimeMillis();
+        tempoScanner = tempo - tempoScanner;
+        tempoParser = tempo;
+        
         thisErros = 0;
         lastErros = 0;
         
-        System.out.println("Iniciando Parser");
+        System.out.println("\nIniciando Parser");
         
         Parser parser = new Parser(tokens);
         List<Instrucao> instrucoes = new LinkedList<>();
@@ -115,13 +127,16 @@ public class TB {
             }
         }
         
+        tempo = System.currentTimeMillis();
+        tempoParser = tempo - tempoParser;
+        tempoPreProcessor = tempo;
+        
         thisErros = 0;
         lastErros = 0;
         
-        System.out.println("Iniciando Pré processador");
+        System.out.println("\nIniciando Pré processador");
         
         PreProcessor verificador = new PreProcessor(instrucoes);
-        List<Instrucao> instrucoes2 = new LinkedList<>();
         
         verificador.verificaPrograma();
         
@@ -134,6 +149,19 @@ public class TB {
                     System.out.println(verificador.getErroAt(e).toString());
                 }
             }
+        }
+        
+        tempo = System.currentTimeMillis();
+        tempoPreProcessor = tempo - tempoPreProcessor;
+        
+        tempo = tempoScanner + tempoParser + tempoPreProcessor;
+        
+        if (CALCULO_TEMPO_DECORRIDO) {
+            System.out.println("");
+            System.out.println("Tempo decorrido: " + tempo + "ms");
+            System.out.println("- Scanner:       " + tempoScanner + "ms");
+            System.out.println("- Parser:        " + tempoParser + "ms");
+            System.out.println("- Pre-processor: " + tempoPreProcessor + "ms");
         }
     }
 }
