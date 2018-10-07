@@ -516,6 +516,10 @@ public class Token {
         }
     }
     
+    public String nome(){
+        return palavra.toLowerCase();
+    }
+    
     /**
      * Imprime a função do token seguida da palavra
      * @return "DELIM_BLOCO_INICIO: Início"
