@@ -14,6 +14,10 @@ public class InstrucaoInvalida extends Instrucao {
     public InstrucaoInvalida() {
         super();
         tipo = TipoInstrucao._INVALIDO;
+        valida = false;
     }
-    
+
+    @Override
+    public void finaliza() {
+    }
 }

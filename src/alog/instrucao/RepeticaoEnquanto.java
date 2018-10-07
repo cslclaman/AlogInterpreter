@@ -27,4 +27,14 @@ public class RepeticaoEnquanto extends EstruturaControle {
     public Token getTokenEnquanto() {
         return tokenEnquanto;
     }
+    
+    @Override
+    public void finaliza() {
+        if (valida) {
+            valida =
+                tokenEnquanto != null &&
+                (condicao != null && condicao.isValida()) &&
+                (instrucao != null && instrucao.isValida());
+        }
+    }
 }

@@ -38,4 +38,14 @@ public class RepeticaoRepita extends EstruturaControle {
         texto.append("\n");
         super.addToken(tokenAte);
     }
+    
+    @Override
+    public void finaliza() {
+        if (valida) {
+            valida =
+                tokenRepita != null &&
+                (condicao != null && condicao.isValida()) &&
+                (instrucao != null && instrucao.isValida());
+        }
+    }
 }

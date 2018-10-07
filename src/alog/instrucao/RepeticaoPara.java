@@ -15,7 +15,7 @@ import alog.token.Token;
  */
 public class RepeticaoPara extends EstruturaControle {
     private Token tokenPara;
-    private Token contador;
+    private Token variavelCont;
     private Expressao expressaoDe;
     private Expressao expressaoAte;
     
@@ -29,30 +29,51 @@ public class RepeticaoPara extends EstruturaControle {
         super.addToken(tokenPara);
     }
 
-    public void setContador(Token contador) {
-        if (contador.getFuncaoToken() == FuncaoToken.IDENT_NOME_VARIAVEL) {
-            this.contador = contador;
-        } else {
-            invalidaInstrucao();
-        }
-        super.addToken(contador);
+    public void setVariavelCont(Token variavelCont) {
+        if (variavelCont.getFuncaoToken() == FuncaoToken.IDENT_NOME_VARIAVEL) {
+            this.variavelCont = variavelCont;
+        } 
+        super.addToken(variavelCont);
     }
 
     public void setExpressaoDe(Expressao expressaoDe) {
         this.expressaoDe = expressaoDe;
         tokens.addAll(expressaoDe.listaTokens());
         texto.append(expressaoDe.toString()).append(" ");
-        if (!expressaoDe.instrucaoValida()){
-            invalidaInstrucao();
-        }
     }
     
     public void setExpressaoAte(Expressao expressaoAte) {
         this.expressaoAte = expressaoAte;
         tokens.addAll(expressaoAte.listaTokens());
         texto.append(expressaoAte.toString()).append(" ");
-        if (!expressaoAte.instrucaoValida()){
-            invalidaInstrucao();
+    }
+
+    public Token getTokenPara() {
+        return tokenPara;
+    }
+
+    public Token getVariavelCont() {
+        return variavelCont;
+    }
+
+    public Expressao getExpressaoDe() {
+        return expressaoDe;
+    }
+
+    public Expressao getExpressaoAte() {
+        return expressaoAte;
+    }
+    
+    @Override
+    public void finaliza() {
+        if (valida) {
+            valida =
+                tokenPara != null &&
+                variavelCont != null &&
+                (expressaoDe != null && expressaoDe.isValida()) &&
+                (expressaoAte != null && expressaoAte.isValida()) &&
+                (instrucao != null && instrucao.isValida());
         }
     }
+    
 }

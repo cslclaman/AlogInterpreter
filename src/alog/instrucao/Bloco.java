@@ -12,7 +12,7 @@ public class Bloco extends Instrucao {
     private LinkedList<Instrucao> instrucoes;
     private Token inicio;
     private Token fim;
-    private boolean blocoValido;
+    private int numInstrucoes;
     /**
      * Constrói um bloco vazio, sem instruções.
      */
@@ -20,7 +20,7 @@ public class Bloco extends Instrucao {
         super();
         tipo = TipoInstrucao.BLOCO;
         instrucoes = new LinkedList<>();
-        blocoValido = true;
+        numInstrucoes = 0;
     }
 
     /**
@@ -29,12 +29,10 @@ public class Bloco extends Instrucao {
      */
     public void addInstrucao(Instrucao instrucao){
         instrucoes.add(instrucao);
+        numInstrucoes ++;
         texto.append("\n    ").append(instrucao.toString());
         for (Token token : instrucao.listaTokens()){
             tokens.add(token);
-        }
-        if (!instrucao.instrucaoValida()){
-            blocoValido = false;
         }
     }
 
@@ -46,22 +44,6 @@ public class Bloco extends Instrucao {
         return instrucoes;
     }
 
-    /**
-     * Retorna se o bloco possui início, fim e pelo menos uma instrução válida
-     * @return se o bloco é válido
-     */
-    @Override
-    public boolean instrucaoValida() {
-        if (inicio == null ||
-            fim == null ||
-            instrucoes.isEmpty() ||
-            !blocoValido
-        ){
-            invalidaInstrucao();
-        }
-        return super.instrucaoValida();
-    }
-    
     public void setInicio(Token inicio){
         this.inicio = inicio;
         addToken(inicio);
@@ -79,5 +61,22 @@ public class Bloco extends Instrucao {
 
     public Token getFim() {
         return fim;
+    }
+    
+    @Override
+    public void finaliza() {
+        if (valida) {
+            int instrValidas = 0;
+            for (Instrucao instrucao : instrucoes) {
+                if (instrucao.isValida()) {
+                    instrValidas ++;
+                }
+            }
+
+            valida =
+                    inicio != null &&
+                    fim != null &&
+                    instrValidas == numInstrucoes;
+        }
     }
 }

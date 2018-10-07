@@ -31,11 +31,9 @@ public class DeclaracaoVariaveis extends Instrucao {
      * @param token Token que representa o tipo de variável
      */
     public void setTipoVariavel(Token token) {
-        if (this.tokenTipoVariavel == null) {
-            this.tokenTipoVariavel = token;
-            tipoVariavel = TipoDado.mapTokenToVariavel(token);
-            addToken(token);
-        }
+        this.tokenTipoVariavel = token;
+        tipoVariavel = TipoDado.mapTokenToVariavel(token);
+        super.addToken(token);
     }
     
     /**
@@ -43,27 +41,8 @@ public class DeclaracaoVariaveis extends Instrucao {
      * @param token Token que representa um nome de variável.
      */
     public void addNomeVariavel(Token token) {
-        if (tokenTipoVariavel != null) {
-            nomesVariaveis.add(token);
-            addToken(token);
-        }
-    }
-
-    @Override
-    public List<Token> listaTokens() {
-        return tokens;
-    }
-
-    /**
-     * Valida se foi definido um tipo válido e se há pelo menos um nome de variável informado.
-     * @return Se a instrução é válida.
-     */
-    @Override
-    public boolean instrucaoValida() {
-        if (tipoVariavel == null || nomesVariaveis.isEmpty()){
-            invalidaInstrucao();
-        }
-        return super.instrucaoValida();
+        nomesVariaveis.add(token);
+        super.addToken(token);
     }
 
     /**
@@ -89,6 +68,18 @@ public class DeclaracaoVariaveis extends Instrucao {
             variaveis.add(new Variavel(tipoVar, token.getPalavra()));
         }
         return variaveis;
+    }
+    
+    /**
+     * Valida se foi definido um tipo válido e se há pelo menos um nome de variável informado.
+     */
+    @Override
+    public void finaliza() {
+        if (valida) {
+            valida = 
+                tipoVariavel != null && 
+                !nomesVariaveis.isEmpty();
+        }
     }
     
 }

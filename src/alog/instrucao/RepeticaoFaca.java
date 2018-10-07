@@ -39,4 +39,13 @@ public class RepeticaoFaca extends EstruturaControle {
         super.addToken(tokenEnquanto);
     }
     
+    @Override
+    public void finaliza() {
+        if (valida) {
+            valida =
+                tokenFaca != null &&
+                (condicao != null && condicao.isValida()) &&
+                (instrucao != null && instrucao.isValida());
+        }
+    }
 }

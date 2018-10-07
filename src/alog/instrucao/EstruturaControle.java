@@ -6,7 +6,6 @@
 package alog.instrucao;
 
 import alog.expressao.Expressao;
-import alog.token.Token;
 
 /**
  *
@@ -21,28 +20,14 @@ public abstract class EstruturaControle extends Instrucao {
         this.condicao = condicao;
         tokens.addAll(condicao.listaTokens());
         texto.append(condicao.toString()).append(" ");
-        if (!condicao.instrucaoValida()){
-            invalidaInstrucao();
-        }
     }
     
     public void setInstrucao(Instrucao instrucao) {
         this.instrucao = instrucao;
         tokens.addAll(instrucao.listaTokens());
         texto.append("\n    ").append(instrucao.toString()).append(" ");
-        if (!instrucao.instrucaoValida()){
-            invalidaInstrucao();
-        }
     }
     
-    @Override
-    public boolean instrucaoValida() {
-        if (condicao == null || instrucao == null){
-            invalidaInstrucao();
-        }
-        return super.instrucaoValida();
-    }
-
     public Expressao getCondicao() {
         return condicao;
     }

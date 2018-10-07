@@ -7,7 +7,6 @@ package alog.instrucao;
 
 import alog.expressao.Expressao;
 import alog.token.Token;
-import java.util.LinkedList;
 
 /**
  *
@@ -28,10 +27,8 @@ public class Atribuicao extends Instrucao {
     }
 
     public void setVariavel(Token variavel) {
-        if (this.variavel == null){
-            this.variavel = variavel;
-            super.addToken(variavel);
-        }
+        this.variavel = variavel;
+        super.addToken(variavel);
     }
 
     public Expressao getExpressao() {
@@ -39,23 +36,20 @@ public class Atribuicao extends Instrucao {
     }
 
     public void setExpressao(Expressao expressao) {
-        if (variavel != null) {
-            this.expressao = expressao;
-            if (!expressao.instrucaoValida()){
-                invalidaInstrucao();
-            }
-            for (Token token : expressao.listaTokens()){
-                super.addToken(token);
-            }
+        this.expressao = expressao;
+        for (Token token : expressao.listaTokens()){
+            super.addToken(token);
         }
     }
 
     @Override
-    public boolean instrucaoValida() {
-        if (variavel == null || expressao == null){
-            invalidaInstrucao();
+    public void finaliza() {
+        if (valida) {
+            valida = 
+                variavel != null &&
+                expressao != null &&
+                expressao.isValida();
         }
-        return super.instrucaoValida();
     }
     
 }

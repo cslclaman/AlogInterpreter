@@ -17,39 +17,50 @@ public class ChamadaRotina extends Instrucao {
 
     protected Token nome;
     protected LinkedList<Expressao> parametros;
+    protected int numParametros;
     
     public ChamadaRotina() {
         super();
         tipo = TipoInstrucao.CHAMADA_ROTINA;
         parametros = new LinkedList<>();
+        numParametros = 0;
     }
 
     public void setTokenNome(Token token){
-        if (nome == null) {
-            nome = token;
+        nome = token;
+        super.addToken(token);
+    }
+    
+    public void addParametro(Expressao expressao) {
+        parametros.add(expressao);
+        numParametros ++;
+        for (Token token : expressao.listaTokens()){
             super.addToken(token);
         }
     }
     
-    public void addParametro(Expressao expressao) {
-        if (nome != null) {
-            parametros.add(expressao);
-            for (Token token : expressao.listaTokens()){
-                super.addToken(token);
-            }
-        }
-    }
-    
-    @Override
-    public boolean instrucaoValida() {
-        if (nome == null || parametros.isEmpty()){
-            invalidaInstrucao();
-        }
-        return super.instrucaoValida();
-    }
-
     public LinkedList<Expressao> getParametros() {
         return parametros;
+    }
+    
+    public int getNumParametros() {
+        return numParametros;
+    }
+
+    @Override
+    public void finaliza() {
+        if (valida) {
+            int numValidos = 0;
+            for (Expressao expressao : parametros) {
+                if (expressao.isValida()){
+                    numValidos ++;
+                }
+            }
+
+            valida = 
+                    nome != null &&
+                    numValidos == numParametros;
+        }
     }
 
 }

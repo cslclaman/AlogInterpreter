@@ -59,6 +59,7 @@ public class Parser extends Verificator {
                 erros.add(new Erro(TipoErro.ALERTA, tokens.get(size - 1),
                         "Fim do programa atingido"));
             }
+            instrucao.finaliza();
             return instrucao;
         } 
         
@@ -66,6 +67,7 @@ public class Parser extends Verificator {
         if (!funcaoValida(token)){
             pos++;
             instrucao.addToken(token);
+            instrucao.finaliza();
             return instrucao;
         }
         
@@ -122,7 +124,7 @@ public class Parser extends Verificator {
             //Define Chamada de Rotina ou Atribuição.
             case _INDEF_ALFABETICO:
             case _INDEF_ALFANUMERICO:
-                if (declVariaveis.containsKey(token.getPalavra())){
+                if (declVariaveis.containsKey(token.nome())){
                     //Inicializa instrução de atribuição
                     token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
                     tokens.set(pos, token);
@@ -186,6 +188,7 @@ public class Parser extends Verificator {
                 break;
         }
         
+        instrucao.finaliza();
         return instrucao;
     }
     
@@ -276,7 +279,7 @@ public class Parser extends Verificator {
                             
                 case _INDEF_ALFABETICO:
                 case _INDEF_ALFANUMERICO:
-                    char inicial = token.getPalavra().charAt(0);
+                    char inicial = token.nome().charAt(0);
                     if (Character.isDigit(inicial)){
                         declaracaoVariaveis.addToken(token);
                         erros.add(new Erro(TipoErro.ERRO, token,
@@ -284,14 +287,14 @@ public class Parser extends Verificator {
                         declaracaoVariaveis.invalidaInstrucao();
                     } else {
                         token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
-                        if (declVariaveis.containsKey(token.getPalavra())){
+                        if (declVariaveis.containsKey(token.nome())){
                             declaracaoVariaveis.addToken(token);
                             erros.add(new Erro(TipoErro.ERRO, token,
                                     String.format("Variável \"%s\" já declarada", token.getPalavra())));
                             declaracaoVariaveis.invalidaInstrucao();
                         } else {
                             declaracaoVariaveis.addNomeVariavel(token);
-                            declVariaveis.put(token.getPalavra(), declaracaoVariaveis.getTipoVariavel());
+                            declVariaveis.put(token.nome(), declaracaoVariaveis.getTipoVariavel());
                         }
                     }
                     funcoesEsperadas.clear();
@@ -341,7 +344,7 @@ public class Parser extends Verificator {
                             
                 case _INDEF_ALFABETICO:
                 case _INDEF_ALFANUMERICO:
-                    if (declVariaveis.containsKey(token.getPalavra())){
+                    if (declVariaveis.containsKey(token.nome())){
                         token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
                         entradaDados.addVariavel(token);
                     } else {
@@ -490,9 +493,8 @@ public class Parser extends Verificator {
                     parserInterno.funcoesEsperadas = funcoesEstrutura();
                     
                     Instrucao instrucaoInterna = parserInterno.proxima();
-                    if (!instrucaoInterna.instrucaoValida()){
-                        erros.addAll(parserInterno.erros);
-                    } else {
+                    erros.addAll(parserInterno.erros);
+                    if (instrucaoInterna.isValida()){
                         condicional.setInstrucaoSe(instrucaoInterna);
                     }
                     
@@ -516,9 +518,8 @@ public class Parser extends Verificator {
                 parserInterno.funcoesEsperadas = funcoesEstrutura();
 
                 Instrucao instrucaoInterna = parserInterno.proxima();
-                if (!instrucaoInterna.instrucaoValida()){
-                    erros.addAll(parserInterno.erros);
-                } else {
+                erros.addAll(parserInterno.erros);
+                if (instrucaoInterna.isValida()){
                     condicional.setInstrucaoSenao(instrucaoInterna);
                 }
                 
@@ -559,9 +560,8 @@ public class Parser extends Verificator {
                     parserInterno.funcoesEsperadas = funcoesEstrutura();
                     
                     Instrucao instrucaoInterna = parserInterno.proxima();
-                    if (!instrucaoInterna.instrucaoValida()){
-                        erros.addAll(parserInterno.erros);
-                    } else {
+                    erros.addAll(parserInterno.erros);
+                    if (instrucaoInterna.isValida()){
                         repetitiva.setInstrucao(instrucaoInterna);
                     }
                     
@@ -598,9 +598,8 @@ public class Parser extends Verificator {
                     parserInterno.funcoesEsperadas = funcoesEstrutura();
                     
                     Instrucao instrucaoInterna = parserInterno.proxima();
-                    if (!instrucaoInterna.instrucaoValida()){
-                        erros.addAll(parserInterno.erros);
-                    } else {
+                    erros.addAll(parserInterno.erros);
+                    if (instrucaoInterna.isValida()){
                         repetitiva.setInstrucao(instrucaoInterna);
                     }
                     
@@ -652,9 +651,8 @@ public class Parser extends Verificator {
                     parserInterno.funcoesEsperadas = funcoesEstrutura();
                     
                     Instrucao instrucaoInterna = parserInterno.proxima();
-                    if (!instrucaoInterna.instrucaoValida()){
-                        erros.addAll(parserInterno.erros);
-                    } else {
+                    erros.addAll(parserInterno.erros);
+                    if (instrucaoInterna.isValida()){
                         repetitiva.setInstrucao(instrucaoInterna);
                     }
                     
@@ -701,9 +699,9 @@ public class Parser extends Verificator {
                             
                 case _INDEF_ALFABETICO:
                 case _INDEF_ALFANUMERICO:
-                    if (declVariaveis.containsKey(token.getPalavra())){
+                    if (declVariaveis.containsKey(token.nome())){
                         token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
-                        repetitiva.setContador(token);
+                        repetitiva.setVariavelCont(token);
                     } else {
                         repetitiva.addToken(token);
                         erros.add(new Erro(TipoErro.ERRO, token, 
@@ -736,9 +734,8 @@ public class Parser extends Verificator {
                     parserInterno.funcoesEsperadas = funcoesEstrutura();
                     
                     Instrucao instrucaoInterna = parserInterno.proxima();
-                    if (!instrucaoInterna.instrucaoValida()){
-                        erros.addAll(parserInterno.erros);
-                    } else {
+                    erros.addAll(parserInterno.erros);
+                    if (instrucaoInterna.isValida()){
                         repetitiva.setInstrucao(instrucaoInterna);
                     }
                     
@@ -818,7 +815,7 @@ public class Parser extends Verificator {
                     
                 case _INDEF_ALFABETICO:
                 case _INDEF_ALFANUMERICO:
-                    if (declVariaveis.containsKey(token.getPalavra())){
+                    if (declVariaveis.containsKey(token.nome())){
                         token.setFuncaoToken(FuncaoToken.IDENT_NOME_VARIAVEL);
                         saida.add(token);
                     } else {

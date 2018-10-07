@@ -13,18 +13,20 @@ public abstract class Instrucao {
     protected LinkedList<Token> tokens;
     protected TipoInstrucao tipo;
     protected StringBuffer texto;
+    protected boolean valida;
     
     public Instrucao(){
         tokens = new LinkedList<>();
         tipo = TipoInstrucao._INDEFINIDO;
         texto = new StringBuffer();
+        valida = true;
     }
     
     /**
      * Retorna instrução completa, aproximadamente como foi escrita. Ex.: {@code "Var <- Op1 + ( Op2 - Op3 ) ;" }
      * @return {@code "Var <- Op1 + ( Op2 - Op3 ) ;" }
      */
-    public String getTexto() {
+    public final String getTexto() {
         return texto.toString().trim();
     }
     
@@ -32,7 +34,7 @@ public abstract class Instrucao {
      * Retorna o tipo da instrução.
      * @return {@link TipoInstrucao}
      */
-    public TipoInstrucao getTipo() {
+    public final TipoInstrucao getTipo() {
         return tipo;
     }
 
@@ -40,7 +42,7 @@ public abstract class Instrucao {
      * Retorna uma lista com todos os Tokens que a Instrução armazena.
      * @return Lista de tokens.
      */
-    public List<Token> listaTokens(){
+    public final List<Token> listaTokens(){
         return tokens;
     }
     
@@ -48,7 +50,7 @@ public abstract class Instrucao {
      * Adiciona um token genérico à lista de tokens da instrução.
      * @param token Token a adicionar na instrução
      */
-    public void addToken(Token token) {
+    public final void addToken(Token token) {
         tokens.add(token);
         texto.append(token.getPalavra()).append(" ");
     }
@@ -58,16 +60,21 @@ public abstract class Instrucao {
      * Note que validade se refere à análise sintática, mas não previne erros em tempo de execução.
      * @return Se tipo de instrução não é inválido
      */
-    public boolean instrucaoValida(){
-        return tipo != TipoInstrucao._INVALIDO;
+    public final boolean isValida(){
+        return valida;
     }
 
     /**
      * Define a instrução como inválida.
      */
-    public void invalidaInstrucao(){
-        tipo = TipoInstrucao._INVALIDO;
+    public final void invalidaInstrucao(){
+        valida = false;
     }
+    
+    /**
+     * Finaliza a instrução. Isso pode implicar em validar atributos e definir validade.
+     */
+    public abstract void finaliza();
     
     /**
      * Retorna descrição da expressão e o texto armazenado.

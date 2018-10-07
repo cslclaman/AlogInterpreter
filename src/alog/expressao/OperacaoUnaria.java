@@ -38,18 +38,6 @@ public class OperacaoUnaria extends Expressao {
     public void setOperador(Token operador) {
         this.operador = operador;
         defineTexto();
-        switch (operador.getFuncaoToken()) {
-            case OP_SIG_NEGATIVO:
-            case OP_SIG_POSITIVO:
-                tipoExpressao = TipoExpressao.OPERACAO_ARITMETICA;
-                break;
-            case OP_LOG_NAO:
-                tipoExpressao = TipoExpressao.OPERACAO_LOGICA;
-                break;
-            default:
-                tipoExpressao = TipoExpressao._INDEFINIDO;
-                break;
-        }
     }
     
     private void defineTexto(){

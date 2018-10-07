@@ -19,23 +19,17 @@ public class FimBloco extends Instrucao {
         super();
         tipo = TipoInstrucao.BLOCO;
     }
+
+    public void setTokenFim(Token token) {
+        this.fim = token;
+        super.addToken(token);
+    }
     
     @Override
-    public void addToken(Token token) {
-        super.addToken(token);
-        if (token.getFuncaoToken() == FuncaoToken.RES_BLOCO_FIM){
-            fim = token;
+    public void finaliza() {
+        if (valida){
+            valida = fim != null;
         }
     }
 
-    @Override
-    public boolean instrucaoValida() {
-        if (fim == null){
-            invalidaInstrucao();
-        }
-        return super.instrucaoValida();
-    }
-    
-    
-    
 }

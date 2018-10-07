@@ -37,19 +37,20 @@ public class EntradaDados extends Instrucao {
         }
     }
 
-    @Override
-    public boolean instrucaoValida() {
-        if (nome == null || parametros.isEmpty()){
-            invalidaInstrucao();
-        }
-        return super.instrucaoValida();
-    }
-
     public Token getNome() {
         return nome;
     }
 
     public LinkedList<Token> getParametros() {
         return parametros;
+    }
+    
+    @Override
+    public void finaliza() {
+        if (valida) {
+            valida = 
+                nome != null &&
+                !parametros.isEmpty();
+        }
     }
 }

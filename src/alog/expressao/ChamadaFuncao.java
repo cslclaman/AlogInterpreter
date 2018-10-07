@@ -14,12 +14,14 @@ import java.util.LinkedList;
  */
 public class ChamadaFuncao extends Operando {
     
-    protected LinkedList<Expressao> parametros;
+    private LinkedList<Expressao> parametros;
+    private int numParametros;
     
     public ChamadaFuncao() {
         super();
         tipoExpressao = TipoExpressao.OPERANDO_FUNCAO;
         parametros = new LinkedList<>();
+        numParametros = 0;
     }
 
     public void setTokenNome(Token token){
@@ -32,17 +34,10 @@ public class ChamadaFuncao extends Operando {
     
     public void addParametro(Expressao expressao) {
         parametros.add(expressao);
+        numParametros ++;
         for (Token token : expressao.listaTokens()){
             super.addToken(token);
         }
-    }
-    
-    @Override
-    public boolean instrucaoValida() {
-        if (operando == null || parametros.isEmpty()){
-            invalidaInstrucao();
-        }
-        return super.instrucaoValida();
     }
     
     @Override
@@ -64,6 +59,22 @@ public class ChamadaFuncao extends Operando {
     }
     
     public int getNumParametros () {
-        return parametros.size();
+        return numParametros;
+    }
+    
+    @Override
+    public void finaliza() {
+        if (valida) {
+            int numValidos = 0;
+            for (Expressao expressao : parametros) {
+                if (expressao.isValida()){
+                    numValidos ++;
+                }
+            }
+
+            valida = 
+                    operando != null &&
+                    numValidos == numParametros;
+        }
     }
 }

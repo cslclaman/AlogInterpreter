@@ -71,4 +71,11 @@ public abstract class Expressao extends Instrucao {
 
     public abstract String imprimeExpressao();
     
+    @Override
+    public void finaliza() {
+        if (valida) {
+            valida = tipoExpressao != TipoExpressao._INDEFINIDO;
+        }
+    }
+    
 }
