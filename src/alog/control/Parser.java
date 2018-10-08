@@ -80,12 +80,12 @@ public class Parser extends Verificator {
                         "Bloco vazio declarado"));
                 }
                 
+                funcoesEsperadas.clear();
                 switch (tipoUltimaInstrucao){
                     case _INDEFINIDO:
                         //funcoesEsperadas = funcoesAlgoritmo();
                         break;
                     case BLOCO:
-                        funcoesEsperadas.clear();
                         funcoesEsperadas = funcoesBloco();
                         break;
                 }
@@ -215,7 +215,12 @@ public class Parser extends Verificator {
         
     private Bloco instrucaoBloco(){
         Token token = tokens.get(pos++);
-        Bloco bloco = new Bloco();
+        Bloco bloco;
+        if (tipoUltimaInstrucao == TipoInstrucao._INDEFINIDO) {
+            bloco = ModuloPrincipal.moduloImplicito();
+        } else {
+            bloco = new Bloco();
+        }
         bloco.setInicio(token);
 
         Parser parserInterno = new Parser(tokens);

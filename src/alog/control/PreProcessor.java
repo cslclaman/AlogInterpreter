@@ -122,6 +122,7 @@ public class PreProcessor extends Verificator {
         }
         switch (instrucao.getTipo()) {
             case BLOCO:
+            case MODULO_PRINCIPAL:
                 verificaBloco(instrucao);
                 break;
 
