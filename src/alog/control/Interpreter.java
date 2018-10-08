@@ -9,10 +9,14 @@ import alog.analise.Erro;
 import alog.analise.TipoErro;
 import alog.instrucao.*;
 import alog.expressao.*;
+import alog.model.TipoDado;
 import alog.model.Variavel;
+import alog.token.Token;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 /**
  * Classe que recebe uma expressão e executa.
@@ -20,10 +24,23 @@ import java.util.List;
  */
 public class Interpreter extends Verificator {
     
+    private class Executavel {
+        Instrucao instrucao;
+        int total;
+        int count;
+        
+        public Executavel(Instrucao instrucao){
+            this.instrucao = instrucao;
+            this.total = 0;
+            this.count = 0;
+        }
+    }
+    
     private InterfaceExecucao interfaceExecucao;
     private HashMap<String, Variavel> variaveis;
     private List<Instrucao> programa;
-    private LinkedList<Instrucao> filaExec;
+    private LinkedList<Instrucao> filaInstrucoes;
+    private LinkedList<Executavel> pilhaExecucao;
     private int pos;
     private int tam;
     private boolean canGo;
@@ -33,105 +50,160 @@ public class Interpreter extends Verificator {
         this.interfaceExecucao = interfaceExecucao;
         this.programa = programa;
         variaveis = new HashMap<>();
-        filaExec = new LinkedList<>();
+        filaInstrucoes = new LinkedList<>();
+        pilhaExecucao = new LinkedList<>();
         tam = programa.size();
         pos = 0;
         canGo = true;
     }
     
     public boolean existeProxima() {
-        return canGo && (!filaExec.isEmpty() || pos < tam);
+        return canGo && (!pilhaExecucao.isEmpty() || pos < tam);
     }
     
     public void proxima () {
-        if (!canGo) return;
+        if (canGo) return;
         
-        if (filaExec.isEmpty()) {
-            if (pos < tam) {
-                filaExec.add(programa.get(pos++));
+        if (pilhaExecucao.isEmpty()) {
+            if (filaInstrucoes.isEmpty()) {
+                if (pos < tam) {
+                    filaInstrucoes.add(programa.get(pos++));
+                    pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
+                } else {
+                    return;
+                }
+            } else {
+                pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
             }
         }
         
-        Instrucao instrucao = filaExec.poll();
-        if (instrucao == null) {
+        Executavel exec;
+        try {
+            exec = pilhaExecucao.pop();
+            interfaceExecucao.atualizaInstrucaoAtual(exec.instrucao);
+        } catch (NoSuchElementException ex) {
             erros.add(new Erro(TipoErro.ERRO, ' ', 1, 1, 1, 
                 "Falha ao carregar próxima instrução - interpretador finalizado"));
+            erros.add(new Erro(TipoErro.DEVEL, ' ', 1, 1, 1, String.format(
+                "Pilha sem elemento de instrução: %s - %s",ex.getClass().getName(), ex.getMessage())));
             canGo = false;
             return;
-        } else {
-            interfaceExecucao.atualizaInstrucaoAtual(instrucao);
         }
         
-        switch (instrucao.getTipo()) {
+        switch (exec.instrucao.getTipo()) {
             case MODULO_PRINCIPAL:
-                executaModuloPrincipal(instrucao);
+                executaModuloPrincipal(exec);
                 break;
             
             case BLOCO:
-                executaBloco(instrucao);
+                executaBloco(exec);
                 break;
 
             case DECLARACAO_VARIAVEL:
-                verificaDeclaracaoVariaveis(instrucao);
+                verificaDeclaracaoVariaveis(exec);
                 break;
 
             case ENTRADA_DE_DADOS:
-                verificaEntradaDados(instrucao);
+                verificaEntradaDados(exec);
                 break;
 
             case SAIDA_DE_DADOS:
-                verificaSaidaDados(instrucao);
+                verificaSaidaDados(exec);
                 break;
 
             case ATRIBUICAO:
-                verificaAtribuicao(instrucao);
+                verificaAtribuicao(exec);
                 break;
 
             case CONDICIONAL:
-                verificaCondicional(instrucao);
+                verificaCondicional(exec);
                 break;
 
             case REPETICAO_ENQUANTO:
-                verificaRepeticaoEnquanto(instrucao);
+                verificaRepeticaoEnquanto(exec);
                 break;
 
             case REPETICAO_FACA:
-                verificaRepeticaoFaca(instrucao);
+                verificaRepeticaoFaca(exec);
                 break;
 
             case REPETICAO_REPITA:
-                verificaRepeticaoRepita(instrucao);
+                verificaRepeticaoRepita(exec);
                 break;
 
             case REPETICAO_PARA:
-                verificaRepeticaoPara(instrucao);
+                verificaRepeticaoPara(exec);
                 break;
 
             default:
-                erros.add(new Erro(TipoErro.DEVEL, instrucao.listaTokens().get(0), 
-                "Instrução \"" + instrucao.getTipo() + "\" não esperada"));
+                erros.add(new Erro(TipoErro.DEVEL, exec.listaTokens().get(0), 
+                "Instrução \"" + exec.getTipo() + "\" não esperada"));
         }
     }
     
-    private void executaModuloPrincipal (Instrucao instrucao) {
-        ModuloPrincipal moduloPrincipal = (ModuloPrincipal) instrucao;
-        for (Instrucao sub : moduloPrincipal.listaInstrucoes()) {
-            filaExec.add(sub);
-            filaExec.add(new FimBloco());
+    private void executaModuloPrincipal (Executavel exec) {
+        ModuloPrincipal moduloPrincipal = (ModuloPrincipal) exec.instrucao;
+        if (exec.total == 0) {
+            exec.total = 3;
+            if (moduloPrincipal.isDeclarado()) {
+                exec.count = 1;
+            } 
+        }
+        switch (exec.count++) {
+            case 0:
+                Token token = geraTokenExib(moduloPrincipal.getTipoModulo(), moduloPrincipal.getNome());
+                interfaceExecucao.atualizaPassoAtual(token);
+                pilhaExecucao.push(exec);
+                break;
+            case 1:
+                interfaceExecucao.atualizaPassoAtual(moduloPrincipal.getInicio());
+                for (Instrucao sub : moduloPrincipal.listaInstrucoes()) {
+                    filaInstrucoes.add(sub);
+                }
+                pilhaExecucao.push(exec);
+                pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
+                break;
+            case 2:
+                interfaceExecucao.atualizaPassoAtual(moduloPrincipal.getFim());
+                break;
         }
     }
     
-    private void executaBloco (Instrucao instrucao) {
-        Bloco bloco = (Bloco) instrucao;
-        for (Instrucao sub : bloco.listaInstrucoes()) {
-            filaExec.add(sub);
+    private void executaBloco (Executavel exec) {
+        Bloco bloco = (Bloco) exec.instrucao;
+        if (exec.total == 0) {
+            exec.total = 2;
+        }
+        switch (exec.count++) {
+            case 0:
+                interfaceExecucao.atualizaPassoAtual(bloco.getInicio());
+                for (Instrucao sub : bloco.listaInstrucoes()) {
+                    filaInstrucoes.add(sub);
+                }
+                pilhaExecucao.push(exec);
+                pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
+                break;
+            case 1:
+                interfaceExecucao.atualizaPassoAtual(bloco.getFim());
+                break;
         }
     }
     
-    private void executaDeclaracaoVariaveis(Instrucao instrucao) {
-        DeclaracaoVariaveis declaracaoVariaveis = (DeclaracaoVariaveis)instrucao;
-        for (Token token : declaracaoVariaveis.getTokensNomesVariaveis()) {
-            variaveis.put(token.nome(), new VariavelVerif(token, declaracaoVariaveis.getTipoVariavel()));
+    private void executaDeclaracaoVariaveis(Executavel exec) {
+        DeclaracaoVariaveis declaracaoVariaveis = (DeclaracaoVariaveis) exec.instrucao;
+        if (exec.total == 0) {
+            exec.total = declaracaoVariaveis.getNumVariaveis();
+        }
+        if (exec.count < exec.total) {
+            Token token = declaracaoVariaveis.getTokensNomesVariaveis().get(exec.count);
+            Variavel variavel = new Variavel(
+                    declaracaoVariaveis.getTipoVariavel(),
+                    token.getPalavra()
+            );
+            variaveis.put(token.nome(), variavel);
+            interfaceExecucao.declaracaoVariavel(variavel);
+            exec.count ++;
+            pilhaExecucao.push(exec);
         }
     }
     
@@ -421,6 +493,10 @@ public class Interpreter extends Verificator {
         }
         int nerr = geraErroFuncaoParametros(funcao, tiposParametros);
         chamadaFuncao.setTipoResultado(funcoes.get(funcao.nome()).retorno);
+    }
+    
+    private Token geraTokenExib(Token... tokens) {
+        return new Token(Arrays.asList(tokens));
     }
     
 }

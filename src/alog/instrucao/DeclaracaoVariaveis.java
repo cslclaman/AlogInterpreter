@@ -56,18 +56,13 @@ public class DeclaracaoVariaveis extends Instrucao {
     public LinkedList<Token> getTokensNomesVariaveis() {
         return nomesVariaveis;
     }
-    
+
     /**
-     * Retorna uma lista de {@link Variavel}.
-     * @return 
+     * Retorna o número de variaveis declaradas nessa instrução.
+     * @return Número de variáveis declaradas.
      */
-    public List<Variavel> getVariaveis(){
-        LinkedList<Variavel> variaveis = new LinkedList<>();
-        TipoDado tipoVar = tipoVariavel;
-        for (Token token : nomesVariaveis) {
-            variaveis.add(new Variavel(tipoVar, token.getPalavra()));
-        }
-        return variaveis;
+    public int getNumVariaveis() {
+        return nomesVariaveis.size();
     }
     
     /**

@@ -62,20 +62,7 @@ public abstract class Instrucao {
      * @return Token com palavra igual ao do texto da expressão.
      */
     public final Token getAsToken () {
-        Token t = tokens.getFirst();
-        Token novo = new Token(t.getLinha(), t.getColuna(), t.getPosicao(), t.getOrdem());
-        t.setFuncaoToken(FuncaoToken._INVALIDO);
-        int pos = t.getPosicao();
-        
-        for (Token token : tokens) {
-            pos += novo.getTamanho();
-            for (int p2 = pos; p2 < token.getPosicao(); p2++) {
-                novo.atualizaPalavra(" ");
-            }
-            novo.atualizaPalavra(token.getPalavra());
-        }
-        
-        return novo;
+        return new Token(tokens);
     }
     
     /**
