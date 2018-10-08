@@ -5,6 +5,8 @@
  */
 package alog.control;
 
+import alog.analise.Erro;
+import alog.analise.TipoErro;
 import alog.instrucao.*;
 import alog.expressao.*;
 import alog.model.Variavel;
@@ -21,38 +23,52 @@ public class Interpreter extends Verificator {
     private InterfaceExecucao interfaceExecucao;
     private HashMap<String, Variavel> variaveis;
     private List<Instrucao> programa;
+    private LinkedList<Instrucao> filaExec;
     private int pos;
+    private int tam;
+    private boolean canGo;
 
     public Interpreter(InterfaceExecucao interfaceExecucao, List<Instrucao> programa) {
         super();
-        variaveis = new HashMap<>();
         this.interfaceExecucao = interfaceExecucao;
         this.programa = programa;
+        variaveis = new HashMap<>();
+        filaExec = new LinkedList<>();
+        tam = programa.size();
         pos = 0;
+        canGo = true;
     }
     
     public boolean existeProxima() {
-        return pos < programa.size();
+        return canGo && (!filaExec.isEmpty() || pos < tam);
     }
     
     public void proxima () {
-        if (pilhaExecucao.isEmpty()) {
-            Instrucao instrucao = programa.get(pos++);
+        if (!canGo) return;
+        
+        if (filaExec.isEmpty()) {
+            if (pos < tam) {
+                filaExec.add(programa.get(pos++));
+            }
         }
         
+        Instrucao instrucao = filaExec.poll();
         if (instrucao == null) {
-            erros.add(new Erro(TipoErro.DEVEL, ' ', 1, 1, 1, 
-                "Instrução nula"));
+            erros.add(new Erro(TipoErro.ERRO, ' ', 1, 1, 1, 
+                "Falha ao carregar próxima instrução - interpretador finalizado"));
+            canGo = false;
             return;
+        } else {
+            interfaceExecucao.atualizaInstrucaoAtual(instrucao);
         }
-        if (!instrucao.isValida()) {
-            erros.add(new Erro(TipoErro.DEVEL, instrucao.listaTokens().get(0), 
-                "Instrução \"" + instrucao.getTipo() + "\" inválida/incorreta"));
-            return;
-        }
+        
         switch (instrucao.getTipo()) {
+            case MODULO_PRINCIPAL:
+                executaModuloPrincipal(instrucao);
+                break;
+            
             case BLOCO:
-                verificaBloco(instrucao);
+                executaBloco(instrucao);
                 break;
 
             case DECLARACAO_VARIAVEL:
@@ -97,22 +113,22 @@ public class Interpreter extends Verificator {
         }
     }
     
-    private void verificaBloco (Instrucao instrucao) {
-        Bloco bloco = (Bloco) instrucao;
-        PreProcessor verificadorInterno = new PreProcessor(bloco.listaInstrucoes());
-        verificadorInterno.erros = this.erros;
-        verificadorInterno.variaveis = this.variaveis;
-        verificadorInterno.funcoes = this.funcoes;
-        verificadorInterno.contFilho = this.contFilho + 1;
-        
-        verificadorInterno.verificaPrograma();
-
-        this.erros = verificadorInterno.erros;
-        this.variaveis = verificadorInterno.variaveis;
-        this.funcoes = verificadorInterno.funcoes;
+    private void executaModuloPrincipal (Instrucao instrucao) {
+        ModuloPrincipal moduloPrincipal = (ModuloPrincipal) instrucao;
+        for (Instrucao sub : moduloPrincipal.listaInstrucoes()) {
+            filaExec.add(sub);
+            filaExec.add(new FimBloco());
+        }
     }
     
-    private void verificaDeclaracaoVariaveis(Instrucao instrucao) {
+    private void executaBloco (Instrucao instrucao) {
+        Bloco bloco = (Bloco) instrucao;
+        for (Instrucao sub : bloco.listaInstrucoes()) {
+            filaExec.add(sub);
+        }
+    }
+    
+    private void executaDeclaracaoVariaveis(Instrucao instrucao) {
         DeclaracaoVariaveis declaracaoVariaveis = (DeclaracaoVariaveis)instrucao;
         for (Token token : declaracaoVariaveis.getTokensNomesVariaveis()) {
             variaveis.put(token.nome(), new VariavelVerif(token, declaracaoVariaveis.getTipoVariavel()));
