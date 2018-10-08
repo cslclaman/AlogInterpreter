@@ -5,6 +5,8 @@
  */
 package alog.token;
 
+import java.util.List;
+
 /**
  * Classe que representa um token.
  * Um token é uma unidade de código (palavra, pontuação, número, símbolo, etc).
@@ -100,6 +102,42 @@ public class Token {
         tamanho = 0;
         precedencia = PRECEDENCIA_INDEFINIDA;
         funcaoToken = FuncaoToken._INVALIDO;
+    }
+    
+    /**
+     * Constrói um novo Token <b><i><u>inválido</u></i></b> a partir de uma lista de tokens.
+     * O conteúdo desse novo Token é a concatenação de todos os itens da lista.
+     * <br>O token gerado é para ser usado apenas em <u>exibição</u> de passos ao executar
+     * uma instrução ou expressão.
+     * <br><b>NÃO EXECUTE ESSE TOKEN.</b> É como usar drogas: você não ganha nada com isso
+     * e todo mundo ao seu redor (nesse caso, o programa) só sai perdendo.
+     * @param tokens lista de tokens a serem concatenados.
+     */
+    public Token(List<Token> tokens) {
+        precedencia = PRECEDENCIA_INDEFINIDA;
+        tipoToken = TipoToken.INDEFINIDO;
+        funcaoToken = FuncaoToken._INVALIDO;
+        if (tokens.isEmpty()) {
+            palavra = "";
+            tamanho = 0;
+        } else {
+            Token t = tokens.get(0);
+            lin = t.lin;
+            col = t.col;
+            posicao = t.posicao;
+            ordem = t.ordem;
+            posicao = t.posicao;
+            tamanho = 0;
+            for (Token token : tokens) {
+                posicao += tamanho;
+                for (int p = posicao; p < token.posicao; p++) {
+                    palavra += " ";
+                    tamanho ++;
+                }
+                palavra += token.palavra;
+                tamanho += palavra.length();
+            }
+        }
     }
 
     /**

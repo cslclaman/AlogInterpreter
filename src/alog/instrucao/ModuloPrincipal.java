@@ -32,12 +32,16 @@ public class ModuloPrincipal extends Bloco {
         modulo.setTipoModulo(tipoModulo);
         
         Token nome = new Token(0, 9, 9, 2);
-        nome.setPalavra("Principal");
+        nome.setPalavra("$Principal");
         nome.setTipoToken(TipoToken.ALFABETICO);
         nome.setFuncaoToken(FuncaoToken.IDENT_NOME_ALGORITMO);
         modulo.setNome(nome);
         
         return modulo;
+    }
+    
+    public boolean isDeclarado() {
+        return nome == null || !nome.getPalavra().equals("$Principal");
     }
     
     public void setTipoModulo(Token tipoModulo) {
