@@ -460,33 +460,169 @@ public class Interpreter extends Verificator {
         }
     }
     
-    private void verificaRepeticaoEnquanto(Instrucao instrucao) {
-        RepeticaoEnquanto repetitiva = (RepeticaoEnquanto)instrucao;
-        Expressao condicao = repetitiva.getCondicao();
-        verificaExpressao(condicao);
-        int nerr = geraErroTipoDadoCondicional(repetitiva.getTokenEnquanto(), condicao.getTipoResultado(), TipoDado.LOGICO);
-        if (nerr == 0) {
-            verificaInstrucao(repetitiva.getInstrucao());
+    private void executaRepeticaoEnquanto(Executavel exec) {
+        RepeticaoEnquanto repetitiva = (RepeticaoEnquanto)exec.instrucao;
+        if (exec.total == 0) {
+            exec.total = 2;
+        }
+        switch (exec.count) {
+            case 0: // Enquanto...
+                interfaceExecucao.estruturaControle(repetitiva.getTokenEnquanto());
+                Expressao expressao = null;
+                if (!pilhaExecucao.isEmpty()) {
+                    Executavel instr = pilhaExecucao.pop();
+                    if (instr.instrucao instanceof Expressao) {
+                        expressao = (Expressao)instr.instrucao;
+                    }
+                } 
+
+                if (expressao == null) {
+                    expressao = repetitiva.getCondicao();
+                    pilhaExecucao.push(exec);
+                    pilhaExecucao.push(new Executavel(expressao));
+                    interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+                } else {
+                    if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
+                        erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
+                            "Não interpretou resultado %s (%s) como lógico para repetição",
+                            expressao.getResultado(), expressao.getTipoResultado())));
+                        Erro erro = new Erro(TipoErro.ERRO, expressao.getAsToken(), String.format(
+                            "Esperava um resultado lógico para a condição, mas encontrou %d"
+                            + " - interpretador finalizado", expressao.getTipoResultado()));
+                        erros.add(erro);
+                        canGo = false;
+                        return;
+                    }
+
+                    if (expressao.getResultado().equals("verdadeiro")) {
+                        exec.count += 1;
+                    } else {
+                        exec.count += 2;
+                    }
+                }
+                break;
+            case 1: // Instrução a ser repetida
+                //interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenFaca());
+                filaInstrucoes.add(repetitiva.getInstrucao());
+                pilhaExecucao.push(exec);
+                pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
+                interfaceExecucao.repeticaoEnquanto();
+                exec.count = 0; // para repetir
+                break;
+        } 
+    }
+    
+    private void executaRepeticaoFaca(Executavel exec) {
+        RepeticaoFaca repetitiva = (RepeticaoFaca)exec.instrucao;
+        if (exec.total == 0) {
+            exec.total = 3;
+        }
+        
+        switch (exec.count) {
+            case 0: // Faça 
+                interfaceExecucao.estruturaControle(repetitiva.getTokenFaca());
+                interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenFaca());
+                pilhaExecucao.push(exec);
+                break;
+            case 1: // Instrução a ser repetida
+                filaInstrucoes.add(repetitiva.getInstrucao());
+                pilhaExecucao.push(exec);
+                pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
+                interfaceExecucao.repeticaoEnquanto();
+                exec.count ++;
+                break;
+            case 2: // Enquanto
+                Expressao expressao = null;
+                if (!pilhaExecucao.isEmpty()) {
+                    Executavel instr = pilhaExecucao.pop();
+                    if (instr.instrucao instanceof Expressao) {
+                        expressao = (Expressao)instr.instrucao;
+                    }
+                } 
+
+                if (expressao == null) {
+                    expressao = repetitiva.getCondicao();
+                    pilhaExecucao.push(exec);
+                    pilhaExecucao.push(new Executavel(expressao));
+                    interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+                } else {
+                    if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
+                        erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
+                            "Não interpretou resultado %s (%s) como lógico para repetição",
+                            expressao.getResultado(), expressao.getTipoResultado())));
+                        Erro erro = new Erro(TipoErro.ERRO, expressao.getAsToken(), String.format(
+                            "Esperava um resultado lógico para a condição, mas encontrou %d"
+                            + " - interpretador finalizado", expressao.getTipoResultado()));
+                        erros.add(erro);
+                        canGo = false;
+                        return;
+                    }
+
+                    if (expressao.getResultado().equals("verdadeiro")) {
+                        exec.count = 1;
+                        pilhaExecucao.push(exec);
+                    } else {
+                        exec.count ++;
+                    }
+                }
+                break;
         }
     }
     
-    private void verificaRepeticaoFaca(Instrucao instrucao) {
-        RepeticaoFaca repetitiva = (RepeticaoFaca)instrucao;
-        Expressao condicao = repetitiva.getCondicao();
-        verificaExpressao(condicao);
-        int nerr = geraErroTipoDadoCondicional(repetitiva.getTokenFaca(), condicao.getTipoResultado(), TipoDado.LOGICO);
-        if (nerr == 0) {
-            verificaInstrucao(repetitiva.getInstrucao());
+    private void executaRepeticaoRepita(Executavel exec) {
+        RepeticaoRepita repetitiva = (RepeticaoRepita)exec.instrucao;
+        if (exec.total == 0) {
+            exec.total = 3;
         }
-    }
-    
-    private void verificaRepeticaoRepita(Instrucao instrucao) {
-        RepeticaoRepita repetitiva = (RepeticaoRepita)instrucao;
-        Expressao condicao = repetitiva.getCondicao();
-        verificaExpressao(condicao);
-        int nerr = geraErroTipoDadoCondicional(repetitiva.getTokenRepita(), condicao.getTipoResultado(), TipoDado.LOGICO);
-        if (nerr == 0) {
-            verificaInstrucao(repetitiva.getInstrucao());
+        
+        switch (exec.count) {
+            case 0: // Repita
+                interfaceExecucao.estruturaControle(repetitiva.getTokenRepita());
+                interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenRepita());
+                pilhaExecucao.push(exec);
+                break;
+            case 1: // Instrução a ser repetida
+                filaInstrucoes.add(repetitiva.getInstrucao());
+                pilhaExecucao.push(exec);
+                pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
+                interfaceExecucao.repeticaoEnquanto();
+                exec.count ++;
+                break;
+            case 2: // Até
+                Expressao expressao = null;
+                if (!pilhaExecucao.isEmpty()) {
+                    Executavel instr = pilhaExecucao.pop();
+                    if (instr.instrucao instanceof Expressao) {
+                        expressao = (Expressao)instr.instrucao;
+                    }
+                } 
+
+                if (expressao == null) {
+                    expressao = repetitiva.getCondicao();
+                    pilhaExecucao.push(exec);
+                    pilhaExecucao.push(new Executavel(expressao));
+                    interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+                } else {
+                    if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
+                        erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
+                            "Não interpretou resultado %s (%s) como lógico para repetição",
+                            expressao.getResultado(), expressao.getTipoResultado())));
+                        Erro erro = new Erro(TipoErro.ERRO, expressao.getAsToken(), String.format(
+                            "Esperava um resultado lógico para a condição, mas encontrou %d"
+                            + " - interpretador finalizado", expressao.getTipoResultado()));
+                        erros.add(erro);
+                        canGo = false;
+                        return;
+                    }
+
+                    if (expressao.getResultado().equals("falso")) {
+                        exec.count = 1;
+                        pilhaExecucao.push(exec);
+                    } else {
+                        exec.count ++;
+                    }
+                }
+                break;
         }
     }
     
