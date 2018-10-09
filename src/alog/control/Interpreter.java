@@ -293,6 +293,7 @@ public class Interpreter extends Verificator {
                                 break;
                         }
                         exec.count = nvar + 1;
+                        variaveis.replace(token.nome(), variavel);
                     } catch (NumberFormatException ex) {
                         erros.add(new Erro(TipoErro.DEVEL, token, String.format(
                             "Conversão não realizada para tipo %s: %s - %s", 
@@ -329,6 +330,7 @@ public class Interpreter extends Verificator {
                 expressao = saidaDados.getParametros().get(exec.count);
                 pilhaExecucao.push(exec);
                 pilhaExecucao.push(new Executavel(expressao));
+                interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
             } else {
                 interfaceExecucao.saidaDados(expressao.getResultado());
                 exec.count++;
@@ -339,16 +341,62 @@ public class Interpreter extends Verificator {
         }
     }
     
-    private void verificaAtribuicao(Instrucao instrucao) {
-        Atribuicao atribuicao = (Atribuicao)instrucao;
-        Expressao expressao = atribuicao.getExpressao();
-        Token variavel = atribuicao.getVariavel();
-        verificaExpressao(expressao);
-        geraErroTipoDadoAtribuicao(variavel, expressao.getTipoResultado());
-        VariavelVerif var = variaveis.get(variavel.nome());
-        var.inicializada = true;
-        var.chamadas += 1;
-        variaveis.replace(variavel.nome(), var);
+    private void executaAtribuicao(Executavel exec) {
+        Atribuicao atribuicao = (Atribuicao)exec.instrucao;
+        if (exec.total == 0) {
+            exec.total = 1;
+        }
+        if (exec.total == exec.count) return;
+        
+        Expressao expressao = null;
+        if (!pilhaExecucao.isEmpty()) {
+            Executavel instr = pilhaExecucao.pop();
+            if (instr.instrucao instanceof Expressao) {
+                expressao = (Expressao)instr.instrucao;
+            }
+        } 
+
+        if (expressao == null) {
+            expressao = atribuicao.getExpressao();
+            pilhaExecucao.push(exec);
+            pilhaExecucao.push(new Executavel(expressao));
+            interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+        } else {
+            Token token = atribuicao.getVariavel();
+            Variavel variavel = variaveis.get(token.nome());
+            String retorno = expressao.getResultado();
+            
+            TipoDado[] esperado;
+            switch (variavel.getTipo()){
+                case INTEIRO:
+                    esperado = new TipoDado[]{TipoDado.INTEIRO};
+                    break;
+                case REAL:
+                    esperado = new TipoDado[]{TipoDado.INTEIRO, TipoDado.REAL};
+                    break;
+                case CARACTER:
+                    esperado = new TipoDado[]{TipoDado.CARACTER};
+                    break;
+                default:
+                    esperado = new TipoDado[] {};
+            }
+            
+            if (tiposDadosCorretos(expressao.getTipoResultado(), esperado)) {
+                variavel.setValor(retorno);
+                variaveis.replace(token.nome(), variavel);
+                interfaceExecucao.atribuicao(variavel, retorno);
+                exec.count++;
+            } else {
+                erros.add(new Erro(TipoErro.DEVEL, token, String.format(
+                    "Não pode atribuir valor %s (%s) a variável %s"
+                    + " - interpretador finalizado", retorno, expressao.getTipoResultado(), variavel.getTipo())));
+                Erro erro = new Erro(TipoErro.ERRO, token, String.format(
+                    "Falha ao realizar atribuição: não pode atribuir valor %s a variável de tipo %s"
+                    + " - interpretador finalizado", expressao.getTipoResultado(), variavel.getTipo()));
+                erros.add(erro);
+                canGo = false;
+            }
+        }
     }
     
     private void verificaCondicional(Instrucao instrucao) {
@@ -608,6 +656,17 @@ public class Interpreter extends Verificator {
         }
         int nerr = geraErroFuncaoParametros(funcao, tiposParametros);
         chamadaFuncao.setTipoResultado(funcoes.get(funcao.nome()).retorno);
+    }
+    
+    private boolean tiposDadosCorretos (TipoDado encontrado, TipoDado... esperados){
+        boolean found = false;
+        for (TipoDado tipo : esperados) {
+            if (tipo == encontrado) {
+                found = true;
+                break;
+            }
+        }
+        return found;
     }
     
     private Token geraTokenExib(Token... tokens) {
