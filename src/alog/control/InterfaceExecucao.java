@@ -68,14 +68,28 @@ public interface InterfaceExecucao {
      * Assim como no método {@link declaracaoVariavel(alog.model.Variavel) },
      * esse método terá uma chamada para cada variável informada como parâmetro.
      * <br>Caso o tipo do valor lido não possa ser convertido para o tipo da variável,
-     * será chamado o método {@link erroEntradaDados(alog.model.Variavel, alog.analise.Erro)}.
+     * será chamado o método {@link erroEntradaDados(alog.model.Variavel, alog.analise.Erro)}
+     * e depois tornará a chamar este mesmo método.
+     * <br><b>Nota: caso a interface não consiga causar uma interrupção para retornar
+     * o valor lido, este método <u><i>DEVE</i></u> retornar <code>null</code> e depois
+     * chamar o método {@link #entradaDadosRetorno() }</b>
      * @param variavel A variável (tipo Inteiro) que receberá o valor lido.
-     * @return String com o valor lido a ser salvo na variável.
+     * @return String com o valor lido a ser salvo na variável ou
+     * <code>null</code> caso a interface não tenha poder de fazer o interpretador esperar.
      */
     String entradaDados(Variavel variavel);
     
     /**
+     * Retorna o valor a ser armazenado em uma variável durante uma entrada de dados.
+     * Esse método será usado caso o método {@link #entradaDados(alog.model.Variavel) } retorne <code>null</code>.
+     * @return String com o valor lido a ser salvo na variável. Se for <code>null</code>, encerra a interpretação.
+     */
+    String entradaDadosRetorno();
+    
+    /**
      * Indica um erro ao realizar uma entrada de dados, principalmente de conversão de tipo.
+     * <br>Acompanhado de uma nova chamada ao método {@link #entradaDados(alog.model.Variavel) }
+     * a não ser que o erro ocorrido seja fatal.
      * @param variavel A variável que teve erro ao receber o valor lido.
      * @param erro {@link Erro} com Detalhes do erro encontrado (nível, token, mensagem).
      */
@@ -134,5 +148,11 @@ public interface InterfaceExecucao {
      * Indica que a instrução atual é a instrução de uma repetição Repita-Até.
      */
     default void repeticaoRepita(){};
+    
+    /**
+     * Retorna um erro fatal, ou seja, um erro que impeça o interpretador de continuar a execução.
+     * @param erro Detalhes do erro ocorrido.
+     */
+    void erroFatal(Erro erro);
     
 }

@@ -45,6 +45,10 @@ public class EntradaDados extends Instrucao {
         return parametros;
     }
     
+    public int getNumParametros() {
+        return parametros.size();
+    }
+    
     @Override
     public void finaliza() {
         if (valida) {

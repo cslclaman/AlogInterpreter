@@ -82,11 +82,13 @@ public class Interpreter extends Verificator {
             exec = pilhaExecucao.pop();
             interfaceExecucao.atualizaInstrucaoAtual(exec.instrucao);
         } catch (NoSuchElementException ex) {
-            erros.add(new Erro(TipoErro.ERRO, ' ', 1, 1, 1, 
-                "Falha ao carregar próxima instrução - interpretador finalizado"));
             erros.add(new Erro(TipoErro.DEVEL, ' ', 1, 1, 1, String.format(
                 "Pilha sem elemento de instrução: %s - %s",ex.getClass().getName(), ex.getMessage())));
+            Erro fatal = new Erro(TipoErro.ERRO, ' ', 1, 1, 1, 
+                "Falha ao carregar próxima instrução - interpretador finalizado");
+            erros.add(fatal);
             canGo = false;
+            interfaceExecucao.erroFatal(fatal);
             return;
         }
         
@@ -100,44 +102,44 @@ public class Interpreter extends Verificator {
                 break;
 
             case DECLARACAO_VARIAVEL:
-                verificaDeclaracaoVariaveis(exec);
+                executaDeclaracaoVariaveis(exec);
                 break;
 
             case ENTRADA_DE_DADOS:
-                verificaEntradaDados(exec);
+                executaEntradaDados(exec);
                 break;
 
             case SAIDA_DE_DADOS:
-                verificaSaidaDados(exec);
+                executaSaidaDados(exec);
                 break;
 
             case ATRIBUICAO:
-                verificaAtribuicao(exec);
+                executaAtribuicao(exec);
                 break;
 
             case CONDICIONAL:
-                verificaCondicional(exec);
+                executaCondicional(exec);
                 break;
 
             case REPETICAO_ENQUANTO:
-                verificaRepeticaoEnquanto(exec);
+                executaRepeticaoEnquanto(exec);
                 break;
 
             case REPETICAO_FACA:
-                verificaRepeticaoFaca(exec);
+                executaRepeticaoFaca(exec);
                 break;
 
             case REPETICAO_REPITA:
-                verificaRepeticaoRepita(exec);
+                executaRepeticaoRepita(exec);
                 break;
 
             case REPETICAO_PARA:
-                verificaRepeticaoPara(exec);
+                executaRepeticaoPara(exec);
                 break;
 
             default:
-                erros.add(new Erro(TipoErro.DEVEL, exec.listaTokens().get(0), 
-                "Instrução \"" + exec.getTipo() + "\" não esperada"));
+                erros.add(new Erro(TipoErro.DEVEL, exec.instrucao.listaTokens().get(0), 
+                "Instrução \"" + exec.instrucao.getTipo() + "\" não esperada"));
         }
     }
     
@@ -196,6 +198,7 @@ public class Interpreter extends Verificator {
         }
         if (exec.count < exec.total) {
             Token token = declaracaoVariaveis.getTokensNomesVariaveis().get(exec.count);
+            interfaceExecucao.atualizaPassoAtual(token);
             Variavel variavel = new Variavel(
                     declaracaoVariaveis.getTipoVariavel(),
                     token.getPalavra()
@@ -203,24 +206,92 @@ public class Interpreter extends Verificator {
             variaveis.put(token.nome(), variavel);
             interfaceExecucao.declaracaoVariavel(variavel);
             exec.count ++;
+        }
+        if (exec.count < exec.total) {
             pilhaExecucao.push(exec);
         }
     }
     
-    private void verificaEntradaDados(Instrucao instrucao) {
-        EntradaDados entradaDados = (EntradaDados)instrucao;
-        for (Token token : entradaDados.getParametros()) {
-            VariavelVerif var = variaveis.get(token.nome());
-            var.inicializada = true;
-            var.chamadas += 1;
-            variaveis.replace(token.nome(), var);
+    private void executaEntradaDados(Executavel exec) {
+        EntradaDados entradaDados = (EntradaDados) exec.instrucao;
+        if (exec.total == 0) {
+            exec.total = entradaDados.getNumParametros();
+        }
+        int nvar = exec.count % exec.total;
+        int passo = exec.count / exec.total;
+        
+        String retorno = null;
+        boolean readed = false;
+        Token token = entradaDados.getParametros().get(nvar);
+        Variavel variavel = variaveis.get(token.nome());
+        
+        if (nvar < exec.total) {
+            switch (passo) {
+                case 0:
+                    interfaceExecucao.atualizaPassoAtual(token);
+                    retorno = interfaceExecucao.entradaDados(variavel);
+                    if (retorno != null) {
+                        readed = true;
+                        exec.count += exec.total;
+                    }
+                    break;
+                case 1:
+                    interfaceExecucao.atualizaPassoAtual(token);
+                    if (!readed) {
+                        retorno = interfaceExecucao.entradaDadosRetorno();
+                    }
+                    if (retorno == null) {
+                        erros.add(new Erro(TipoErro.DEVEL, token, "Retorno nulo"));
+                        Erro erro = new Erro(TipoErro.ERRO, token, 
+                            "Falha ao realizar entrada de dados - interpretador finalizado");
+                        erros.add(erro);
+                        canGo = false;
+                        return;
+                    }
+                    try {
+                        switch (variavel.getTipo()){
+                            case INTEIRO:
+                                variavel.setValorInteiro(Long.parseLong(retorno));
+                                break;
+                            case REAL:
+                                variavel.setValorReal(Double.parseDouble(retorno));
+                                break;
+                            default:
+                                variavel.setValor(retorno);
+                                break;
+                        }
+                        exec.count = nvar + 1;
+                    } catch (NumberFormatException ex) {
+                        erros.add(new Erro(TipoErro.DEVEL, token, String.format(
+                            "Conversão não realizada para tipo %s: %s - %s", 
+                                variavel.getTipo().toString(), ex.getClass().getName(), ex.getMessage())));
+                        Erro erro = new Erro(TipoErro.ERRO, token, 
+                            "Valor informado não era do tipo " + variavel.getTipo().toString() + " - tente novamente");
+                        erros.add(erro);
+                        interfaceExecucao.erroEntradaDados(variavel, erro);
+                        exec.count = nvar;
+                    }
+                    break;
+            } 
+        }
+        if (nvar < exec.total) {
+            pilhaExecucao.push(exec);
         }
     }
     
-    private void verificaSaidaDados(Instrucao instrucao) {
-        SaidaDados saidaDados = (SaidaDados)instrucao;
-        for (Expressao expressao : saidaDados.getParametros()) {
-            verificaExpressao(expressao);
+    private void executaSaidaDados(Executavel exec) {
+        SaidaDados saidaDados = (SaidaDados)exec.instrucao;
+        if (exec.total == 0) {
+            exec.total = saidaDados.getNumParametros();
+        }
+        if (exec.count < exec.total) {
+            
+            Expressao expressao = saidaDados.getParametros().get(exec.count);
+            
+            exec.count++;
+        }
+        if (exec.count < exec.total) {
+            pilhaExecucao.push(exec);
         }
     }
     
