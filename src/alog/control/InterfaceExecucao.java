@@ -115,8 +115,9 @@ public interface InterfaceExecucao {
     /**
      * Indica que a instrução atual indica uma estrutura de controle (condicional ou repetitiva),
      * que possua condição e instrução a ser executada. Por padrão, não tem ação.
+     * @param estrutura Token identificador (SE, PARA, ENQUANTO, etc).
      */
-    default void estruturaControle(){};
+    default void estruturaControle(Token estrutura){};
     
     /**
      * Indica que a instrução atual é a instrução do "então" de uma condicional.

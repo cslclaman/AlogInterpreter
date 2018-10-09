@@ -52,6 +52,10 @@ public class Condicional extends EstruturaControle {
         return instrucao;
     }
 
+    public Token getTokenSenao() {
+        return tokenSenao;
+    }
+
     public Instrucao getInstrucaoSenao() {
         return instrucaoSenao;
     }

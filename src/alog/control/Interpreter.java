@@ -399,15 +399,63 @@ public class Interpreter extends Verificator {
         }
     }
     
-    private void verificaCondicional(Instrucao instrucao) {
-        Condicional condicional = (Condicional)instrucao;
-        Expressao condicao = condicional.getCondicao();
-        verificaExpressao(condicao);
-        int nerr = geraErroTipoDadoCondicional(condicional.getTokenSe(), condicao.getTipoResultado(), TipoDado.LOGICO);
-        if (nerr == 0) {
-            verificaInstrucao(condicional.getInstrucaoSe());
+    private void executaCondicional(Executavel exec) {
+        Condicional condicional = (Condicional)exec.instrucao;
+        if (exec.total == 0) {
+            exec.total = condicional.isComposta() ? 3 : 2;
+        }
+        if (exec.count == 0) { // SE (Condição)
+            interfaceExecucao.estruturaControle(condicional.getTokenSe());
+            Expressao expressao = null;
+            if (!pilhaExecucao.isEmpty()) {
+                Executavel instr = pilhaExecucao.pop();
+                if (instr.instrucao instanceof Expressao) {
+                    expressao = (Expressao)instr.instrucao;
+                }
+            } 
+
+            if (expressao == null) {
+                expressao = condicional.getCondicao();
+                pilhaExecucao.push(exec);
+                pilhaExecucao.push(new Executavel(expressao));
+                interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+            } else {
+                if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
+                    erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
+                        "Não interpretou resultado %s (%s) como lógico para condicional",
+                        expressao.getResultado(), expressao.getTipoResultado())));
+                    Erro erro = new Erro(TipoErro.ERRO, expressao.getAsToken(), String.format(
+                        "Esperava um resultado lógico para a condição, mas encontrou %d"
+                        + " - interpretador finalizado", expressao.getTipoResultado()));
+                    erros.add(erro);
+                    canGo = false;
+                    return;
+                }
+
+                if (expressao.getResultado().equals("verdadeiro")) {
+                    exec.count += 1;
+                } else {
+                    exec.count += 2;
+                }
+            }
+        }
+        
+        if (exec.count == 1) { // Senão INSTRUÇÃO
+            //interfaceExecucao.atualizaPassoAtual(condicional.getTokenEntao());
+            filaInstrucoes.add(condicional.getInstrucaoSe());
             if (condicional.isComposta()) {
-                verificaInstrucao(condicional.getInstrucaoSenao());
+                pilhaExecucao.push(exec);
+            }
+            pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
+            interfaceExecucao.condicionalSe();
+            exec.count ++;
+        } else {
+            if (condicional.isComposta()) {
+                interfaceExecucao.atualizaPassoAtual(condicional.getTokenSenao());
+                filaInstrucoes.add(condicional.getInstrucaoSenao());
+                pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
+                interfaceExecucao.condicionalSenao();
+                exec.count ++;
             }
         }
     }
