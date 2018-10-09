@@ -16,4 +16,11 @@ public class SaidaDados extends ChamadaRotina {
         tipo = TipoInstrucao.SAIDA_DE_DADOS;
     }
     
+    @Override
+    public void finaliza() {
+        super.finaliza();
+        if (valida) {
+            valida = numParametros > 0;
+        }
+    }
 }

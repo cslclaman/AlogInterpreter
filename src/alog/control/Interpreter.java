@@ -80,7 +80,6 @@ public class Interpreter extends Verificator {
         Executavel exec;
         try {
             exec = pilhaExecucao.pop();
-            interfaceExecucao.atualizaInstrucaoAtual(exec.instrucao);
         } catch (NoSuchElementException ex) {
             erros.add(new Erro(TipoErro.DEVEL, ' ', 1, 1, 1, String.format(
                 "Pilha sem elemento de instrução: %s - %s",ex.getClass().getName(), ex.getMessage())));
@@ -94,49 +93,82 @@ public class Interpreter extends Verificator {
         
         switch (exec.instrucao.getTipo()) {
             case MODULO_PRINCIPAL:
+                interfaceExecucao.atualizaInstrucaoAtual(exec.instrucao);
                 executaModuloPrincipal(exec);
                 break;
             
             case BLOCO:
+                interfaceExecucao.atualizaInstrucaoAtual(exec.instrucao);
                 executaBloco(exec);
                 break;
 
             case DECLARACAO_VARIAVEL:
+                interfaceExecucao.atualizaInstrucaoAtual(exec.instrucao);
                 executaDeclaracaoVariaveis(exec);
                 break;
 
             case ENTRADA_DE_DADOS:
+                interfaceExecucao.atualizaInstrucaoAtual(exec.instrucao);
                 executaEntradaDados(exec);
                 break;
 
             case SAIDA_DE_DADOS:
+                interfaceExecucao.atualizaInstrucaoAtual(exec.instrucao);
                 executaSaidaDados(exec);
                 break;
 
             case ATRIBUICAO:
+                interfaceExecucao.atualizaInstrucaoAtual(exec.instrucao);
                 executaAtribuicao(exec);
                 break;
 
             case CONDICIONAL:
+                interfaceExecucao.atualizaInstrucaoAtual(exec.instrucao);
                 executaCondicional(exec);
                 break;
 
             case REPETICAO_ENQUANTO:
+                interfaceExecucao.atualizaInstrucaoAtual(exec.instrucao);
                 executaRepeticaoEnquanto(exec);
                 break;
 
             case REPETICAO_FACA:
+                interfaceExecucao.atualizaInstrucaoAtual(exec.instrucao);
                 executaRepeticaoFaca(exec);
                 break;
 
             case REPETICAO_REPITA:
+                interfaceExecucao.atualizaInstrucaoAtual(exec.instrucao);
                 executaRepeticaoRepita(exec);
                 break;
 
             case REPETICAO_PARA:
+                interfaceExecucao.atualizaInstrucaoAtual(exec.instrucao);
                 executaRepeticaoPara(exec);
                 break;
 
+            case EXPRESSAO:
+                if (exec.total < exec.count) {
+                    interfaceExecucao.atualizaExpressaoAtual((Expressao)exec.instrucao);
+                    executaInstrucao(exec);
+                } else {
+                    try {
+                        Executavel inst = pilhaExecucao.pop();
+                        pilhaExecucao.push(exec);
+                        pilhaExecucao.push(inst);
+                        proxima();
+                    } catch (NoSuchElementException ex) {
+                        erros.add(new Erro(TipoErro.DEVEL, ' ', 1, 1, 1, String.format(
+                            "Pilha sem elemento de instrução: %s - %s",ex.getClass().getName(), ex.getMessage())));
+                        Erro fatal = new Erro(TipoErro.ERRO, ' ', 1, 1, 1, 
+                            "Falha ao carregar próxima instrução - interpretador finalizado");
+                        erros.add(fatal);
+                        canGo = false;
+                        interfaceExecucao.erroFatal(fatal);
+                    }
+                }
+                break;
+                
             default:
                 erros.add(new Erro(TipoErro.DEVEL, exec.instrucao.listaTokens().get(0), 
                 "Instrução \"" + exec.instrucao.getTipo() + "\" não esperada"));
@@ -285,13 +317,25 @@ public class Interpreter extends Verificator {
             exec.total = saidaDados.getNumParametros();
         }
         if (exec.count < exec.total) {
+            Expressao expressao = null;
+            if (!pilhaExecucao.isEmpty()) {
+                Executavel instr = pilhaExecucao.pop();
+                if (instr.instrucao instanceof Expressao) {
+                    expressao = (Expressao)instr.instrucao;
+                }
+            } 
             
-            Expressao expressao = saidaDados.getParametros().get(exec.count);
-            
-            exec.count++;
-        }
-        if (exec.count < exec.total) {
-            pilhaExecucao.push(exec);
+            if (expressao == null) {
+                expressao = saidaDados.getParametros().get(exec.count);
+                pilhaExecucao.push(exec);
+                pilhaExecucao.push(new Executavel(expressao));
+            } else {
+                interfaceExecucao.saidaDados(expressao.getResultado());
+                exec.count++;
+                if (exec.count < exec.total) {
+                    pilhaExecucao.push(exec);
+                }
+            }
         }
     }
     
