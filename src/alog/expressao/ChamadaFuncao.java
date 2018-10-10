@@ -58,6 +58,10 @@ public class ChamadaFuncao extends Operando {
         return parametros;
     }
     
+    public void atualizaParametro(int pos, Expressao expressao) {
+        parametros.set(pos, expressao);
+    }
+    
     public int getNumParametros () {
         return numParametros;
     }

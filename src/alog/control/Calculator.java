@@ -5,9 +5,8 @@
  */
 package alog.control;
 
-import alog.token.FuncaoToken;
+import alog.expressao.Operando;
 import alog.model.TipoDado;
-import alog.token.Token;
 import alog.model.Variavel;
 
 /**
@@ -15,342 +14,482 @@ import alog.model.Variavel;
  * @author Caique Souza
  */
 public class Calculator {
-    private Token operador;
-    private FuncaoToken funcao;
+    public static final String TRUE = "verdadeiro";
+    public static final String FALSE = "falso";
     
-    public Calculator(Token operador){
-        this.operador = operador;
-        funcao = FuncaoToken._INVALIDO;
+    private TipoDado tipo;
+    private String valor;
+    private String caracter;
+    private Long inteiro;
+    private Double real;
+    private Boolean logico;
+
+    public Calculator(TipoDado tipo, String valor) {
+        this.tipo = tipo;
+        this.valor = valor;
     }
     
-    public Token executaOperacaoAritmetica(Variavel op1, Variavel op2){
-        Token resultToken = null;
-        if (defineOperacao(op1, op2)){
-            String result = "";
-        
-            switch (operador.getFuncaoToken()){
-                case OP_MAT_SOMA:
-                    switch (funcao){
-                        case CONST_INTEIRA:
-                            result = String.valueOf(op1.getValorInteiro() + op2.getValorInteiro());
-                            break;
-                        case CONST_REAL:
-                            result = String.valueOf(op1.getValorReal()+ op2.getValorReal());
-                            break;
+    public Calculator(Variavel var) {
+        this.tipo = var.getTipo();
+        this.valor = var.getValor();
+    }
+    
+    public Calculator positivo() {
+        try {
+            switch (this.tipo) {
+                case INTEIRO: {
+                    long a = Long.parseLong(this.valor);
+                    return new Calculator(this.tipo, String.valueOf( (+a) ));
+                }
+                case REAL: {
+                    double a = Double.parseDouble(valor);
+                    return new Calculator(this.tipo, String.valueOf( (+a) ));
+                }
+                default: {
+                    return null;
+                }
+            }
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+    
+    public Calculator negativo() {
+        try {
+            switch (this.tipo) {
+                case INTEIRO: {
+                    long a = Long.parseLong(this.valor);
+                    return new Calculator(this.tipo, String.valueOf( (-a) ));
+                }
+                case REAL: {
+                    double a = Double.parseDouble(valor);
+                    return new Calculator(this.tipo, String.valueOf( (-a) ));
+                }
+                default: {
+                    return null;
+                }
+            }
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+    
+    public Calculator soma(Calculator c) {
+        TipoDado tipoR;
+        try {
+            switch (this.tipo) {
+                case INTEIRO: {
+                    long a = Long.parseLong(this.valor);
+                    if (c.tipo == TipoDado.INTEIRO) {
+                        tipoR = TipoDado.INTEIRO;
+                        long b = Long.parseLong(c.valor);
+                        return new Calculator(tipoR, String.valueOf( (a + b) ));
+                    } else {
+                        tipoR = TipoDado.REAL;
+                        double b = Double.parseDouble(c.valor);
+                        return new Calculator(tipoR, String.valueOf( (a + b) ));
                     }
-                    break;
-                case OP_MAT_SUBTRACAO:
-                    switch (funcao){
-                        case CONST_INTEIRA:
-                            result = String.valueOf(op1.getValorInteiro() - op2.getValorInteiro());
-                            break;
-                        case CONST_REAL:
-                            result = String.valueOf(op1.getValorReal() - op2.getValorReal());
-                            break;
+                }
+                case REAL: {
+                    tipoR = TipoDado.REAL;
+                    double a = Double.parseDouble(valor);
+                    if (c.tipo == TipoDado.INTEIRO) {
+                        long b = Long.parseLong(c.valor);
+                        return new Calculator(tipoR, String.valueOf( (a + b) ));
+                    } else {
+                        double b = Double.parseDouble(c.valor);
+                        return new Calculator(tipoR, String.valueOf( (a + b) ));
                     }
-                    break;
-                case OP_MAT_MULTIPLICACAO:
-                    switch (funcao){
-                        case CONST_INTEIRA:
-                            result = String.valueOf(op1.getValorInteiro() * op2.getValorInteiro());
-                            break;
-                        case CONST_REAL:
-                            result = String.valueOf(op1.getValorReal() * op2.getValorReal());
-                            break;
+                }
+                default: {
+                    return null;
+                }
+            }
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+    
+    public Calculator subtr(Calculator c) {
+        TipoDado tipoR;
+        try {
+            switch (this.tipo) {
+                case INTEIRO: {
+                    long a = Long.parseLong(this.valor);
+                    if (c.tipo == TipoDado.INTEIRO) {
+                        tipoR = TipoDado.INTEIRO;
+                        long b = Long.parseLong(c.valor);
+                        return new Calculator(tipoR, String.valueOf( (a - b) ));
+                    } else {
+                        tipoR = TipoDado.REAL;
+                        double b = Double.parseDouble(c.valor);
+                        return new Calculator(tipoR, String.valueOf( (a - b) ));
                     }
-                    break;
-                case OP_MAT_DIV_INTEIRA:
-                    if (op2.getValorInteiro() == 0){
-                        System.err.println("Erro: Divisão por Zero");
+                }
+                case REAL: {
+                    tipoR = TipoDado.REAL;
+                    double a = Double.parseDouble(valor);
+                    if (c.tipo == TipoDado.INTEIRO) {
+                        long b = Long.parseLong(c.valor);
+                        return new Calculator(tipoR, String.valueOf( (a - b) ));
+                    } else {
+                        double b = Double.parseDouble(c.valor);
+                        return new Calculator(tipoR, String.valueOf( (a - b) ));
+                    }
+                }
+                default: {
+                    return null;
+                }
+            }
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+    
+    public Calculator mult(Calculator c) {
+        TipoDado tipoR;
+        try {
+            switch (this.tipo) {
+                case INTEIRO: {
+                    long a = Long.parseLong(this.valor);
+                    if (c.tipo == TipoDado.INTEIRO) {
+                        tipoR = TipoDado.INTEIRO;
+                        long b = Long.parseLong(c.valor);
+                        return new Calculator(tipoR, String.valueOf( (a * b) ));
+                    } else {
+                        tipoR = TipoDado.REAL;
+                        double b = Double.parseDouble(c.valor);
+                        return new Calculator(tipoR, String.valueOf( (a * b) ));
+                    }
+                }
+                case REAL: {
+                    tipoR = TipoDado.REAL;
+                    double a = Double.parseDouble(valor);
+                    if (c.tipo == TipoDado.INTEIRO) {
+                        long b = Long.parseLong(c.valor);
+                        return new Calculator(tipoR, String.valueOf( (a * b) ));
+                    } else {
+                        double b = Double.parseDouble(c.valor);
+                        return new Calculator(tipoR, String.valueOf( (a * b) ));
+                    }
+                }
+                default: {
+                    return null;
+                }
+            }
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+    
+    public Calculator divReal(Calculator c) {
+        TipoDado tipoR = TipoDado.REAL;
+        try {
+            switch (this.tipo) {
+                case INTEIRO: 
+                case REAL: {
+                    double a = Double.parseDouble(this.valor);
+                    if (c.tipo == TipoDado.INTEIRO || c.tipo == TipoDado.REAL) {
+                        double b = Double.parseDouble(c.valor);
+                        if (b == 0) {
+                            return null;
+                        } else {
+                            return new Calculator(tipoR, String.valueOf( (a / b) ));
+                        }
+                    } else {
                         return null;
                     }
-                    result = String.valueOf(op1.getValorInteiro() / op2.getValorInteiro());
-                    break;
-                case OP_MAT_MOD:
-                    if (op2.getValorInteiro() == 0){
-                        System.err.println("Erro: Divisão por Zero");
+                }
+                default: {
+                    return null;
+                }
+            }
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+    
+    public Calculator divInteira(Calculator c) {
+        TipoDado tipoR = TipoDado.INTEIRO;
+        try {
+            switch (this.tipo) {
+                case INTEIRO: {
+                    long a = Long.parseLong(this.valor);
+                    if (c.tipo == TipoDado.INTEIRO) {
+                        long b = Long.parseLong(c.valor);
+                        if (b == 0) {
+                            return null;
+                        } else {
+                            return new Calculator(tipoR, String.valueOf( (a / b) ));
+                        }
+                    } else {
                         return null;
                     }
-                    result = String.valueOf(op1.getValorInteiro() % op2.getValorInteiro());
-                    break;
-                case OP_MAT_DIV_REAL:
-                    if (op2.getValorReal() == 0.0){
-                        System.err.println("Erro: Divisão por Zero");
+                }
+                default: {
+                    return null;
+                }
+            }
+        } catch (NumberFormatException ex) {
+            return null;
+        }
+    }
+    
+    public Calculator mod(Calculator c) {
+        TipoDado tipoR = TipoDado.INTEIRO;
+        try {
+            switch (this.tipo) {
+                case INTEIRO: {
+                    long a = Long.parseLong(this.valor);
+                    if (c.tipo == TipoDado.INTEIRO) {
+                        long b = Long.parseLong(c.valor);
+                        if (b == 0) {
+                            return null;
+                        } else {
+                            return new Calculator(tipoR, String.valueOf( (a % b) ));
+                        }
+                    } else {
                         return null;
                     }
-                    result = String.valueOf(op1.getValorReal() / op2.getValorReal());
-                    break;
+                }
+                default: {
+                    return null;
+                }
             }
-            if (result.isEmpty()){
-                System.err.println("Erro ao calcular - sem resultado");
-            } else {
-                resultToken = new Token();
-                resultToken.setLinha(operador.getLinha());
-                resultToken.setColuna(operador.getColuna());
-                resultToken.setOrdem(operador.getOrdem());
-                resultToken.setPosicao(operador.getPosicao());
-                resultToken.setPalavra(result);
-                resultToken.setFuncaoToken(funcao);
-            }
+        } catch (NumberFormatException ex) {
+            return null;
         }
-        return resultToken;
     }
     
-    public Token executaFuncaoPot(Variavel op1, Variavel op2){
-        Token resultToken = null;
-        if (defineOperacao(op1, op2)){
-            String result = "";
-            String msg = "";
-            
-            try {
-                result = String.valueOf(Math.pow(op1.getValorReal(), op2.getValorReal()));
-                if (Double.parseDouble(result) == Integer.parseInt(result)){
-                    funcao = FuncaoToken.CONST_INTEIRA;
-                    result = String.valueOf(Integer.parseInt(result));
+    public Calculator maior(Calculator c) {
+        TipoDado tipoR = TipoDado.LOGICO;
+        try {
+            switch (this.tipo) {
+                case INTEIRO: 
+                case REAL: {
+                    double a = Double.parseDouble(this.valor);
+                    if (c.tipo == TipoDado.INTEIRO || c.tipo == TipoDado.REAL) {
+                        double b = Double.parseDouble(c.valor);
+                        String result = a > b ? TRUE : FALSE;
+                        return new Calculator(tipoR, result);
+                    } else {
+                        return null;
+                    }
                 }
-            } catch (NumberFormatException ex){
-                msg = "\nExceção: " + ex.toString();
+                case CARACTER: {
+                    if (c.tipo == TipoDado.CARACTER) {
+                        String result = this.valor.compareTo(c.valor) > 0 ? TRUE : FALSE;
+                        return new Calculator(tipoR, result);
+                    } else {
+                        return null;
+                    }
+                }
+                default: {
+                    return null;
+                }
             }
-            
-            if (result.isEmpty()){
-                System.err.println("Erro ao calcular - sem resultado" + msg);
-            } else {
-                resultToken = new Token();
-                resultToken.setLinha(operador.getLinha());
-                resultToken.setColuna(operador.getColuna());
-                resultToken.setOrdem(operador.getOrdem());
-                resultToken.setPosicao(operador.getPosicao());
-                resultToken.setPalavra(result);
-                resultToken.setFuncaoToken(funcao);
-            }
+        } catch (NumberFormatException ex) {
+            return null;
         }
-        return resultToken;
     }
     
-    public Token executaFuncaoRaiz(Variavel op1){
-        Token resultToken = null;
-        if (defineOperacao(op1)){
-            String result = "";
-            String msg = "";
-            
-            try {
-                result = String.valueOf(Math.sqrt(op1.getValorReal()));
-                if (Double.parseDouble(result) == Integer.parseInt(result)){
-                    funcao = FuncaoToken.CONST_INTEIRA;
-                    result = String.valueOf(Integer.parseInt(result));
+    public Calculator menor(Calculator c) {
+        TipoDado tipoR = TipoDado.LOGICO;
+        try {
+            switch (this.tipo) {
+                case INTEIRO: 
+                case REAL: {
+                    double a = Double.parseDouble(this.valor);
+                    if (c.tipo == TipoDado.INTEIRO || c.tipo == TipoDado.REAL) {
+                        double b = Double.parseDouble(c.valor);
+                        String result = a < b ? TRUE : FALSE;
+                        return new Calculator(tipoR, result);
+                    } else {
+                        return null;
+                    }
                 }
-            } catch (NumberFormatException ex){
-                msg = "\nExceção: " + ex.toString();
+                case CARACTER: {
+                    if (c.tipo == TipoDado.CARACTER) {
+                        String result = this.valor.compareTo(c.valor) < 0 ? TRUE : FALSE;
+                        return new Calculator(tipoR, result);
+                    } else {
+                        return null;
+                    }
+                }
+                default: {
+                    return null;
+                }
             }
-            
-            if (result.isEmpty()){
-                System.err.println("Erro ao calcular - sem resultado" + msg);
-            } else {
-                resultToken = new Token();
-                resultToken.setLinha(operador.getLinha());
-                resultToken.setColuna(operador.getColuna());
-                resultToken.setOrdem(operador.getOrdem());
-                resultToken.setPosicao(operador.getPosicao());
-                resultToken.setPalavra(result);
-                resultToken.setFuncaoToken(funcao);
-            }
+        } catch (NumberFormatException ex) {
+            return null;
         }
-        return resultToken;
     }
     
-    public Token executaOperacaoRelacional(Variavel op1, Variavel op2){
-        Token resultToken = null;
-        if (defineOperacao(op1, op2)){
-            Boolean result = null;
-            
-            switch (operador.getFuncaoToken()){
-                case OP_REL_MAIOR:
-                    if (op1.getTipo() == TipoDado.CARACTER){
-                        result = op1.getValor().compareTo(op2.getValor()) > 0;
+    public Calculator maiorIgual(Calculator c) {
+        TipoDado tipoR = TipoDado.LOGICO;
+        try {
+            switch (this.tipo) {
+                case INTEIRO: 
+                case REAL: {
+                    double a = Double.parseDouble(this.valor);
+                    if (c.tipo == TipoDado.INTEIRO || c.tipo == TipoDado.REAL) {
+                        double b = Double.parseDouble(c.valor);
+                        String result = a >= b ? TRUE : FALSE;
+                        return new Calculator(tipoR, result);
                     } else {
-                        result = op1.getValorReal() > op2.getValorReal();
+                        return null;
                     }
-                    break;
-                case OP_REL_MAIOR_IGUAL:
-                    if (op1.getTipo() == TipoDado.CARACTER){
-                        result = op1.getValor().compareTo(op2.getValor()) >= 0;
+                }
+                case CARACTER: {
+                    if (c.tipo == TipoDado.CARACTER) {
+                        String result = this.valor.compareTo(c.valor) >= 0 ? TRUE : FALSE;
+                        return new Calculator(tipoR, result);
                     } else {
-                        result = op1.getValorReal() >= op2.getValorReal();
+                        return null;
                     }
-                    break;
-                case OP_REL_MENOR:
-                    if (op1.getTipo() == TipoDado.CARACTER){
-                        result = op1.getValor().compareTo(op2.getValor()) < 0;
-                    } else {
-                        result = op1.getValorReal() < op2.getValorReal();
-                    }
-                    break;
-                case OP_REL_MENOR_IGUAL:
-                    if (op1.getTipo() == TipoDado.CARACTER){
-                        result = op1.getValor().compareTo(op2.getValor()) <= 0;
-                    } else {
-                        result = op1.getValorReal() <= op2.getValorReal();
-                    }
-                    break;
-                case OP_REL_IGUAL:
-                    if (op1.getTipo() == TipoDado.CARACTER){
-                        result = op1.getValor().compareTo(op2.getValor()) == 0;
-                    } else {
-                        result = op1.getValorReal() == op2.getValorReal();
-                    }
-                    break;
-                case OP_REL_DIFERENTE:
-                    if (op1.getTipo() == TipoDado.CARACTER){
-                        result = op1.getValor().compareTo(op2.getValor()) != 0;
-                    } else {
-                        result = op1.getValorReal() != op2.getValorReal();
-                    }
-                    break;
+                }
+                default: {
+                    return null;
+                }
             }
-            if (result == null){
-                System.err.println("Erro ao calcular - sem resultado (operação inválida)");
-            } else {
-                resultToken = new Token();
-                resultToken.setLinha(operador.getLinha());
-                resultToken.setColuna(operador.getColuna());
-                resultToken.setOrdem(operador.getOrdem());
-                resultToken.setPosicao(operador.getPosicao());
-                resultToken.setPalavra(result ? "1" : "0");
-                resultToken.setFuncaoToken(funcao);
-            }
+        } catch (NumberFormatException ex) {
+            return null;
         }
-        return resultToken;
     }
     
-    public Token executaOperacaoLogica(Variavel op1, Variavel op2){
-        Token resultToken = null;
-        if (defineOperacao(op1, op2)){
-            Boolean result = null;
-            
-            switch (operador.getFuncaoToken()){
-                case OP_LOG_E:
-                    result = op1.getValorInteiro() + op2.getValorInteiro() == 2;
-                    break;
-                case OP_LOG_OU:
-                    result = op1.getValorInteiro() + op2.getValorInteiro() > 0;
-                    break;
+    public Calculator menorIgual(Calculator c) {
+        TipoDado tipoR = TipoDado.LOGICO;
+        try {
+            switch (this.tipo) {
+                case INTEIRO: 
+                case REAL: {
+                    double a = Double.parseDouble(this.valor);
+                    if (c.tipo == TipoDado.INTEIRO || c.tipo == TipoDado.REAL) {
+                        double b = Double.parseDouble(c.valor);
+                        String result = a <= b ? TRUE : FALSE;
+                        return new Calculator(tipoR, result);
+                    } else {
+                        return null;
+                    }
+                }
+                case CARACTER: {
+                    if (c.tipo == TipoDado.CARACTER) {
+                        String result = this.valor.compareTo(c.valor) <= 0 ? TRUE : FALSE;
+                        return new Calculator(tipoR, result);
+                    } else {
+                        return null;
+                    }
+                }
+                default: {
+                    return null;
+                }
             }
-            if (result == null){
-                System.err.println("Erro ao calcular - sem resultado (operação inválida)");
-            } else {
-                resultToken = new Token();
-                resultToken.setLinha(operador.getLinha());
-                resultToken.setColuna(operador.getColuna());
-                resultToken.setOrdem(operador.getOrdem());
-                resultToken.setPosicao(operador.getPosicao());
-                resultToken.setPalavra(result ? "1" : "0");
-                resultToken.setFuncaoToken(funcao);
-            }
+        } catch (NumberFormatException ex) {
+            return null;
         }
-        return resultToken;
     }
     
-    private boolean defineOperacao(Variavel op1){
-        switch (operador.getFuncaoToken()){
-            case LIB_MATH_RAIZ:
-                if (op1.getTipo() == TipoDado.CARACTER){
-                    System.err.println("Operação " + operador.getFuncaoToken()+ " inválida para tipo de dado Caracter");
-                    return false;
-                } else {
-                    funcao = FuncaoToken.CONST_REAL;
+    public Calculator igual(Calculator c) {
+        TipoDado tipoR = TipoDado.LOGICO;
+        try {
+            switch (this.tipo) {
+                case INTEIRO: 
+                case REAL: {
+                    double a = Double.parseDouble(this.valor);
+                    if (c.tipo == TipoDado.INTEIRO || c.tipo == TipoDado.REAL) {
+                        double b = Double.parseDouble(c.valor);
+                        String result = a == b ? TRUE : FALSE;
+                        return new Calculator(tipoR, result);
+                    } else {
+                        return null;
+                    }
                 }
-                break;
+                case CARACTER: {
+                    if (c.tipo == TipoDado.CARACTER) {
+                        String result = this.valor.equals(c.valor) ? TRUE : FALSE;
+                        return new Calculator(tipoR, result);
+                    } else {
+                        return null;
+                    }
+                }
+                case LOGICO: {
+                    if (c.tipo == TipoDado.LOGICO) {
+                        String result = this.valor.equals(c.valor) ? TRUE : FALSE;
+                        return new Calculator(tipoR, result);
+                    } else {
+                        return null;
+                    }
+                }
+            }
+        } catch (NumberFormatException ex) {
+            return null;
         }
-        if (!op1.isInicializada()){
-            System.err.println("Variável " + op1.getNome() + " não inicializada");
-            return false;
-        } 
-        return true;
     }
-        
-    private boolean defineOperacao(Variavel op1, Variavel op2){
-        switch (operador.getFuncaoToken()){
-            case OP_MAT_SOMA:
-            case OP_MAT_SUBTRACAO:
-            case OP_MAT_MULTIPLICACAO:
-                if (op1.getTipo() == TipoDado.CARACTER || op2.getTipo() == TipoDado.CARACTER){
-                    System.err.println("Operação " + operador.getFuncaoToken()+ " inválida para tipo de dado Caracter");
-                    return false;
-                } else {
-                    if (op1.getTipo() == TipoDado.INTEIRO && op2.getTipo() == op1.getTipo()){
-                        funcao = FuncaoToken.CONST_INTEIRA;
+    
+    public Calculator diferente(Calculator c) {
+        TipoDado tipoR = TipoDado.LOGICO;
+        try {
+            switch (this.tipo) {
+                case INTEIRO: 
+                case REAL: {
+                    double a = Double.parseDouble(this.valor);
+                    if (c.tipo == TipoDado.INTEIRO || c.tipo == TipoDado.REAL) {
+                        double b = Double.parseDouble(c.valor);
+                        String result = a != b ? TRUE : FALSE;
+                        return new Calculator(tipoR, result);
                     } else {
-                        funcao = FuncaoToken.CONST_REAL;
+                        return null;
                     }
                 }
-                break;
-            case OP_MAT_DIV_INTEIRA:
-            case OP_MAT_MOD:
-                if (op1.getTipo() == TipoDado.CARACTER || op2.getTipo() == TipoDado.CARACTER){
-                    System.err.println("Operação " + operador.getFuncaoToken()+ " inválida para tipo de dado Caracter");
-                    return false;
-                } else {
-                    if (op1.getTipo() == TipoDado.INTEIRO && op2.getTipo() == op1.getTipo()){
-                        funcao = FuncaoToken.CONST_INTEIRA;
+                case CARACTER: {
+                    if (c.tipo == TipoDado.CARACTER) {
+                        String result = !this.valor.equals(c.valor) ? TRUE : FALSE;
+                        return new Calculator(tipoR, result);
                     } else {
-                        System.err.println("Operação " + operador.getFuncaoToken()+ " inválida para tipo de dado Real");
-                        return false;
+                        return null;
                     }
                 }
-                break;
-            case OP_MAT_DIV_REAL:
-                if (op1.getTipo() == TipoDado.CARACTER || op2.getTipo() == TipoDado.CARACTER){
-                    System.err.println("Operação " + operador.getFuncaoToken()+ " inválida para tipo de dado Caracter");
-                    return false;
-                } else {
-                    funcao = FuncaoToken.CONST_REAL;
+                case LOGICO: {
+                    if (c.tipo == TipoDado.LOGICO) {
+                        String result = !this.valor.equals(c.valor) ? TRUE : FALSE;
+                        return new Calculator(tipoR, result);
+                    } else {
+                        return null;
+                    }
                 }
-                break;
-                
-            case LIB_MATH_POT:
-                if (op1.getTipo() == TipoDado.CARACTER || op2.getTipo() == TipoDado.CARACTER){
-                    System.err.println("Operação " + operador.getFuncaoToken()+ " inválida para tipo de dado Caracter");
-                    return false;
-                } else {
-                    funcao = FuncaoToken.CONST_REAL;
-                }
-                break;
-                
-            case OP_REL_MAIOR:
-            case OP_REL_MAIOR_IGUAL:
-            case OP_REL_MENOR:
-            case OP_REL_MENOR_IGUAL:
-            case OP_REL_IGUAL:
-            case OP_REL_DIFERENTE:
-                if ( (op1.getTipo() == TipoDado.CARACTER && op2.getTipo() != TipoDado.CARACTER) ||
-                     (op2.getTipo() == TipoDado.CARACTER && op1.getTipo() != TipoDado.CARACTER)
-                        ){
-                    System.err.println("Operação " + operador.getFuncaoToken()+ " inválida"
-                            + " - não é possível comparar " + op1.getTipo() + " com " + op2.getTipo());
-                    return false;
-                } else {
-                    funcao = FuncaoToken.CONST_INTEIRA;
-                }
-                break;
-                
-            case OP_LOG_E:
-            case OP_LOG_OU:
-                if ( op1.getTipo() != TipoDado.INTEIRO || op2.getTipo() != TipoDado.INTEIRO ){
-                    System.err.println("Operação " + operador.getFuncaoToken()+ " inválida"
-                            + " - operações lógicas só são possíveis entre variáveis lógicas (inteiros 0 e 1)");
-                } else {
-                    funcao = FuncaoToken.CONST_INTEIRA;
-                }
-                break;
+            }
+        } catch (NumberFormatException ex) {
+            return null;
         }
-        if (!op1.isInicializada()){
-            System.err.println("Variável " + op1.getNome() + " não inicializada");
-            return false;
-        } 
-        if (!op2.isInicializada()){
-            System.err.println("Variável " + op2.getNome() + " não inicializada");
-            return false;
+    }
+    
+    public Calculator e(Calculator c) {
+        TipoDado tipoR = TipoDado.LOGICO;
+        if (this.tipo == TipoDado.LOGICO && c.tipo == this.tipo) {
+            boolean res = this.valor.equals(TRUE) && c.valor.equals(TRUE);
+            return new Calculator(tipoR, (res ? TRUE : FALSE) );
+        } else{
+            return null;
         }
-        return true;
+    }
+    
+    public Calculator ou(Calculator c) {
+        TipoDado tipoR = TipoDado.LOGICO;
+        if (this.tipo == TipoDado.LOGICO && c.tipo == this.tipo) {
+            boolean res = this.valor.equals(TRUE) || c.valor.equals(TRUE);
+            return new Calculator(tipoR, (res ? TRUE : FALSE) );
+        } else{
+            return null;
+        }
+    }
+    
+    public Calculator nao() {
+        TipoDado tipoR = TipoDado.LOGICO;
+        if (this.tipo == TipoDado.LOGICO) {
+            String res = this.valor.equals(TRUE) ? FALSE : TRUE;
+            return new Calculator(tipoR, res);
+        } else{
+            return null;
+        }
     }
 }

@@ -432,6 +432,7 @@ public class Interpreter extends Verificator {
                     Erro erro = new Erro(TipoErro.ERRO, expressao.getAsToken(), String.format(
                         "Esperava um resultado lógico para a condição, mas encontrou %s"
                         + " - interpretador finalizado", expressao.getTipoResultado()));
+                    interfaceExecucao.erroFatal(erro);
                     erros.add(erro);
                     canGo = false;
                     return;
@@ -497,6 +498,7 @@ public class Interpreter extends Verificator {
                             "Esperava um resultado lógico para a condição, mas encontrou %s"
                             + " - interpretador finalizado", expressao.getTipoResultado()));
                         erros.add(erro);
+                        interfaceExecucao.erroFatal(erro);
                         canGo = false;
                         return;
                     }
@@ -564,6 +566,7 @@ public class Interpreter extends Verificator {
                             "Esperava um resultado lógico para a condição, mas encontrou %s"
                             + " - interpretador finalizado", expressao.getTipoResultado()));
                         erros.add(erro);
+                        interfaceExecucao.erroFatal(erro);
                         canGo = false;
                         return;
                     }
@@ -625,6 +628,7 @@ public class Interpreter extends Verificator {
                             + " - interpretador finalizado", expressao.getTipoResultado()));
                         erros.add(erro);
                         canGo = false;
+                        interfaceExecucao.erroFatal(erro);
                         return;
                     }
 
@@ -660,6 +664,7 @@ public class Interpreter extends Verificator {
                     Erro erro = new Erro(TipoErro.ERRO, tokenVarCont, String.format(
                         "Variável contadora deve ser numérica (inteira ou real), mas encontrou %s "
                                 + "- interpretador finalizado", variavel.getTipo()));
+                    interfaceExecucao.erroFatal(erro);
                     erros.add(erro);
                     canGo = false;
                     return;
@@ -706,6 +711,7 @@ public class Interpreter extends Verificator {
                         Erro erro = new Erro(TipoErro.ERRO, expressao.getAsToken(), String.format(
                             "Esperava um resultado %s para início de repetição, mas encontrou %s"
                             + " - interpretador finalizado", variavel.getTipo(), expressao.getTipoResultado()));
+                        interfaceExecucao.erroFatal(erro);
                         erros.add(erro);
                         canGo = false;
                     }
@@ -753,6 +759,7 @@ public class Interpreter extends Verificator {
                         Erro erro = new Erro(TipoErro.ERRO, expressao.getAsToken(), String.format(
                             "Esperava um resultado %s para início de repetição, mas encontrou %s"
                             + " - interpretador finalizado", variavel.getTipo(), expressao.getTipoResultado()));
+                        interfaceExecucao.erroFatal(erro);
                         erros.add(erro);
                         canGo = false;
                         return;
@@ -831,33 +838,209 @@ public class Interpreter extends Verificator {
     private void executaExpressao(Executavel exec) {
         Expressao expressao = (Expressao)exec.instrucao;
         switch (expressao.getTipoExpressao()) {
-            case OPERACAO_UNARIA:
-                verificaOperacaoUnaria(expressao);
-                break;
-            case OPERACAO_ARITMETICA:
-                verificaOperacaoAritmetica(expressao);
-                break;
-            case OPERACAO_RELACIONAL:
-                verificaOperacaoRelacional(expressao);
-                break;
-            case OPERACAO_LOGICA:
-                verificaOperacaoLogica(expressao);
+            case OPERANDO_CONSTANTE:
+                executaExpressaoOperandoConstante(exec);
                 break;
             case OPERANDO_VARIAVEL:
-                verificaOperandoVariavel(expressao);
+                executaExpressaoOperandoVariavel(exec);
                 break;
             case OPERANDO_FUNCAO:
-                verificaOperandoFuncao(expressao);
+                executaExpressaoOperandoFuncao(exec);
+                break;
+            case OPERACAO_UNARIA:
+                executaExpressaoOperacaoUnaria(exec);
+                break;
+            case OPERACAO_ARITMETICA:
+                executaExpressaoOperacaoAritmetica(exec);
+                break;
+            case OPERACAO_RELACIONAL:
+                executaExpressaoOperacaoRelacional(exec);
+                break;
+            case OPERACAO_LOGICA:
+                executaExpressaoOperacaoLogica(exec);
                 break;
             default:
                 break;
         }
     }
     
-    private void executaExpressaoOperacaoUnaria (Expressao expressao) {
-        OperacaoUnaria operacaoUnaria = (OperacaoUnaria)expressao;
-        Expressao expr = operacaoUnaria.getExpressao();
+    private void executaExpressaoOperandoConstante(Executavel exec) {
+        Operando operando = (Operando)exec.instrucao;
+        if (exec.total == 0) {
+            exec.total = 1;
+        }
+        interfaceExecucao.atualizaExpressaoAtual(operando);
+        interfaceExecucao.atualizaPassoAtual(operando.getOperando());
+        
+        exec.instrucao = operando;
+        exec.count ++;
+        pilhaExecucao.push(exec);
+    }
+    
+    private void executaExpressaoOperandoVariavel(Executavel exec) {
+        Operando operando = (Operando)exec.instrucao;
+        if (exec.total == 0) {
+            exec.total = 1;
+        }
+        interfaceExecucao.atualizaExpressaoAtual(operando);
+        interfaceExecucao.atualizaPassoAtual(operando.getOperando());
+        
+        Token token = operando.getOperando();
+        Variavel variavel = variaveis.get(token.nome());
+        interfaceExecucao.selecionaVariavel(variavel);
+        if (!variavel.isInicializada()) {
+            Erro fatal = new Erro(TipoErro.ERRO, token, 
+                "Variável não inicializada");
+            erros.add(fatal);
+            canGo = false;
+            interfaceExecucao.erroFatal(fatal);
+        } else {
+            operando.setTipoResultado(variavel.getTipo());
+            operando.setResultado(variavel.getValor());
+            exec.instrucao = operando;
+            exec.count ++;
+            pilhaExecucao.push(exec);
+        }
+    }
+    
+    private void executaExpressaoOperandoFuncao (Executavel exec) {
+        ChamadaFuncao chamadaFuncao = (ChamadaFuncao)exec.instrucao;
+        int npar = chamadaFuncao.getNumParametros();
+        Token nome = chamadaFuncao.getOperando();
+        if (exec.total == 0) {
+            exec.total = npar + 1;
+            if (nome.nome().equals("pot") && npar != 2) {
+                Erro fatal = new Erro(TipoErro.ERRO, nome, 
+                    "Número de parâmetros incorretos - esperava 2, recebeu " + npar);
+                erros.add(fatal);
+                canGo = false;
+                interfaceExecucao.erroFatal(fatal);
+            }
+            if (nome.nome().equals("raiz") && npar != 1) {
+                Erro fatal = new Erro(TipoErro.ERRO, nome, 
+                    "Número de parâmetros incorretos - esperava 1, recebeu " + npar);
+                erros.add(fatal);
+                canGo = false;
+                interfaceExecucao.erroFatal(fatal);
+            }
+        }
+        
+        if (exec.count < exec.total - 1) {
+            Expressao expressao = null;
+            if (!pilhaExecucao.isEmpty()) {
+                Executavel instr = pilhaExecucao.pop();
+                if (instr.instrucao instanceof Expressao) {
+                    expressao = (Expressao)instr.instrucao;
+                } else {
+                    pilhaExecucao.push(instr);
+                }
+            } 
+            if (expressao == null) {
+                expressao = chamadaFuncao.getParametros().get(exec.count);
+                pilhaExecucao.push(exec);
+                pilhaExecucao.push(new Executavel(expressao));
+                interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+            } else {
+                if (tiposDadosCorretos(expressao.getTipoResultado(), esperadosPorFuncao(nome.nome())[exec.count])) {
+                    chamadaFuncao.atualizaParametro(exec.count, expressao);
+                    exec.count ++;
+                    pilhaExecucao.push(exec);
+                    interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+                } else {
+                    erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
+                        "Não interpretou resultado %s (%s) como parâmetro %d de função %s",
+                        expressao.getResultado(), expressao.getTipoResultado(), exec.count, nome.getPalavra())));
+                    Erro erro = new Erro(TipoErro.ERRO, expressao.getAsToken(), String.format(
+                        "Esperava um resultado %s para o parâmetro, mas encontrou %s"
+                        + " - interpretador finalizado", "Inteiro ou real", expressao.getTipoResultado()));
+                    interfaceExecucao.erroFatal(erro);
+                    erros.add(erro);
+                    canGo = false;
+                }
+            }
+        } else {
+            if (exec.count < exec.total) {
+                double result = 0;
+                switch (nome.nome()) {
+                    case "pot":
+                        double base = chamadaFuncao.getParametros().get(0).getResultadoReal();
+                        double expo = chamadaFuncao.getParametros().get(1).getResultadoReal();
+                        result = Math.pow(base, expo);
+                        break;
+                    case "raiz":
+                        double num = chamadaFuncao.getParametros().get(0).getResultadoReal();
+                        if (num >= 0) {
+                            result = Math.sqrt(num);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                
+                chamadaFuncao.setResultado(String.valueOf(result));
+                exec.count ++;
+                pilhaExecucao.push(exec);
+            }
+        }
+    }
+    
+    private void executaExpressaoOperacaoUnaria (Executavel exec) {
+        OperacaoUnaria operacaoUnaria = (OperacaoUnaria)exec.instrucao;
         Token operador = operacaoUnaria.getOperador();
+        if (exec.total == 0) {
+            exec.total = 1;
+        }
+        
+        if (exec.count < exec.total) {
+            Expressao expressao = null;
+            if (!pilhaExecucao.isEmpty()) {
+                Executavel instr = pilhaExecucao.pop();
+                if (instr.instrucao instanceof Expressao) {
+                    expressao = (Expressao)instr.instrucao;
+                } else {
+                    pilhaExecucao.push(instr);
+                }
+            } 
+            if (expressao == null) {
+                expressao = operacaoUnaria.getExpressao();
+                pilhaExecucao.push(exec);
+                pilhaExecucao.push(new Executavel(expressao));
+                interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+            } else {
+                long resInt;
+                double resReal;
+                String resStr;
+                boolean resLog;
+                
+                switch (expressao.getTipoResultado()) {
+                    case INTEIRO:
+                        resInt = expressao.getResultadoInteiro();
+                        break;
+                    case REAL:
+                        resReal = expressao.getResultadoReal();
+                        operacaoUnaria.setResultado(String.valueOf(resReal));
+                        break;
+                    default:
+                        break;
+                }
+                
+                
+                switch (operador.getFuncaoToken()) {
+                    case OP_SIG_NEGATIVO:
+                        
+                        break;
+                }
+            }
+        }
+        
+        
+        
+        
+        
+        switch (operador.getFuncaoToken()) {
+            
+                
+        }
         
     }
     
@@ -975,29 +1158,6 @@ public class Interpreter extends Verificator {
         }
     }
     
-    private void verificaOperandoVariavel(Expressao expressao) {
-        Operando operando = (Operando)expressao;
-        Token var = operando.getOperando();
-        geraErroVariavelNaoInicializada(var);
-        VariavelVerif varVerif = variaveis.get(var.nome());
-        operando.setTipoResultado(varVerif.tipo);
-        varVerif.chamadas += 1;
-        variaveis.replace(var.nome(), varVerif);
-    }
-    
-    private void verificaOperandoFuncao (Expressao expressao) {
-        ChamadaFuncao chamadaFuncao = (ChamadaFuncao)expressao;
-        Token funcao = chamadaFuncao.getTokenNome();
-        TipoDado[] tiposParametros = new TipoDado[chamadaFuncao.getNumParametros()];
-        int c = 0;
-        for (Expressao param : chamadaFuncao.getParametros()) {
-            verificaExpressao(param);
-            tiposParametros[c++] = param.getTipoResultado();
-        }
-        int nerr = geraErroFuncaoParametros(funcao, tiposParametros);
-        chamadaFuncao.setTipoResultado(funcoes.get(funcao.nome()).retorno);
-    }
-    
     private boolean tiposDadosCorretos (TipoDado encontrado, TipoDado... esperados){
         boolean found = false;
         for (TipoDado tipo : esperados) {
@@ -1007,6 +1167,20 @@ public class Interpreter extends Verificator {
             }
         }
         return found;
+    }
+    
+    private TipoDado[][] esperadosPorFuncao(String nome) {
+        TipoDado[] real = {TipoDado.REAL, TipoDado.INTEIRO};
+        TipoDado[] inteiro = {TipoDado.INTEIRO};
+        
+        switch (nome) {
+            case "pot":
+                return new TipoDado[][] { real , real };
+            case "raiz":
+                return new TipoDado[][] { real };
+            default:
+                return new TipoDado[][] {};
+        }
     }
     
     private Token geraTokenExib(Token... tokens) {
