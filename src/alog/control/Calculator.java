@@ -424,6 +424,7 @@ public class Calculator {
         } catch (NumberFormatException ex) {
             return null;
         }
+        return null;
     }
     
     public Calculator diferente(Calculator c) {
@@ -456,6 +457,9 @@ public class Calculator {
                     } else {
                         return null;
                     }
+                }
+                default: {
+                    return null;
                 }
             }
         } catch (NumberFormatException ex) {
