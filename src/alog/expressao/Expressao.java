@@ -39,6 +39,26 @@ public abstract class Expressao extends Instrucao {
     public String getResultado() {
         return resultado;
     }
+    
+    public Long getResultadoInteiro() {
+        try {
+            return Long.parseLong(resultado);
+        } catch (NumberFormatException e) {
+            return 0L;
+        }
+    }
+    
+    public Double getResultadoReal() {
+        try {
+            return Double.parseDouble(resultado);
+        } catch (NumberFormatException e) {
+            return 0.0;
+        }
+    }
+    
+    public Boolean getResultadoLogico() {
+        return resultado.equals("verdadeiro");
+    }
 
     public void setResultado(String resultado) {
         this.resultado = resultado;

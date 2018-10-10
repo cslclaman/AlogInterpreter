@@ -113,6 +113,14 @@ public interface InterfaceExecucao {
     default void atribuicao(Variavel variavel, String valor){};
     
     /**
+     * Indica que uma variável está sendo selecionada em alguma operação.
+     * Não tem ação por padrão.
+     * @param variavel A variável selecionada na instrução
+     */
+    default void selecionaVariavel(Variavel variavel){};
+    
+    
+    /**
      * Indica que a instrução atual indica uma estrutura de controle (condicional ou repetitiva),
      * que possua condição e instrução a ser executada. Por padrão, não tem ação.
      * @param estrutura Token identificador (SE, PARA, ENQUANTO, etc).
