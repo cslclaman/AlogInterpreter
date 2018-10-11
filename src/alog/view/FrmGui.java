@@ -491,7 +491,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     txpSaida.setText("");
                     txpSaida.setBackground(backgroundDisabled);
 
-                    btnVerificar.setEnabled(false);
+                    //btnVerificar.setEnabled(false);
                     //btnInicioPerc.setEnabled(false);
                     
                     interpreter = new Interpreter(this, instrucoes);

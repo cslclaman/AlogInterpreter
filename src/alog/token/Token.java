@@ -118,9 +118,8 @@ public class Token {
         tipoToken = TipoToken.INDEFINIDO;
         funcaoToken = FuncaoToken._INVALIDO;
         palavra = "";
-        if (tokens.isEmpty()) {
-            tamanho = 0;
-        } else {
+        tamanho = 0;
+        if (!tokens.isEmpty()) {
             Token t = tokens.get(0);
             lin = t.lin;
             col = t.col;
@@ -128,8 +127,7 @@ public class Token {
             ordem = t.ordem;
             tamanho = 0;
             for (Token token : tokens) {
-                posicao = t.getPosicao() + tamanho;
-                for (int p = posicao; p < token.posicao; p++) {
+                for (int p = posicao + tamanho; p < token.posicao; p++) {
                     palavra += " ";
                     tamanho ++;
                 }

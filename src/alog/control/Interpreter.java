@@ -140,7 +140,7 @@ public class Interpreter extends Verificator {
                 break;
 
             case EXPRESSAO:
-                if (exec.total == 0 || exec.total < exec.count) {
+                if (exec.total == 0 || exec.count < exec.total) {
                     interfaceExecucao.atualizaExpressaoAtual((Expressao)exec.instrucao);
                     executaExpressao(exec);
                 } else {
@@ -1044,7 +1044,7 @@ public class Interpreter extends Verificator {
             exec.total = 3;
         }
         
-        if (exec.count < exec.total) {
+        if (exec.count < exec.total - 1) {
             Expressao expressao = null;
             if (!pilhaExecucao.isEmpty()) {
                 Executavel instr = pilhaExecucao.pop();
@@ -1054,29 +1054,32 @@ public class Interpreter extends Verificator {
                     pilhaExecucao.push(instr);
                 }
             } 
-            if (expressao == null) {
-                if (exec.count == 0) {
-                    expressao = operacao.getExpressaoEsq();
-                    pilhaExecucao.push(exec);
-                    pilhaExecucao.push(new Executavel(expressao));
-                    interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+            switch (exec.count) {
+                case 0: {
+                    if (expressao == null) {
+                        expressao = operacao.getExpressaoEsq();
+                        pilhaExecucao.push(exec);
+                        pilhaExecucao.push(new Executavel(expressao));
+                        interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+                    } else {
+                        operacao.setExpressaoEsq(expressao);
+                        exec.count ++;
+                        pilhaExecucao.push(exec);
+                    }
                 }
-                if (exec.count == 1) {
-                    expressao = operacao.getExpressaoDir();
-                    pilhaExecucao.push(exec);
-                    pilhaExecucao.push(new Executavel(expressao));
-                    interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+                case 1: {
+                    if (expressao == null) {
+                        expressao = operacao.getExpressaoDir();
+                        pilhaExecucao.push(exec);
+                        pilhaExecucao.push(new Executavel(expressao));
+                        interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+                    } else {
+                        operacao.setExpressaoDir(expressao);
+                        exec.count ++;
+                        pilhaExecucao.push(exec);
+                    }
                 }
-            } else {
-                if (exec.count == 0) {
-                    operacao.setExpressaoEsq(expressao);
-                    exec.count ++;
-                }
-                if (exec.count == 1) {
-                    operacao.setExpressaoDir(expressao);
-                    exec.count ++;
-                }
-                if (exec.count == 2) {
+                case 2: {
                     Calculator calc = new Calculator(operacao.getExpressaoEsq());
                     Calculator oper = new Calculator(operacao.getExpressaoDir());
                     Calculator res = null;
