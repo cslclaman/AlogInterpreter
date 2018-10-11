@@ -5,14 +5,15 @@
  */
 package alog.view;
 
-import alog.control.Calculator;
+import alog.analise.Erro;
+import alog.analise.TipoErro;
+import alog.control.InterfaceExecucao;
+import alog.control.Interpreter;
 import alog.control.Parser;
+import alog.control.PreProcessor;
 import alog.control.Scanner;
-import alog.instrucao.Bloco;
+import alog.expressao.Expressao;
 import alog.instrucao.Instrucao;
-import alog.token.FuncaoToken;
-import alog.instrucao.TipoInstrucao;
-import alog.model.TipoDado;
 import alog.token.Token;
 import alog.model.Variavel;
 import java.util.LinkedList;
@@ -27,7 +28,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +35,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
@@ -45,7 +44,9 @@ import javax.swing.text.StyleContext;
  *
  * @author Caique
  */
-public class FrmGui extends javax.swing.JFrame {
+public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
+    
+    private Interpreter interpreter = null;
     
     StyleContext sc;
     private final Style stylePlain;
@@ -56,6 +57,8 @@ public class FrmGui extends javax.swing.JFrame {
     private final int FORMAT_PERC = 1;
     
     private final Style styleError;
+    private final Style styleWarn;
+    private final Style styleRes;
     private final int FORMAT_ERROR = 2;
     
     private final Color backgroundDisabled = javax.swing.UIManager.getDefaults().getColor("FormattedTextField.disabledBackground");
@@ -76,11 +79,17 @@ public class FrmGui extends javax.swing.JFrame {
         stylePerc = sc.addStyle("percurso", null);
         stylePerc.addAttribute(StyleConstants.Background, Color.YELLOW);
         
+        styleRes = sc.addStyle("percursoRes", null);
+        styleRes.addAttribute(StyleConstants.Foreground, Color.BLUE);
+        
         styleOper = sc.addStyle("percursoOperador", null);
         styleOper.addAttribute(StyleConstants.Background, Color.CYAN);
         
         styleError = sc.addStyle("tokenErrado", null);
         styleError.addAttribute(StyleConstants.Background, Color.RED);
+        
+        styleWarn = sc.addStyle("tokenAlerta", null);
+        styleWarn.addAttribute(StyleConstants.Background, Color.ORANGE);
         
         initComponents();
         txpIde.setDocument(new DefaultStyledDocument());
@@ -89,6 +98,7 @@ public class FrmGui extends javax.swing.JFrame {
         formatacao = FORMAT_PLAIN;
         
         tabVariaveis = (DefaultTableModel)tblVariaveis.getModel();
+        tokensAnt = new LinkedList<>();
     }
 
     /**
@@ -102,7 +112,6 @@ public class FrmGui extends javax.swing.JFrame {
 
         jScrollPane2 = new javax.swing.JScrollPane();
         txpIde = new javax.swing.JTextPane();
-        btnInicioPerc = new javax.swing.JButton();
         btnProxPerc = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblVariaveis = new javax.swing.JTable();
@@ -160,14 +169,6 @@ public class FrmGui extends javax.swing.JFrame {
         jScrollPane2.setViewportView(txpIde);
 
         jScrollPane2.setRowHeaderView(new TextLineNumber(txpIde, 2));
-
-        btnInicioPerc.setText("|< Início");
-        btnInicioPerc.setEnabled(false);
-        btnInicioPerc.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnInicioPercActionPerformed(evt);
-            }
-        });
 
         btnProxPerc.setText(">> Próximo passo");
         btnProxPerc.setEnabled(false);
@@ -343,8 +344,7 @@ public class FrmGui extends javax.swing.JFrame {
                         .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(btnVerificar, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnInicioPerc)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGap(79, 79, 79)
                                 .addComponent(btnProxPerc))))
                     .addComponent(jLabel5))
                 .addContainerGap())
@@ -384,346 +384,33 @@ public class FrmGui extends javax.swing.JFrame {
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(btnVerificar, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(btnInicioPerc, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 41, Short.MAX_VALUE)
-                            .addComponent(btnProxPerc, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addComponent(btnProxPerc, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
 
         pack();
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
-    
-    private void btnInicioPercActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnInicioPercActionPerformed
-        if (tokenAnt != null){
-            docIde.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
-            tokenAnt = null;
-        }
         
-        Scanner scanner = new Scanner(oldText);
-        List<Token> tokens = scanner.listaTokens();
-        
-        System.err.println(scanner.imprimeErros());
-        
-        if (scanner.getNumErros() > 0){
-            JOptionPane.showMessageDialog(
-                    this,
-                    scanner.getNumErros() +
-                            " erros encontrados - verifique seu algoritmo",
-                    "Verificação concluída",
-                    JOptionPane.WARNING_MESSAGE);
-            formatacao = FORMAT_ERROR;
-            for (Token t : scanner.retornaErros()){
-                docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
-            }
-            
-            btnProxPerc.setEnabled(false);
-            btnInicioPerc.setEnabled(false);
-        } else {
-        
-            Parser parser = new Parser(tokens);
-            expressoes = new LinkedList<>();
-
-            while (parser.hasNext()){
-                Instrucao e = parser.parseExpression();
-                switch (e.getTipo()){
-                    case DECLARACAO_VARIAVEL:
-                    case ENTRADA_DE_DADOS:
-                    case SAIDA_DE_DADOS:
-                        e.setIndice(1);
-                        break;
-                    default:
-                        break;
-                }
-                expressoes.add(e);
-            }
-
-            System.err.println(parser.imprimeErros());
-
-            if (parser.getNumErros() > 0){
-                JOptionPane.showMessageDialog(
-                        this,
-                        parser.getNumErros() +
-                                " erros encontrados - verifique seu algoritmo",
-                        "Verificação concluída",
-                        JOptionPane.WARNING_MESSAGE);
-                formatacao = FORMAT_ERROR;
-                for (Token t : parser.getTokensErros()){
-                    docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
-                }
-
-                btnProxPerc.setEnabled(false);
-                btnInicioPerc.setEnabled(false);
-            } else {
-                exprIndex = 1;
-                operacaoCondicional = false;
-                condicionaisResult = new LinkedList<>();
-                execProx = true;
-                nomeVar = "";
-
-                lblPosCaret.setText("Em execução");
-
-                variaveis = new HashMap<>();
-                varOrdem = new HashMap<>();
-                expressao = expressoes.getFirst();
-                tabVariaveis.setRowCount(0);
-
-                txpEntrada.setText("");
-                txpEntrada.setEditable(false);
-                txpEntrada.setBackground(backgroundDisabled);
-
-                docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
-                txpProcessamento.setText("");
-                txpProcessamento.setBackground(backgroundDisabled);
-
-                txpSaida.setText("");
-                txpSaida.setBackground(backgroundDisabled);
-
-                btnVerificar.setEnabled(false);
-                btnProxPerc.setEnabled(true);
-                btnInicioPerc.setEnabled(false);
-            }
-        }
-    }//GEN-LAST:event_btnInicioPercActionPerformed
-    
     private void btnProxPercActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProxPercActionPerformed
-        btnInicioPerc.setEnabled(true);
+        boolean enabled;
         
-        if (tokenAnt != null){
-            docIde.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
+        if (interpreter == null) {
+            enabled = false;
+        } else {
+            interpreter.proxima();
+            enabled = interpreter.existeProxima();
         }
+        btnProxPerc.setEnabled(enabled);
         
-        docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
-        txpEntrada.setText("");
-        
-        txpProcessamento.setText("");
-        txpProcessamento.setBackground(backgroundDisabled);
-        
-        if (!expressao.hasNextToken()){
-            if (!execProx){
-                execProx = true;
-                exprIndex++;
-            }
-            if (exprIndex < expressoes.size()){
-                expressao = expressoes.get(exprIndex++);
-            } else {
-                btnProxPerc.setEnabled(false);
-                formatacao = FORMAT_PLAIN;
-                JOptionPane.showMessageDialog(this, "Execução concluída", "Execução concluída", JOptionPane.INFORMATION_MESSAGE);
-                return;
-            }
-        }
-        
-        if (expressao.getTipo() == TipoInstrucao.BLOCO){
-            Bloco bloco = (Bloco)expressao;
-            expressoes.remove(expressao);
-            int indice = --exprIndex;
-            while (bloco.hasNextExpressao()){
-                Instrucao e = bloco.getNextExpressao();
-                switch (e.getTipo()){
-                    case DECLARACAO_VARIAVEL:
-                    case ENTRADA_DE_DADOS:
-                    case SAIDA_DE_DADOS:
-                        e.setIndice(1);
-                        break;
-                    default:
-                        break;
-                }
-                expressoes.add(indice++, e);
-            }
-            expressao = expressoes.get(exprIndex++);
-        }
-            
-        btnProxPerc.setEnabled(expressao.hasNextToken() || exprIndex < expressoes.size());
-
-        formatacao = FORMAT_PERC;
-        Token token = expressao.getNextToken();
-        docIde.setCharacterAttributes(token.getPosicao(), token.getTamanho(), stylePerc, true);
-        tblVariaveis.clearSelection();
-
-        switch(expressao.getTipo()){
-            case DELIM_BLOCO:
-                switch (token.getFuncaoToken()){
-                    case RES_BLOCO_INICIO:
-                        blocoAtual ++;
-                        break;
-                    case RES_BLOCO_FIM:
-                        blocoAtual --;
-                        break;
-                }
-                break;
-            case DECLARACAO_VARIAVEL:
-                TipoDado tipoVar;
-                switch (expressao.getTokenAt(0).getFuncaoToken()){
-                    case RES_TIPO_INTEIRO:
-                        tipoVar = TipoDado.INTEIRO;
-                        break;
-                    case RES_TIPO_REAL:
-                        tipoVar = TipoDado.REAL;
-                        break;
-                    case RES_TIPO_CARACTER:
-                    default:
-                        tipoVar = TipoDado.CARACTER;
-                        break;
-                }
-                nomeVar = token.getPalavra();
-                Variavel variavel = new Variavel(tipoVar, nomeVar);
-                variaveis.put(nomeVar, variavel);
-
-                ArrayList<Variavel> lista = new ArrayList(variaveis.values());
-                Collections.sort(lista, (v1, v2) -> {
-                    int comp = v1.getTipo().toString().compareTo(v2.getTipo().toString());
-                    if (comp == 0){
-                        return v1.getNome().compareToIgnoreCase(v2.getNome());
-                    } else {
-                        return comp;
-                    }
-                });
-                
-                tabVariaveis.setRowCount(0);
-                for (Variavel v : lista){
-                    tabVariaveis.addRow(new String[]{v.getTipo().toString(),v.getNome(),v.getValor()});
-                    varOrdem.put(v.getNome(), lista.indexOf(v));
-                }
-                
-                tblVariaveis.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
-                break;
-            case ENTRADA_DE_DADOS:
-                tblVariaveis.clearSelection();
-                
-                nomeVar = token.getPalavra();
-                execEntradaDados();
-                break;
-                
-            case SAIDA_DE_DADOS:
-                txpSaida.setBackground(backgroundEnabled);
-                
-                String textoSaida = "";
-                switch (token.getFuncaoToken()){
-                    case CONST_CARACTER:
-                        textoSaida = token.getPalavra().replace("\"", "");
-                        break;
-                    case CONST_INTEIRA:
-                    case CONST_REAL:
-                        textoSaida = token.getPalavra();
-                        break;
-                    case IDENT_NOME_VARIAVEL:
-                        nomeVar = token.getPalavra();
-                        variavel = variaveis.get(nomeVar);
-                        
-                        if (variavel == null){
-                            System.err.println("Variável " + nomeVar + " não encontrada");
-                        } else {
-                            tblVariaveis.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
-                            switch (variavel.getTipo()){
-                                case REAL:
-                                    int indicePonto = variavel.getValor().indexOf(".");
-                                    if (indicePonto >= 0 && variavel.getValor().substring(indicePonto + 1).length() > 3){
-                                        textoSaida = variavel.getValor().substring(0, indicePonto + 4);
-                                        break;
-                                    }
-                                case INTEIRO:
-                                case CARACTER:
-                                    textoSaida = variavel.getValor();
-                                    break;
-                            }
-                        }
-                        break;
-                }
-                if (!expressao.hasNextToken()){
-                    textoSaida += "\n";
-                }
-                txpSaida.setText(txpSaida.getText() + textoSaida);
-                break;
-                
-            case ATRIBUICAO:
-            case OPERACAO_ARITMETICA:
-                Token ultimoExpr = expressao.getTokenAt(expressao.getNumTokens() - 1);
-                Token newToken = new Token();
-                int posInicio = token.getPosicao();
-                int offset = (ultimoExpr.getPosicao() + ultimoExpr.getTamanho()) - posInicio;
-                docIde.setCharacterAttributes(posInicio, offset, stylePerc, true);
-                
-                newToken.setLinha(token.getLinha());
-                newToken.setColuna(token.getColuna());
-                newToken.setPosicao(token.getPosicao());
-                newToken.setOrdem(token.getOrdem());
-                try {
-                    newToken.atualizaPalavra(docIde.getText(posInicio, offset));
-                } catch (BadLocationException ex){
-                    System.err.println(ex.toString());
-                }
-                token = newToken;
-                
-                expressao.setIndice(0);
-                operacaoCondicional = false;
-                execOperacao();
-                
-                break;
-                
-            case OPERACAO_LOGICA:
-                switch (token.getFuncaoToken()){
-                    case RES_COND_SE:
-                        //docIde.setCharacterAttributes(token.getPosicao(), token.getTamanho(), stylePlain, true);
-                        ultimoExpr = expressao.getTokenAt(expressao.getNumTokens() - 1);
-                        newToken = new Token();
-                        posInicio = token.getPosicao();
-                        offset = (ultimoExpr.getPosicao() + ultimoExpr.getTamanho()) - posInicio;
-                        docIde.setCharacterAttributes(posInicio, offset, stylePerc, true);
-
-                        newToken.setLinha(token.getLinha());
-                        newToken.setColuna(token.getColuna());
-                        newToken.setPosicao(token.getPosicao());
-                        newToken.setOrdem(token.getOrdem());
-                        try {
-                            newToken.atualizaPalavra(docIde.getText(posInicio, offset));
-                        } catch (BadLocationException ex){
-                            System.err.println(ex.toString());
-                        }
-                        token = newToken;
-
-                        expressao.setIndice(1);
-                        operacaoCondicional = true;
-                        execOperacao();
-
-                        break;
-                    case RES_COND_SENAO:
-                        execProx = !condicionaisResult.pop();
-                        break;
-                }
-                break;
-                
-            case _INVALIDO:
-                System.err.println("Expressão inválida");
-                System.err.println("\t" + expressao.getTexto());
-                
-                formatacao = FORMAT_ERROR;
-                docIde.setCharacterAttributes(token.getPosicao(), token.getTamanho(), styleError, true);
-                
-                break;
-            default:
-                System.err.println("Expressão indefinida");
-                System.err.println("\t" + expressao.getTexto());
-                
-                formatacao = FORMAT_ERROR;
-                docIde.setCharacterAttributes(token.getPosicao(), token.getTamanho(), styleError, true);
-                
-                break;
-        }
-        
-        tokenAnt = token;
-        
-        if (!execProx && token.getFuncaoToken() == FuncaoToken.RES_COND_SENAO){
-            btnProxPercActionPerformed(evt);
-        }
     }//GEN-LAST:event_btnProxPercActionPerformed
 
     private void btnVerificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerificarActionPerformed
-        if (tokenAnt != null){
+        while (!tokensAnt.isEmpty()){
+            Token tokenAnt = tokensAnt.pop();
             docIde.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
-            tokenAnt = null;
         }
-        
+            
         oldText = txpIde.getText();
         
         if (oldText.isEmpty()){
@@ -734,80 +421,83 @@ public class FrmGui extends javax.swing.JFrame {
         Scanner scanner = new Scanner(oldText);
         List<Token> tokens = scanner.listaTokens();
         
-        System.err.println(scanner.imprimeErros());
+        System.err.println(scanner.printErros(TipoErro.DEVEL));
         
-        if (scanner.getNumErros() > 0){
+        if (scanner.getNumErros(TipoErro.DEVEL) > 0){
             JOptionPane.showMessageDialog(
                     this,
-                    scanner.getNumErros() +
+                    scanner.getNumErros(TipoErro.DEVEL) +
                             " erros encontrados - verifique seu algoritmo",
                     "Verificação concluída",
                     JOptionPane.WARNING_MESSAGE);
             formatacao = FORMAT_ERROR;
-            for (Token t : scanner.retornaErros()){
+            for (Erro e : scanner.getErros(TipoErro.DEVEL)){
+                Token t = e.getToken();
                 docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
             }
             
             btnProxPerc.setEnabled(false);
-            btnInicioPerc.setEnabled(false);
+            //btnInicioPerc.setEnabled(false);
         } else {
             Parser parser = new Parser(tokens);
-            expressoes = new LinkedList<>();
+            instrucoes = new LinkedList<>();
 
-            while (parser.hasNext()){
-                Instrucao e = parser.parseExpression();
-                switch (e.getTipo()){
-                    case DECLARACAO_VARIAVEL:
-                    case ENTRADA_DE_DADOS:
-                    case SAIDA_DE_DADOS:
-                        e.setIndice(1);
-                        break;
-                    default:
-                        break;
-                }
-                expressoes.add(e);
-            }
+            instrucoes = parser.listaInstrucoes();
 
-            System.err.println(parser.imprimeErros());
+            System.err.println(parser.printErros(TipoErro.DEVEL));
 
-            if (parser.getNumErros() > 0){
-                JOptionPane.showMessageDialog(this, parser.getNumErros() + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
+            if (parser.getNumErros(TipoErro.DEVEL) > 0){
+                JOptionPane.showMessageDialog(this, parser.getNumErros(TipoErro.DEVEL) + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
                 formatacao = FORMAT_ERROR;
-                for (Token t : parser.getTokensErros()){
+                for (Erro e : parser.getErros(TipoErro.DEVEL)){
+                    Token t = e.getToken();
                     docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
                 }
                 btnProxPerc.setEnabled(false);
-                btnInicioPerc.setEnabled(false);
+                //btnInicioPerc.setEnabled(false);
             } else {
-                JOptionPane.showMessageDialog(this, "Nenhum erro encontrado - pronto para execução", "Verificação concluída", JOptionPane.INFORMATION_MESSAGE);
+                
+                PreProcessor processor = new PreProcessor(instrucoes);
+                processor.verificaPrograma();
+                
+                if (processor.getNumErros(TipoErro.DEVEL) > 0){
+                    JOptionPane.showMessageDialog(this, processor.getNumErros(TipoErro.DEVEL) + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
+                    formatacao = FORMAT_ERROR;
+                    for (Erro e : processor.getErros(TipoErro.DEVEL)){
+                        Token t = e.getToken();
+                        if (e.getTipo() == TipoErro.ERRO) 
+                            docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
+                        else
+                            docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleWarn, true);
+                    }
+                    btnProxPerc.setEnabled(false);
+                    //btnInicioPerc.setEnabled(false);
+                } else {
+                
+                    JOptionPane.showMessageDialog(this, "Nenhum erro encontrado - pronto para execução", "Verificação concluída", JOptionPane.INFORMATION_MESSAGE);
 
-                exprIndex = 1;
-                operacaoCondicional = false;
-                condicionaisResult = new LinkedList<>();
-                execProx = true;
-                nomeVar = "";
+                    lblPosCaret.setText("Em execução");
 
-                lblPosCaret.setText("Em execução");
+                    tabVariaveis.setRowCount(0);
 
-                variaveis = new HashMap<>();
-                varOrdem = new HashMap<>();
-                expressao = expressoes.getFirst();
-                tabVariaveis.setRowCount(0);
+                    txpEntrada.setText("");
+                    txpEntrada.setEditable(false);
+                    txpEntrada.setBackground(backgroundDisabled);
 
-                txpEntrada.setText("");
-                txpEntrada.setEditable(false);
-                txpEntrada.setBackground(backgroundDisabled);
+                    docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
+                    txpProcessamento.setText("");
+                    txpProcessamento.setBackground(backgroundDisabled);
 
-                docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
-                txpProcessamento.setText("");
-                txpProcessamento.setBackground(backgroundDisabled);
+                    txpSaida.setText("");
+                    txpSaida.setBackground(backgroundDisabled);
 
-                txpSaida.setText("");
-                txpSaida.setBackground(backgroundDisabled);
-
-                btnVerificar.setEnabled(false);
-                btnProxPerc.setEnabled(true);
-                btnInicioPerc.setEnabled(false);
+                    btnVerificar.setEnabled(false);
+                    //btnInicioPerc.setEnabled(false);
+                    
+                    interpreter = new Interpreter(this, instrucoes);
+                    btnProxPerc.setEnabled(interpreter.existeProxima());
+                    variaveis = new LinkedList<>();
+                }
             }
         }
     }//GEN-LAST:event_btnVerificarActionPerformed
@@ -821,81 +511,10 @@ public class FrmGui extends javax.swing.JFrame {
             docIde.setCharacterAttributes(0, docIde.getLength(), stylePlain, true);
         }
     }//GEN-LAST:event_txpIdeKeyReleased
-
-    private void execEntradaDados(){
-        Variavel variavel = variaveis.get(nomeVar);
-        if (variavel == null){
-            JOptionPane.showMessageDialog(this, "Variável " + nomeVar + " não encontrada", "Erro de execução", JOptionPane.ERROR_MESSAGE);
-        } else {
-            tblVariaveis.clearSelection();
-            tblVariaveis.setSelectionBackground(Color.YELLOW);
-            tblVariaveis.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
-            
-            lblVariavelEntrada.setText("Variável " + nomeVar + " (tipo " + variavel.getTipo() + "):");
-            btnProxPerc.setEnabled(false);
-            
-            txpEntrada.setBackground(backgroundEnabled);
-            txpEntrada.setEditable(true);
-            txpEntrada.setText("");
-            btnEntradaConfirma.setEnabled(true);
-            txpEntrada.requestFocus();
-            Caret caret = txpEntrada.getCaret();
-            caret.setDot(0);
-            txpEntrada.setCaret(caret);
-        }
-    }
     
     private void btnEntradaConfirmaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEntradaConfirmaActionPerformed
-        Variavel variavel = variaveis.get(nomeVar);
-        
-        boolean valorValido = true;
-        String linha = txpEntrada.getText().replace("\n", "");
-
-        switch(variavel.getTipo()){
-            case CARACTER:
-                variavel.setValor(linha);
-                break;
-            case INTEIRO:
-                try {
-                    int valor = Integer.parseInt(linha);
-                    variavel.setValor(String.valueOf(valor));
-                } catch (NumberFormatException ex){
-                    JOptionPane.showMessageDialog(this, "Valor \"" + linha + "\" inválido - esperado valor inteiro", "Valor inválido", JOptionPane.WARNING_MESSAGE);
-                    valorValido = false;
-                }
-                break;
-            case REAL:
-                try {
-                    double valor = Double.parseDouble(linha);
-                    variavel.setValor(String.valueOf(valor));
-                } catch (NumberFormatException ex){
-                    JOptionPane.showMessageDialog(this, "Valor \"" + linha + "\" inválido - esperado valor real", "Valor inválido", JOptionPane.WARNING_MESSAGE);
-                    valorValido = false;
-                }
-                break;
-        }
-        
-        if (valorValido){
-            variaveis.put(nomeVar, variavel);
-            tblVariaveis.setSelectionBackground(Color.GREEN);
-            tabVariaveis.setValueAt(variavel.getValor(), varOrdem.get(nomeVar), 2);
-            
-            tblVariaveis.clearSelection();
-            tblVariaveis.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
-
-            boolean proxHabilita = expressao.hasNextToken() || exprIndex < expressoes.size();
-            btnProxPerc.setEnabled(proxHabilita);
-            
-            lblVariavelEntrada.setText("");
-            btnEntradaConfirma.setEnabled(false);
-            txpEntrada.setText("");
-            txpEntrada.setEditable(false);
-            txpEntrada.setBackground(backgroundDisabled);
-            btnProxPerc.requestFocus();
-            if (expressao.hasNextToken()){
-                btnProxPercActionPerformed(evt);
-            }
-        } 
+        interpreter.proxima();
+        btnProxPerc.setEnabled(interpreter.existeProxima());
     }//GEN-LAST:event_btnEntradaConfirmaActionPerformed
 
     private void txpEntradaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txpEntradaKeyPressed
@@ -905,360 +524,8 @@ public class FrmGui extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_txpEntradaKeyPressed
 
-    private LinkedList<Token> pilha;
-    private LinkedList<Token> saida;
-    
-    private void execOperacao(){
-        btnProxPerc.setEnabled(false);
-        int funcParam = 0;
-        int contParam = 0;
-        
-        pilha = new LinkedList<>();
-        saida = new LinkedList<>();
-        
-        String exibicao = "";
-        int col = 0;
-        int ordem = 0;
-        
-        while (expressao.hasNextToken()){
-            Token token = expressao.getNextToken();
-            
-            token.setLinha(0);
-            token.setColuna(col);
-            token.setPosicao(col);
-            token.setOrdem(ordem++);
-            
-            if (exibicao.isEmpty()){
-                exibicao = token.getPalavra();
-            } else {
-                exibicao += " " + token.getPalavra();
-            }
-            col += token.getTamanho() + 1;
-            
-            switch (token.getFuncaoToken()){
-                case IDENT_NOME_VARIAVEL:
-                case CONST_CARACTER:
-                case CONST_INTEIRA:
-                case CONST_REAL:
-                    saida.add(token);
-                    if (funcParam > 0){
-                        contParam++;
-                    }
-                    if (contParam > funcParam){
-                        System.err.println("Chamada de função inválida (muitos argumentos) - esperava " + funcParam + " argumentos, encontrou " + contParam);
-                    }
-                    break;
-
-                case OP_ATRIBUICAO:
-                case OP_MAT_SOMA:
-                case OP_MAT_SUBTRACAO:
-                case OP_MAT_MULTIPLICACAO:
-                case OP_MAT_DIV_INTEIRA:
-                case OP_MAT_DIV_REAL:
-                case OP_MAT_MOD:
-                case OP_REL_MAIOR:
-                case OP_REL_MAIOR_IGUAL:
-                case OP_REL_MENOR:
-                case OP_REL_MENOR_IGUAL:
-                case OP_REL_IGUAL:
-                case OP_REL_DIFERENTE:
-                case OP_LOG_E:
-                case OP_LOG_OU:
-                    while (!pilha.isEmpty() && pilha.peek().getPrecedencia() > token.getPrecedencia()){
-                        saida.add(pilha.pop());
-                    }
-                    pilha.push(token);
-                    break;
-                
-                case LIB_MATH_POT:
-                    while (!pilha.isEmpty() && pilha.peek().getPrecedencia() > token.getPrecedencia()){
-                        saida.add(pilha.pop());
-                    }
-                    pilha.push(token);
-                    contParam = 0;
-                    funcParam = 2;
-                    break;
-                    
-                case LIB_MATH_RAIZ:
-                    while (!pilha.isEmpty() && pilha.peek().getPrecedencia() > token.getPrecedencia()){
-                        saida.add(pilha.pop());
-                    }
-                    pilha.push(token);
-                    contParam = 0;
-                    funcParam = 1;
-                    break;
-                    
-                case DELIM_PARENTESES_ABRE:
-                    pilha.push(token);
-                    break;
-                    
-                case DELIM_PARENTESES_FECHA:
-                    if (contParam < funcParam){
-                        System.err.println("Chamada de função inválida (poucos argumentos) - esperava " + funcParam + " argumentos, encontrou " + contParam);
-                    } else {
-                        funcParam = 0;
-                        contParam = 0;
-                    }
-                    while (!pilha.isEmpty()){
-                        Token out = pilha.pop();
-                        if (out.getFuncaoToken() == FuncaoToken.DELIM_PARENTESES_ABRE){
-                            break;
-                        } else {
-                            saida.add(out);
-                        }
-                    }
-                    break;
-                    
-                case RES_COND_ENTAO:
-                    break;
-            }
-        }
-        while (!pilha.isEmpty()){
-            saida.add(pilha.pop());
-        }
-        
-        txpProcessamento.setBackground(backgroundEnabled);
-        btnProcContinuar.setEnabled(true);
-        txpProcessamento.setText(exibicao);
-    }
-    
-    public Variavel retornaVariavel(Token token){
-        Variavel temp;
-        String nomeVar = "temp" + token.getOrdem();
-        switch (token.getFuncaoToken()){
-            case IDENT_NOME_VARIAVEL:
-                temp = variaveis.get(token.getPalavra());
-                tblVariaveis.addRowSelectionInterval(varOrdem.get(token.getPalavra()), varOrdem.get(token.getPalavra()));
-                break;
-            case CONST_CARACTER:
-                temp = new Variavel(TipoDado.CARACTER, nomeVar);
-                temp.setValor(token.getPalavra().replace("\"", ""));
-                break;
-            case CONST_INTEIRA:
-                temp = new Variavel(TipoDado.INTEIRO, nomeVar);
-                temp.setValor(token.getPalavra());
-                break;
-            case CONST_REAL:
-                temp = new Variavel(TipoDado.REAL, nomeVar);
-                temp.setValor(token.getPalavra());
-                break;
-            default:
-                System.out.println("Tipo de token inválido para efetuar operação: " + token.getFuncaoToken());
-                temp = null;
-        }
-        return temp;
-    }
-    
     private void btnProcContinuarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProcContinuarActionPerformed
-        Calculator calculadora;
-        boolean popTokens = true;
-        tblVariaveis.clearSelection();
-        
-        while (!saida.isEmpty() && popTokens){
-            Token token = saida.pop();
-            Token resultToken;
-            Variavel op1, op2;
-            switch (token.getFuncaoToken()){
-                case IDENT_NOME_VARIAVEL:
-                case CONST_CARACTER:
-                case CONST_INTEIRA:
-                case CONST_REAL:
-                    pilha.push(token);
-                    break;
-                case OP_MAT_SOMA:
-                case OP_MAT_SUBTRACAO:
-                case OP_MAT_MULTIPLICACAO:
-                case OP_MAT_DIV_INTEIRA:
-                case OP_MAT_DIV_REAL:
-                case OP_MAT_MOD:
-                    docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
-                    imprimeTokens(token);
-                    
-                    Token tok2 = pilha.pop();
-                    Token tok1 = pilha.pop();
-                    op2 = retornaVariavel(tok2);
-                    op1 = retornaVariavel(tok1);
-                    
-                    docProc.setCharacterAttributes(tok1.getPosicao(), tok1.getTamanho(), stylePerc, true);
-                    docProc.setCharacterAttributes(token.getPosicao(), token.getTamanho(), styleOper, true);
-                    docProc.setCharacterAttributes(tok2.getPosicao(), tok2.getTamanho(), stylePerc, true);
-                    
-                    token.setColuna(tok1.getColuna());
-                    
-                    calculadora = new Calculator(token);
-                    resultToken = calculadora.executaOperacaoAritmetica(op1, op2);
-                    
-                    if (resultToken == null){
-                        System.err.println("Operação não executada");
-                        popTokens = false;
-                    } else {
-                        pilha.push(resultToken);
-                        popTokens = false;
-                    }
-                    break;
-                    
-                case OP_REL_MAIOR:
-                case OP_REL_MAIOR_IGUAL:
-                case OP_REL_MENOR:
-                case OP_REL_MENOR_IGUAL:
-                case OP_REL_IGUAL:
-                case OP_REL_DIFERENTE:
-                    docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
-                    imprimeTokens(token);
-                    
-                    tok2 = pilha.pop();
-                    tok1 = pilha.pop();
-                    op2 = retornaVariavel(tok2);
-                    op1 = retornaVariavel(tok1);
-                    
-                    docProc.setCharacterAttributes(tok1.getPosicao(), tok1.getTamanho(), stylePerc, true);
-                    docProc.setCharacterAttributes(token.getPosicao(), token.getTamanho(), styleOper, true);
-                    docProc.setCharacterAttributes(tok2.getPosicao(), tok2.getTamanho(), stylePerc, true);
-                    
-                    token.setColuna(tok1.getColuna());
-                    
-                    calculadora = new Calculator(token);
-                    resultToken = calculadora.executaOperacaoRelacional(op1, op2);
-                    
-                    if (resultToken == null){
-                        System.err.println("Operação não executada");
-                        popTokens = false;
-                    } else {
-                        pilha.push(resultToken);
-                        popTokens = false;
-                    }
-                    break;
-                    
-                case OP_LOG_E:
-                case OP_LOG_OU:
-                    docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
-                    imprimeTokens(token);
-                    
-                    tok2 = pilha.pop();
-                    tok1 = pilha.pop();
-                    op2 = retornaVariavel(tok2);
-                    op1 = retornaVariavel(tok1);
-                    
-                    docProc.setCharacterAttributes(tok1.getPosicao(), tok1.getTamanho(), stylePerc, true);
-                    docProc.setCharacterAttributes(token.getPosicao(), token.getTamanho(), styleOper, true);
-                    docProc.setCharacterAttributes(tok2.getPosicao(), tok2.getTamanho(), stylePerc, true);
-                    
-                    token.setColuna(tok1.getColuna());
-                    
-                    calculadora = new Calculator(token);
-                    resultToken = calculadora.executaOperacaoLogica(op1, op2);
-                    
-                    if (resultToken == null){
-                        System.err.println("Operação não executada");
-                        popTokens = false;
-                    } else {
-                        pilha.push(resultToken);
-                        popTokens = false;
-                    }
-                    break;
-                    
-                case LIB_MATH_POT:
-                    op2 = retornaVariavel(pilha.pop());
-                    op1 = retornaVariavel(pilha.pop());
-                    calculadora = new Calculator(token);
-                    resultToken = calculadora.executaFuncaoPot(op1, op2);
-                    if (resultToken == null){
-                        System.err.println("Operação não executada");
-                        popTokens = false;
-                    } else {
-                        pilha.push(resultToken);
-                        popTokens = false;
-                    }
-                    break;
-                    
-                case LIB_MATH_RAIZ:
-                    op1 = retornaVariavel(pilha.pop());
-                    calculadora = new Calculator(token);
-                    resultToken = calculadora.executaFuncaoRaiz(op1);
-                    if (resultToken == null){
-                        System.err.println("Operação não executada");
-                        popTokens = false;
-                    } else {
-                        pilha.push(resultToken);
-                        popTokens = false;
-                    }
-                    break;
-                    
-                case OP_ATRIBUICAO:
-                    docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
-                    imprimeTokens(token);
-                    
-                    Token tokValor = pilha.pop();
-                    op1 = retornaVariavel(tokValor);
-                    Token tokVar = pilha.pop();
-                    
-                    docProc.setCharacterAttributes(tokValor.getPosicao(), tokValor.getTamanho(), stylePerc, true);
-                    docProc.setCharacterAttributes(token.getPosicao(), token.getTamanho(), styleOper, true);
-                    docProc.setCharacterAttributes(tokVar.getPosicao(), tokVar.getTamanho(), stylePerc, true);
-                    
-                    if (tokVar.getFuncaoToken() != FuncaoToken.IDENT_NOME_VARIAVEL){
-                        System.err.println("Atribuição inválida - Esperava Variável, encontrou Constante");
-                    }
-                    docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
-                    
-                    nomeVar = tokVar.getPalavra();
-                    Variavel variavel = variaveis.get(nomeVar);
-                    if (variavel == null){
-                        JOptionPane.showMessageDialog(this, "Variável " + nomeVar + " não encontrada", "Erro de execução", JOptionPane.ERROR_MESSAGE);
-                    } else {
-                        switch (variavel.getTipo()){
-                            case INTEIRO:
-                                if (op1.getTipo() != TipoDado.INTEIRO){
-                                    System.err.println("Atribuição inválida - Esperava " + variavel.getTipo() + ", encontrou " + op1.getTipo());
-                                    break;
-                                }
-                                variavel.setValor(op1.getValor());
-                                break;
-                            case REAL:
-                                if (op1.getTipo() != TipoDado.REAL && op1.getTipo() != TipoDado.INTEIRO){
-                                    System.err.println("Atribuição inválida - Esperava " + variavel.getTipo() + ", encontrou " + op1.getTipo());
-                                }
-                                variavel.setValor(op1.getValor());
-                                break;
-                            case CARACTER:
-                                if (op1.getTipo() != TipoDado.CARACTER){
-                                    System.err.println("Atribuição inválida - Esperava " + variavel.getTipo() + ", encontrou " + op1.getTipo());
-                                }
-                                variavel.setValor(op1.getValor());
-                                break;
-                        }
-                        variaveis.put(nomeVar, variavel);
-                        tabVariaveis.setValueAt(variavel.getValor(), varOrdem.get(nomeVar), 2);
-                        tblVariaveis.addRowSelectionInterval(varOrdem.get(nomeVar), varOrdem.get(nomeVar));
-                        
-                        popTokens = false;
-                    }
-            }
-        }
-        
-        if (saida.isEmpty()){
-            if (pilha.size() == 1 && operacaoCondicional){
-                Token t = pilha.peek();
-                Variavel r = retornaVariavel(t);
-                if (r == null || r.getTipo() != TipoDado.INTEIRO){
-                    System.err.println("Erro na execução - variável para token " + t + " inválida");
-                } else {
-                    docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
-                    condicionaisResult.push(r.getValorInteiro() == 1);
-                    execProx = condicionaisResult.peek();
-                    operacaoCondicional = false;
-                }
-            } else {
-                if (pilha.size() == 1){
-                    operacaoCondicional = true;
-                    imprimeTokens(pilha.pop());
-                }
-                btnProcContinuar.setEnabled(false);
-                btnProxPerc.setEnabled(expressao.hasNextToken() || exprIndex < expressoes.size());
-                pilha = new LinkedList<>();
-                saida = new LinkedList<>();
-            }
-        }
+        interpreter.proxima();
     }//GEN-LAST:event_btnProcContinuarActionPerformed
 
     private void txpIdeKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txpIdeKeyPressed
@@ -1374,66 +641,8 @@ public class FrmGui extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_mitSalvarComoActionPerformed
     
-    private void imprimeTokens(Token op){
-        LinkedList<Token> tokens = new LinkedList<>();
-        tokens.addAll(pilha);
-        tokens.addAll(saida);
-        tokens.add(op);
-        Collections.sort(tokens, (tk1, tk2) -> {
-            return Integer.compare(tk1.getOrdem(), tk2.getOrdem());
-        });
-        
-        String exibicao = "";
-        
-        for (Token t : tokens){
-            String palavra;
-            if (t.getPalavra().equals(op.getPalavra()) && operacaoCondicional){
-                palavra = t.getPalavra().equals("0") ? "Falso" :  t.getPalavra().equals("1") ? "Verdadeiro" : t.getPalavra();
-            } else {
-                palavra = t.getPalavra();
-            }
-            exibicao += (exibicao.isEmpty() ? "" : " ") + palavra;
-        }
-        txpProcessamento.setText(exibicao);
-    }
-    
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Windows".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(FrmGui.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(FrmGui.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(FrmGui.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(FrmGui.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        //</editor-fold>
-
-        /* Create and display the form */
-        java.awt.EventQueue.invokeLater(() -> {
-            new FrmGui().setVisible(true);
-        });
-    }
-
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEntradaConfirma;
-    private javax.swing.JButton btnInicioPerc;
     private javax.swing.JButton btnProcContinuar;
     private javax.swing.JButton btnProxPerc;
     private javax.swing.JButton btnVerificar;
@@ -1461,12 +670,11 @@ public class FrmGui extends javax.swing.JFrame {
     private javax.swing.JTextPane txpProcessamento;
     private javax.swing.JTextPane txpSaida;
     // End of variables declaration//GEN-END:variables
-    private LinkedList<Instrucao> expressoes;
-    private HashMap<String,Variavel> variaveis;
-    private HashMap<String,Integer> varOrdem;
+    private LinkedList<Instrucao> instrucoes;
+    private LinkedList<Variavel> variaveis;
+    private LinkedList<Token> tokensAnt;
     private Instrucao expressao;
     private int exprIndex;
-    private int tabIndex;
     private DefaultStyledDocument docIde;
     private DefaultStyledDocument docProc;
     private int formatacao;
@@ -1479,8 +687,110 @@ public class FrmGui extends javax.swing.JFrame {
     private LinkedList<Boolean> condicionaisResult;
     private boolean execProx;
     
-    private Token tokenAnt = null;
-    private String nomeVar;
-    
     private File arquivo;
+
+    @Override
+    public void atualizaPassoAtual(Token token) {
+        tblVariaveis.clearSelection();
+        while (!tokensAnt.isEmpty()){
+            Token tokenAnt = tokensAnt.pop();
+            docIde.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
+        }
+        tokensAnt.push(token);
+        docIde.setCharacterAttributes(token.getPosicao(), token.getTamanho(), stylePerc, true);
+    }
+    
+    @Override
+    public void atualizaPassoAtual(Token controle, Token token) {
+        atualizaPassoAtual(token);
+        tokensAnt.push(controle);
+        docIde.setCharacterAttributes(controle.getPosicao(), controle.getTamanho(), styleRes, true);
+    }
+
+    @Override
+    public void atualizaExpressaoAtual(Expressao expressao) {
+        txpProcessamento.setText(expressao.getTexto());
+    }
+
+    @Override
+    public void declaracaoVariavel(Variavel variavel) {
+        variaveis.add(variavel);
+        Collections.sort(variaveis, (v1, v2) -> {
+            int comp = v1.getTipo().name().compareTo(v2.getTipo().name());
+            return comp == 0 ? v1.getNome().compareToIgnoreCase(v2.getNome()) : comp;
+        });
+        tabVariaveis.setRowCount(0);
+        for (Variavel v : variaveis){
+            tabVariaveis.addRow(new String[]{v.getTipo().toString(),v.getNome(),v.getValor()});
+        }
+        selecionaVariavel(variavel);
+    }
+
+    @Override
+    public String entradaDados(Variavel variavel) {
+        lblVariavelEntrada.setText("Variável " + variavel.getNome() + " (tipo " + variavel.getTipo() + "):");
+        btnProxPerc.setEnabled(false);
+            
+        txpEntrada.setBackground(backgroundEnabled);
+        txpEntrada.setEditable(true);
+        txpEntrada.setText("");
+        btnEntradaConfirma.setEnabled(true);
+        txpEntrada.requestFocus();
+        Caret caret = txpEntrada.getCaret();
+        caret.setDot(0);
+        txpEntrada.setCaret(caret);
+        
+        return null;
+    }
+
+    @Override
+    public String entradaDadosRetorno() {
+        String linha = txpEntrada.getText().replace("\n", "");
+        
+        lblVariavelEntrada.setText("");
+        btnEntradaConfirma.setEnabled(false);
+        txpEntrada.setText("");
+        txpEntrada.setEditable(false);
+        txpEntrada.setBackground(backgroundDisabled);
+        btnProxPerc.requestFocus();
+        
+        return linha;
+    }
+
+    @Override
+    public void erroEntradaDados(Variavel variavel, Erro erro) {
+        JOptionPane.showMessageDialog(this, erro.getMensagem(), "Valor inválido", JOptionPane.WARNING_MESSAGE);
+    }
+
+    @Override
+    public void saidaDados(String saida) {
+        txpSaida.setBackground(backgroundEnabled);
+        txpSaida.setText(txpSaida.getText() + saida);
+    }
+
+    @Override
+    public void defineValorVariavel(Variavel variavel) {
+        int i = variaveis.indexOf(variavel);
+        variaveis.set(i, variavel);
+        tblVariaveis.setValueAt(variavel.getValor(),i,2);
+        tblVariaveis.setSelectionBackground(Color.GREEN);
+        tblVariaveis.addRowSelectionInterval(i, i);
+    }
+
+    @Override
+    public void selecionaVariavel(Variavel variavel) {
+        tblVariaveis.setSelectionBackground(Color.YELLOW);
+        int i = variaveis.indexOf(variavel);
+        tblVariaveis.addRowSelectionInterval(i, i);
+    }
+
+    @Override
+    public void erroFatal(Erro erro) {
+        JOptionPane.showMessageDialog(this, erro.getMensagem(), "Erro na execução", JOptionPane.ERROR_MESSAGE);
+        btnProxPerc.setEnabled(false);
+    }
+    
+    
+    
+    
 }

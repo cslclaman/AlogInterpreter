@@ -29,7 +29,7 @@ public class Principal {
      */
     public static void main(String[] args) {
         if (args.length > 1 && args[0].equals("-console")){
-            try {
+            /* try {
                 StringBuilder codigofonte = new StringBuilder();
                 InputStreamReader fr = new InputStreamReader(new FileInputStream(args[1]), "UTF-8");
                 BufferedReader br = new BufferedReader(fr);
@@ -94,8 +94,9 @@ public class Principal {
                 System.err.println(ex.toString());
                 System.exit(1);
             }
-            
-        } else {
+            */
+            System.out.println("Modo console não disponível no momento");
+        } // else {
             try {
                 for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                     if ("Windows".equals(info.getName())) {
@@ -109,7 +110,7 @@ public class Principal {
             java.awt.EventQueue.invokeLater(() -> {
                 new FrmGui().setVisible(true);
             });
-        }
+        // }
     }
     
 }
