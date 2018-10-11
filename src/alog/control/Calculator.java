@@ -5,6 +5,7 @@
  */
 package alog.control;
 
+import alog.expressao.Expressao;
 import alog.expressao.Operando;
 import alog.model.TipoDado;
 import alog.model.Variavel;
@@ -19,19 +20,28 @@ public class Calculator {
     
     private TipoDado tipo;
     private String valor;
-    private String caracter;
-    private Long inteiro;
-    private Double real;
-    private Boolean logico;
-
+    
     public Calculator(TipoDado tipo, String valor) {
         this.tipo = tipo;
         this.valor = valor;
     }
     
+    public Calculator(Expressao oper) {
+        this.tipo = oper.getTipoResultado();
+        this.valor = oper.getResultado();
+    }
+    
     public Calculator(Variavel var) {
         this.tipo = var.getTipo();
         this.valor = var.getValor();
+    }
+
+    public TipoDado getTipo() {
+        return tipo;
+    }
+
+    public String getValor() {
+        return valor;
     }
     
     public Calculator positivo() {
