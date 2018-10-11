@@ -71,4 +71,21 @@ public class Variavel {
     public String toString(){
         return tipo + ": " + nome;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final Variavel other = (Variavel) obj;
+        return this.tipo == other.tipo && this.nome.equalsIgnoreCase(other.nome);
+    }
+    
+    
 }
