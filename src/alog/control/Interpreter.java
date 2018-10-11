@@ -63,7 +63,7 @@ public class Interpreter extends Verificator {
     }
     
     public void proxima () {
-        if (canGo) return;
+        if (!canGo) return;
         
         if (pilhaExecucao.isEmpty()) {
             if (filaInstrucoes.isEmpty()) {
@@ -851,13 +851,9 @@ public class Interpreter extends Verificator {
                 executaExpressaoOperacaoUnaria(exec);
                 break;
             case OPERACAO_ARITMETICA:
-                executaExpressaoOperacaoAritmetica(exec);
-                break;
             case OPERACAO_RELACIONAL:
-                executaExpressaoOperacaoRelacional(exec);
-                break;
             case OPERACAO_LOGICA:
-                executaExpressaoOperacaoLogica(exec);
+                executaExpressaoOperacao(exec);
                 break;
             default:
                 break;
@@ -1007,157 +1003,143 @@ public class Interpreter extends Verificator {
                 pilhaExecucao.push(new Executavel(expressao));
                 interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
             } else {
-                long resInt;
-                double resReal;
-                String resStr;
-                boolean resLog;
-                
-                switch (expressao.getTipoResultado()) {
-                    case INTEIRO:
-                        resInt = expressao.getResultadoInteiro();
-                        break;
-                    case REAL:
-                        resReal = expressao.getResultadoReal();
-                        operacaoUnaria.setResultado(String.valueOf(resReal));
-                        break;
-                    default:
-                        break;
-                }
-                
-                
+                Calculator calc = new Calculator(expressao);
+                Calculator res = null;
                 switch (operador.getFuncaoToken()) {
                     case OP_SIG_NEGATIVO:
-                        
+                        res = calc.negativo();
                         break;
+                    case OP_SIG_POSITIVO:
+                        res = calc.positivo();
+                        break;
+                    case OP_LOG_NAO:
+                        res = calc.nao();
+                        break;
+                    default:
+                        break;
+                }
+                if (res == null) {
+                    Erro erro = new Erro(TipoErro.ERRO, expressao.getAsToken(), "Expressão sem resultado");
+                    interfaceExecucao.erroFatal(erro);
+                    erros.add(erro);
+                    canGo = false;
+                } else {
+                    operacaoUnaria.setTipoResultado(res.getTipo());
+                    operacaoUnaria.setResultado(res.getValor());
+                    exec.instrucao = operacaoUnaria;
+                    exec.count ++;
+                    pilhaExecucao.push(exec);
                 }
             }
         }
-        
-        
-        
-        
-        
-        switch (operador.getFuncaoToken()) {
-            
-                
-        }
-        
     }
     
-    private void verificaOperacaoAritmetica (Expressao expressao) {
-        Operacao operacao = (Operacao)expressao;
-        Expressao exprEsq = operacao.getExpressaoEsq();
-        Expressao exprDir = operacao.getExpressaoDir();
+    private void executaExpressaoOperacao (Executavel exec) {
+        Operacao operacao = (Operacao)exec.instrucao;
         Token operador = operacao.getOperador();
-        verificaExpressao(exprEsq);
-        verificaExpressao(exprDir);
-        
-        TipoDado[] esperados;
-        
-        switch (operador.getFuncaoToken()){
-            case OP_MAT_SOMA:
-            case OP_MAT_SUBTRACAO:
-            case OP_MAT_MULTIPLICACAO:
-            case OP_MAT_DIV_REAL:
-                esperados = new TipoDado[] {TipoDado.INTEIRO, TipoDado.REAL};
-                break;
-            case OP_MAT_DIV_INTEIRA:
-            case OP_MAT_MOD:
-                esperados = new TipoDado[] {TipoDado.INTEIRO};
-                break;
-            default:
-                esperados = new TipoDado[] {};
-                break;
+        if (exec.total == 0) {
+            exec.total = 3;
         }
-        int nerr = 0;
-        nerr += geraErroTipoDadoInvalidoOperador(operador, exprEsq.getAsToken(), exprEsq.getTipoResultado(), esperados);
-        nerr += geraErroTipoDadoInvalidoOperador(operador, exprDir.getAsToken(), exprDir.getTipoResultado(), esperados);
-        if (nerr == 0) {
-            if (exprEsq.getTipoResultado() == TipoDado.INTEIRO && exprDir.getTipoResultado() == TipoDado.INTEIRO) {
-                operacao.setTipoResultado(TipoDado.INTEIRO);
+        
+        if (exec.count < exec.total) {
+            Expressao expressao = null;
+            if (!pilhaExecucao.isEmpty()) {
+                Executavel instr = pilhaExecucao.pop();
+                if (instr.instrucao instanceof Expressao) {
+                    expressao = (Expressao)instr.instrucao;
+                } else {
+                    pilhaExecucao.push(instr);
+                }
+            } 
+            if (expressao == null) {
+                if (exec.count == 0) {
+                    expressao = operacao.getExpressaoEsq();
+                    pilhaExecucao.push(exec);
+                    pilhaExecucao.push(new Executavel(expressao));
+                    interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+                }
+                if (exec.count == 1) {
+                    expressao = operacao.getExpressaoDir();
+                    pilhaExecucao.push(exec);
+                    pilhaExecucao.push(new Executavel(expressao));
+                    interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+                }
             } else {
-                operacao.setTipoResultado(TipoDado.REAL);
+                if (exec.count == 0) {
+                    operacao.setExpressaoEsq(expressao);
+                    exec.count ++;
+                }
+                if (exec.count == 1) {
+                    operacao.setExpressaoDir(expressao);
+                    exec.count ++;
+                }
+                if (exec.count == 2) {
+                    Calculator calc = new Calculator(operacao.getExpressaoEsq());
+                    Calculator oper = new Calculator(operacao.getExpressaoDir());
+                    Calculator res = null;
+                    switch (operador.getFuncaoToken()) {
+                        case OP_MAT_SOMA:
+                            res = calc.soma(oper);
+                            break;
+                        case OP_MAT_SUBTRACAO:
+                            res = calc.subtr(oper);
+                            break;
+                        case OP_MAT_MULTIPLICACAO:
+                            res = calc.mult(oper);
+                            break;
+                        case OP_MAT_DIV_REAL:
+                            res = calc.divReal(oper);
+                            break;
+                        case OP_MAT_DIV_INTEIRA:
+                            res = calc.divInteira(oper);
+                            break;
+                        case OP_MAT_MOD:
+                            res = calc.mod(oper);
+                            break;
+                        case OP_REL_MAIOR:
+                            res = calc.maior(oper);
+                            break;
+                        case OP_REL_MAIOR_IGUAL:
+                            res = calc.maiorIgual(oper);
+                            break;
+                        case OP_REL_MENOR:
+                            res = calc.menor(oper);
+                            break;
+                        case OP_REL_MENOR_IGUAL:
+                            res = calc.menorIgual(oper);
+                            break;
+                        case OP_REL_IGUAL:
+                            res = calc.igual(oper);
+                            break;
+                        case OP_REL_DIFERENTE:
+                            res = calc.diferente(oper);
+                            break;
+                        case OP_LOG_E:
+                            res = calc.e(oper);
+                            break;
+                        case OP_LOG_OU:
+                            res = calc.ou(oper);
+                            break;
+                        default:
+                            break;
+                    }
+                    if (res == null) {
+                        Erro erro = new Erro(TipoErro.ERRO, expressao.getAsToken(), "Expressão sem resultado");
+                        interfaceExecucao.erroFatal(erro);
+                        erros.add(erro);
+                        canGo = false;
+                    } else {
+                        operacao.setTipoResultado(res.getTipo());
+                        operacao.setResultado(res.getValor());
+                        exec.instrucao = operacao;
+                        exec.count ++;
+                        pilhaExecucao.push(exec);
+                    }
+                }
             }
         }
     }
-    
-    private void verificaOperacaoRelacional (Expressao expressao) {
-        Operacao operacao = (Operacao)expressao;
-        Expressao exprEsq = operacao.getExpressaoEsq();
-        Expressao exprDir = operacao.getExpressaoDir();
-        Token operador = operacao.getOperador();
-        verificaExpressao(exprEsq);
-        verificaExpressao(exprDir);
         
-        TipoDado[] esperados;
-        
-        switch (operador.getFuncaoToken()){
-            case OP_REL_MAIOR:
-            case OP_REL_MAIOR_IGUAL:
-            case OP_REL_MENOR:
-            case OP_REL_MENOR_IGUAL:
-                switch (exprDir.getTipoResultado()) {
-                    case CARACTER:
-                        esperados = new TipoDado[] {TipoDado.CARACTER};
-                        break;
-                    default:
-                        esperados = new TipoDado[] {TipoDado.INTEIRO, TipoDado.REAL};
-                        break;
-                }
-                break;
-            case OP_REL_IGUAL:
-            case OP_REL_DIFERENTE:
-                switch (exprDir.getTipoResultado()) {
-                    case CARACTER:
-                        esperados = new TipoDado[] {TipoDado.CARACTER};
-                        break;
-                    case LOGICO:
-                        esperados = new TipoDado[] {TipoDado.LOGICO};
-                        break;
-                    default:
-                        esperados = new TipoDado[] {TipoDado.INTEIRO, TipoDado.REAL};
-                        break;
-                }
-                break;
-            default:
-                esperados = new TipoDado[] {};
-                break;
-        }
-        int nerr = 0;
-        nerr += geraErroTipoDadoInvalidoOperador(operador, exprEsq.getAsToken(), exprEsq.getTipoResultado(),esperados);
-        nerr += geraErroTipoDadoInvalidoOperador(operador, exprDir.getAsToken(), exprDir.getTipoResultado(),esperados);
-        if (nerr == 0) {
-            operacao.setTipoResultado(TipoDado.LOGICO);
-        }
-    }
-    
-    private void verificaOperacaoLogica (Expressao expressao) {
-        Operacao operacao = (Operacao)expressao;
-        Expressao exprEsq = operacao.getExpressaoEsq();
-        Expressao exprDir = operacao.getExpressaoDir();
-        Token operador = operacao.getOperador();
-        verificaExpressao(exprEsq);
-        verificaExpressao(exprDir);
-        
-        TipoDado[] esperados;
-        
-        switch (operador.getFuncaoToken()){
-            case OP_LOG_E:
-            case OP_LOG_OU:
-                esperados = new TipoDado[] {TipoDado.LOGICO};
-                break;
-            default:
-                esperados = new TipoDado[] {};
-                break;
-        }
-        int nerr = 0;
-        nerr += geraErroTipoDadoInvalidoOperador(operador, exprEsq.getAsToken(), exprEsq.getTipoResultado(), esperados);
-        nerr += geraErroTipoDadoInvalidoOperador(operador, exprDir.getAsToken(), exprDir.getTipoResultado(), esperados);
-        if (nerr == 0) {
-            operacao.setTipoResultado(TipoDado.LOGICO);
-        }
-    }
-    
     private boolean tiposDadosCorretos (TipoDado encontrado, TipoDado... esperados){
         boolean found = false;
         for (TipoDado tipo : esperados) {
