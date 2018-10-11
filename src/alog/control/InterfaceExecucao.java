@@ -21,11 +21,9 @@ import alog.token.Token;
 public interface InterfaceExecucao {
     
     /**
-     * Atualiza à interface qual a instrução sendo executada. Para fins de controle.
-     * <br>Um bloco, nesse caso, não é considerado como instrução única. São consideradas suas instruções internas.
-     * @param instrucao Instrução sendo executada
+     * Avisa à interface que uma nova instrução será executada.
      */
-    void atualizaInstrucaoAtual(Instrucao instrucao);
+    default void atualizaInstrucao() {};
     
     /**
      * Atualiza à interface qual o passo (token) sendo executado dentro da instrução atual. Para fins de controle.
@@ -36,20 +34,18 @@ public interface InterfaceExecucao {
     void atualizaPassoAtual(Token token);
     
     /**
+     * Atualiza à interface qual o passo (token) sendo executado dentro da instrução atual. Para fins de controle.
+     * Permite um parâmetro adicional para um token de controle (por exemplo, SE, PARA, FUNÇÃO...)
+     * @param controle token da instrução 
+     * @param token token sendo executado.
+     */
+    void atualizaPassoAtual(Token controle, Token token);
+    
+    /**
      * Atualiza à interface uma expressão que esteja sendo executada dentro da instrução atual. Para fins de controle.
      * @param expressao expressão sendo executada.
      */
     void atualizaExpressaoAtual(Expressao expressao);
-    
-    /**
-     * Indica que a instrução atual indica um bloco. Por padrão, não tem ação.
-     */
-    default void inicioBloco(){};
-    
-    /**
-     * Indica que a instrução atual finaliza um bloco. Por padrão, não tem ação.
-     */
-    default void fimBloco(){};
     
     /**
      * Indica uma declaração de variável e informa a variável que acabou de ser criada.
@@ -62,6 +58,13 @@ public interface InterfaceExecucao {
      * @param variavel A variável que acabou de ser declarada.
      */
     default void declaracaoVariavel(Variavel variavel){};
+    
+    /**
+     * Indica que o valor de uma variável acabou de ser alterado.
+     * Pode ser chamado em atribuições ou entradas de dados.
+     * @param variavel A variável que acabou de ter o valor alterado.
+     */
+    default void defineValorVariavel(Variavel variavel){};
     
     /**
      * Realiza a leitura de dados para uma variável anteriormente declarada.
@@ -105,58 +108,11 @@ public interface InterfaceExecucao {
     void saidaDados(String saida);
     
     /**
-     * Indica a execução de uma operação de atribuição, após a interpretação da expressão.
-     * Não tem ação por padrão.
-     * @param variavel A variável que receberá o valor.
-     * @param valor O valor que será atribuído (após interpretação).
-     */
-    default void atribuicao(Variavel variavel, String valor){};
-    
-    /**
      * Indica que uma variável está sendo selecionada em alguma operação.
      * Não tem ação por padrão.
      * @param variavel A variável selecionada na instrução
      */
     default void selecionaVariavel(Variavel variavel){};
-    
-    
-    /**
-     * Indica que a instrução atual indica uma estrutura de controle (condicional ou repetitiva),
-     * que possua condição e instrução a ser executada. Por padrão, não tem ação.
-     * @param estrutura Token identificador (SE, PARA, ENQUANTO, etc).
-     */
-    default void estruturaControle(Token estrutura){};
-    
-    /**
-     * Indica que a instrução atual é a instrução do "então" de uma condicional.
-     */
-    default void condicionalSe(){};
-    
-    /**
-     * Indica que a instrução atual é a instrução do "senão" de uma condicional (caso exista).
-     */
-    default void condicionalSenao(){};
-    
-    /**
-     * Indica que a instrução atual é a instrução de uma repetição Para-Faça.
-     * @param variavel Variável contadora
-     */
-    default void repeticaoPara(Variavel variavel){};
-    
-    /**
-     * Indica que a instrução atual é a instrução de uma repetição Faça-Enquanto.
-     */
-    default void repeticaoFaça(){};
-    
-    /**
-     * Indica que a instrução atual é a instrução de uma repetição Enquanto-Faça.
-     */
-    default void repeticaoEnquanto(){};
-    
-    /**
-     * Indica que a instrução atual é a instrução de uma repetição Repita-Até.
-     */
-    default void repeticaoRepita(){};
     
     /**
      * Retorna um erro fatal, ou seja, um erro que impeça o interpretador de continuar a execução.
