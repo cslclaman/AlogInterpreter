@@ -30,10 +30,18 @@ public class DeclaracaoVariaveis extends Instrucao {
      * Esse token será mapeado para {@link TipoDado}
      * @param token Token que representa o tipo de variável
      */
-    public void setTipoVariavel(Token token) {
+    public void setTokenTipoVariavel(Token token) {
         this.tokenTipoVariavel = token;
         tipoVariavel = TipoDado.mapTokenToVariavel(token);
         super.addToken(token);
+    }
+
+    /**
+     * Retorna o token que representa o tipo da variável sendo criada
+     * @return Token que representa o tipo de variável
+     */
+    public Token getTokenTipoVariavel() {
+        return tokenTipoVariavel;
     }
     
     /**

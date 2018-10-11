@@ -59,6 +59,10 @@ public abstract class Expressao extends Instrucao {
     public Boolean getResultadoLogico() {
         return resultado.equals("verdadeiro");
     }
+    
+    public String getResultadoCaracter() {
+        return resultado.replace("\"", "");
+    }
 
     public void setResultado(String resultado) {
         this.resultado = resultado;

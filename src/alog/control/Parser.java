@@ -269,7 +269,7 @@ public class Parser extends Verificator {
                 case RES_TIPO_INTEIRO:
                 case RES_TIPO_REAL:
                 //case RES_TIPO_LOGICO:
-                    declaracaoVariaveis.setTipoVariavel(token);
+                    declaracaoVariaveis.setTokenTipoVariavel(token);
                     funcoesEsperadas.clear();
                     funcoesEsperadas.add(FuncaoToken.DELIM_DOIS_PONTOS);
                     break;
