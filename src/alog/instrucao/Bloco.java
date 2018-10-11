@@ -62,6 +62,10 @@ public class Bloco extends Instrucao {
     public Token getFim() {
         return fim;
     }
+
+    public int getNumInstrucoes() {
+        return numInstrucoes;
+    }
     
     @Override
     public void finaliza() {

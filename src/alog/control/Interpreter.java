@@ -179,15 +179,16 @@ public class Interpreter extends Verificator {
     private void executaModuloPrincipal (Executavel exec) {
         ModuloPrincipal moduloPrincipal = (ModuloPrincipal) exec.instrucao;
         if (exec.total == 0) {
-            exec.total = 3;
-            if (moduloPrincipal.isDeclarado()) {
+            exec.total = 4;
+            if (!moduloPrincipal.isDeclarado()) {
                 exec.count = 1;
             } 
         }
-        switch (exec.count++) {
+        switch (exec.count) {
             case 0:
                 Token token = geraTokenExib(moduloPrincipal.getTipoModulo(), moduloPrincipal.getNome());
                 interfaceExecucao.atualizaPassoAtual(token);
+                exec.count ++;
                 pilhaExecucao.push(exec);
                 break;
             case 1:
@@ -195,10 +196,21 @@ public class Interpreter extends Verificator {
                 for (Instrucao sub : moduloPrincipal.listaInstrucoes()) {
                     filaInstrucoes.add(sub);
                 }
+                exec.count ++;
                 pilhaExecucao.push(exec);
                 pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
                 break;
             case 2:
+                if (!filaInstrucoes.isEmpty()) {
+                    pilhaExecucao.push(exec);
+                    pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
+                    proxima();
+                } else {
+                    exec.count ++;
+                    pilhaExecucao.push(exec);
+                }
+                break;
+            case 3:
                 interfaceExecucao.atualizaPassoAtual(moduloPrincipal.getFim());
                 break;
         }
@@ -266,8 +278,8 @@ public class Interpreter extends Verificator {
                     retorno = interfaceExecucao.entradaDados(variavel);
                     if (retorno != null) {
                         readed = true;
-                        exec.count += exec.total;
                     }
+                    exec.count += exec.total;
                     break;
                 case 1:
                     interfaceExecucao.atualizaPassoAtual(token);
@@ -309,7 +321,7 @@ public class Interpreter extends Verificator {
                     break;
             } 
         }
-        if (nvar < exec.total) {
+        if (nvar + 1 < exec.total) {
             pilhaExecucao.push(exec);
         }
     }
