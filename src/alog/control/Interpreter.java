@@ -342,9 +342,9 @@ public class Interpreter extends Verificator {
                 interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
             } else {
                 if (expressao.getTipoResultado() == TipoDado.CARACTER) {
-                    interfaceExecucao.saidaDados(expressao.getResultado());
+                    interfaceExecucao.saidaDados(expressao.getResultadoCaracter());
                 } else {
-                    
+                    interfaceExecucao.saidaDados(expressao.getResultado());
                 }
                 
                 exec.count++;
@@ -1044,42 +1044,51 @@ public class Interpreter extends Verificator {
             exec.total = 3;
         }
         
-        if (exec.count < exec.total - 1) {
+        if (exec.count < exec.total) {
             Expressao expressao = null;
-            if (!pilhaExecucao.isEmpty()) {
-                Executavel instr = pilhaExecucao.pop();
-                if (instr.instrucao instanceof Expressao) {
-                    expressao = (Expressao)instr.instrucao;
-                } else {
-                    pilhaExecucao.push(instr);
-                }
-            } 
+            
             switch (exec.count) {
-                case 0: {
+                case 0:
+                    if (!pilhaExecucao.isEmpty()) {
+                        Executavel instr = pilhaExecucao.pop();
+                        if (instr.instrucao instanceof Expressao) {
+                            expressao = (Expressao)instr.instrucao;
+                        } else {
+                            pilhaExecucao.push(instr);
+                        }
+                    } 
                     if (expressao == null) {
                         expressao = operacao.getExpressaoEsq();
                         pilhaExecucao.push(exec);
                         pilhaExecucao.push(new Executavel(expressao));
                         interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
                     } else {
-                        operacao.setExpressaoEsq(expressao);
+                        operacao.atualizaExpressaoEsq(expressao);
                         exec.count ++;
                         pilhaExecucao.push(exec);
                     }
-                }
-                case 1: {
+                    break;
+                case 1:
+                    if (!pilhaExecucao.isEmpty()) {
+                        Executavel instr = pilhaExecucao.pop();
+                        if (instr.instrucao instanceof Expressao) {
+                            expressao = (Expressao)instr.instrucao;
+                        } else {
+                            pilhaExecucao.push(instr);
+                        }
+                    } 
                     if (expressao == null) {
                         expressao = operacao.getExpressaoDir();
                         pilhaExecucao.push(exec);
                         pilhaExecucao.push(new Executavel(expressao));
                         interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
                     } else {
-                        operacao.setExpressaoDir(expressao);
+                        operacao.atualizaExpressaoDir(expressao);
                         exec.count ++;
                         pilhaExecucao.push(exec);
                     }
-                }
-                case 2: {
+                    break;
+                case 2:
                     Calculator calc = new Calculator(operacao.getExpressaoEsq());
                     Calculator oper = new Calculator(operacao.getExpressaoDir());
                     Calculator res = null;
@@ -1141,7 +1150,7 @@ public class Interpreter extends Verificator {
                         exec.count ++;
                         pilhaExecucao.push(exec);
                     }
-                }
+                    break;
             }
         }
     }
