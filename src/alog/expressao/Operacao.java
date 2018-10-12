@@ -40,7 +40,15 @@ public class Operacao extends Expressao {
         this.expressaoDir = expressaoDir;
         defineTexto();
     }
+    
+    public void atualizaExpressaoEsq(Expressao expressao) {
+        this.expressaoEsq = expressao;
+    }
 
+    public void atualizaExpressaoDir(Expressao expressao) {
+        this.expressaoDir = expressao;
+    }
+    
     public Token getOperador() {
         return operador;
     }

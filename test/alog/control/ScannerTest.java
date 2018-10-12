@@ -5,6 +5,7 @@
  */
 package alog.control;
 
+import alog.analise.Erro;
 import alog.test.Defaults;
 import alog.token.FuncaoToken;
 import alog.token.Token;
@@ -125,11 +126,11 @@ public class ScannerTest {
         
         scanner = new Scanner(Defaults.CODIGO_INVALIDO_C);
         scanner.listaTokens();
-        assertEquals("Resultado diferente do esperado",scanner.getListaErros(), erros);
+        assertEquals("Resultado diferente do esperado",scanner.getErros(), erros);
         
         scanner = new Scanner(Defaults.CODIGO_VALIDO_ALOG_SEQUENCIAL);
         scanner.listaTokens();
-        assertEquals("Resultado diferente do esperado",scanner.getListaErros(), new LinkedList<>());
+        assertEquals("Resultado diferente do esperado",scanner.getErros(), new LinkedList<>());
     }
 
     /**
@@ -143,7 +144,7 @@ public class ScannerTest {
         scanner = new Scanner(Defaults.CODIGO_INVALIDO_C);
         scanner.listaTokens();
         assertEquals("Resultado diferente do esperado",
-                scanner.imprimeErros(), 
+                scanner.printErros(), 
                 "Linha 1, Coluna 1: Caractere '#' (unicode 35) inválido\n" +
                 "Linha 2, Coluna 12: Caractere '{' (unicode 123) inválido\n" +
                 "Linha 4, Coluna 17: Caractere '&' (unicode 38) inválido\n" +
@@ -151,7 +152,7 @@ public class ScannerTest {
         
         scanner = new Scanner(Defaults.CODIGO_VALIDO_ALOG_SEQUENCIAL);
         scanner.listaTokens();
-        assertEquals("Resultado diferente do esperado",scanner.imprimeErros(), "");
+        assertEquals("Resultado diferente do esperado",scanner.getErros(), "");
         
     }
 
@@ -166,15 +167,15 @@ public class ScannerTest {
         String[] invChars = {"#", "{", "&", "}"};
         scanner = new Scanner(Defaults.CODIGO_INVALIDO_C);
         scanner.listaTokens();
-        List<Token> erros = scanner.retornaErros();
+        List<Erro> erros = scanner.getErros();
         assertEquals("Resultado diferente do esperado",erros.size(), 4);
-        for (Token t : erros){
-            assertEquals("Resultado diferente do esperado",t.getPalavra(), invChars[erros.indexOf(t)]);
+        for (Erro t : erros){
+            assertEquals("Resultado diferente do esperado",t.getToken().getPalavra(), invChars[erros.indexOf(t)]);
         }
         
         scanner = new Scanner(Defaults.CODIGO_VALIDO_ALOG_SEQUENCIAL);
         scanner.listaTokens();
-        assertEquals("Resultado diferente do esperado",scanner.retornaErros(), new LinkedList<>());
+        assertEquals("Resultado diferente do esperado",scanner.getErros(), new LinkedList<>());
     }
     
 }

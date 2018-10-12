@@ -30,6 +30,10 @@ public class OperacaoUnaria extends Expressao {
         this.expressao = expressao;
         defineTexto();
     }
+    
+    public void atualizaExpressao(Expressao expressao) {
+        this.expressao = expressao;
+    }
 
     public Token getOperador() {
         return operador;
