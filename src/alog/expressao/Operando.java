@@ -22,24 +22,14 @@ public class Operando extends Expressao {
     
     public void setOperando(Token token) {
         this.operando = token;
-        this.texto.append(operando.getPalavra());
+        this.texto.append(token.getPalavra());
         this.tokens.add(token);
         
         switch (token.getFuncaoToken()) {
             case CONST_CARACTER:
-                tipoExpressao = TipoExpressao.OPERANDO_CONSTANTE;
-                tipoResultado = TipoDado.CARACTER;
-                resultado = token.getPalavra();
-                break;
             case CONST_INTEIRA:
-                tipoExpressao = TipoExpressao.OPERANDO_CONSTANTE;
-                tipoResultado = TipoDado.INTEIRO;
-                resultado = token.getPalavra();
-                break;
             case CONST_REAL:
                 tipoExpressao = TipoExpressao.OPERANDO_CONSTANTE;
-                tipoResultado = TipoDado.REAL;
-                resultado = token.getPalavra();
                 break;
             case IDENT_NOME_VARIAVEL:
                 tipoExpressao = TipoExpressao.OPERANDO_VARIAVEL;

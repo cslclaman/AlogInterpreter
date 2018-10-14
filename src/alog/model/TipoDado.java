@@ -50,11 +50,24 @@ public enum TipoDado {
     
     public static TipoDado mapTokenToVariavel (Token token){
         switch (token.getFuncaoToken()){
-            case RES_TIPO_CARACTER: return CARACTER;
-            case RES_TIPO_INTEIRO:  return INTEIRO;
-            case RES_TIPO_REAL:     return REAL;
-            case RES_TIPO_LOGICO:   return LOGICO;
-            default:                return null;
+            case RES_TIPO_CARACTER:
+            case CONST_CARACTER:
+                return CARACTER;
+                
+            case RES_TIPO_INTEIRO:
+            case CONST_INTEIRA:
+                return INTEIRO;
+                
+            case RES_TIPO_REAL:
+            case CONST_REAL:
+                return REAL;
+                
+            case RES_TIPO_LOGICO:
+            case CONST_LOGICA:
+                return LOGICO;
+                
+            default:
+                return null;
         }
     }
 }
