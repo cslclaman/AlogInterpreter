@@ -870,7 +870,6 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     @Override
     public void erroEntradaDados(Variavel variavel, Erro erro) {
         JOptionPane.showMessageDialog(this, erro.getMensagem(), "Valor inválido", JOptionPane.WARNING_MESSAGE);
-        btnProxPercActionPerformed(null);
     }
 
     @Override

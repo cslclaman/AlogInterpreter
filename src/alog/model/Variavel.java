@@ -5,6 +5,8 @@
  */
 package alog.model;
 
+import java.util.Objects;
+
 /**
  *
  * @author Caique Souza
@@ -46,14 +48,22 @@ public class Variavel {
     public void setValorReal(double valor) {
         setValor(String.valueOf(valor));
     }
-
+    
+    public void setValorCaracter(String valor) {
+        setValor("\"" + valor + "\"");
+    }
+    
     public String getValor() {
         return valor;
     }
     
     public long getValorInteiro() {
         if (inicializada && tipo == TipoDado.INTEIRO){
-            return Long.parseLong(valor);
+            try {
+                return Long.parseLong(valor);
+            } catch (NumberFormatException e) {
+                return 0L;
+            }
         } else {
             return 0L;
         }
@@ -61,9 +71,21 @@ public class Variavel {
     
     public double getValorReal() {
         if (inicializada && tipo == TipoDado.REAL){
-            return Double.parseDouble(valor);
+            try {
+                return Double.parseDouble(valor);
+            } catch (NumberFormatException e) {
+                return 0.0;
+            }
         } else {
             return 0.0;
+        }
+    }
+    
+    public String getValorCaracter() {
+        if (inicializada && tipo == TipoDado.CARACTER){
+            return valor.replace("\"", "");
+        } else {
+            return "";
         }
     }
     
@@ -86,6 +108,13 @@ public class Variavel {
         final Variavel other = (Variavel) obj;
         return this.tipo == other.tipo && this.nome.equalsIgnoreCase(other.nome);
     }
-    
-    
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 83 * hash + Objects.hashCode(this.tipo);
+        hash = 83 * hash + Objects.hashCode(this.nome);
+        return hash;
+    }
+
 }

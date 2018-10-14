@@ -286,7 +286,6 @@ public class Interpreter extends Verificator {
         int nvar = exec.count % exec.total;
         int passo = exec.count / exec.total;
         
-        String retorno = null;
         Token token = entradaDados.getParametros().get(nvar);
         Variavel variavel = variaveis.get(token.nome());
         interfaceExecucao.atualizaPassoAtual(entradaDados.getNome(), token);
@@ -299,7 +298,7 @@ public class Interpreter extends Verificator {
                     exec.count += exec.total;
                     break;
                 case 1:
-                    retorno = interfaceExecucao.entradaDadosRetorno();
+                    String retorno = interfaceExecucao.entradaDadosRetorno();
                     if (retorno == null) {
                         erros.add(new Erro(TipoErro.DEVEL, token, "Retorno nulo"));
                         Erro erro = new Erro(TipoErro.ERRO, token, 
@@ -307,7 +306,7 @@ public class Interpreter extends Verificator {
                         erros.add(erro);
                         canGo = false;
                         return;
-                    }
+                    } 
                     try {
                         switch (variavel.getTipo()){
                             case INTEIRO:
@@ -315,6 +314,9 @@ public class Interpreter extends Verificator {
                                 break;
                             case REAL:
                                 variavel.setValorReal(Double.parseDouble(retorno));
+                                break;
+                            case CARACTER:
+                                variavel.setValorCaracter(retorno);
                                 break;
                             default:
                                 variavel.setValor(retorno);
@@ -332,6 +334,7 @@ public class Interpreter extends Verificator {
                         erros.add(erro);
                         interfaceExecucao.erroEntradaDados(variavel, erro);
                         exec.count = nvar;
+                        runNext = true;
                     }
                     break;
             } 
@@ -838,6 +841,7 @@ public class Interpreter extends Verificator {
         exec.instrucao = operando;
         exec.count ++;
         pilhaExecucao.push(exec);
+        runNext = true;
     }
     
     private void executaExpressaoOperandoVariavel(Executavel exec) {
