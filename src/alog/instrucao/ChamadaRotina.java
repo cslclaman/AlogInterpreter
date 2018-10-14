@@ -38,6 +38,10 @@ public class ChamadaRotina extends Instrucao {
             super.addToken(token);
         }
     }
+
+    public Token getTokenNome() {
+        return nome;
+    }
     
     public LinkedList<Expressao> getParametros() {
         return parametros;
