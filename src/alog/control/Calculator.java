@@ -6,7 +6,6 @@
 package alog.control;
 
 import alog.expressao.Expressao;
-import alog.expressao.Operando;
 import alog.model.TipoDado;
 import alog.model.Variavel;
 
@@ -47,17 +46,14 @@ public class Calculator {
     public Calculator positivo() {
         try {
             switch (this.tipo) {
-                case INTEIRO: {
-                    long a = Long.parseLong(this.valor);
-                    return new Calculator(this.tipo, String.valueOf( (+a) ));
-                }
-                case REAL: {
-                    double a = Double.parseDouble(valor);
-                    return new Calculator(this.tipo, String.valueOf( (+a) ));
-                }
-                default: {
+                case INTEIRO:
+                    long l = Long.parseLong(this.valor);
+                    return new Calculator(this.tipo, String.valueOf( (+l) ));
+                case REAL:
+                    double d = Double.parseDouble(valor);
+                    return new Calculator(this.tipo, String.valueOf( (+d) ));
+                default:
                     return null;
-                }
             }
         } catch (NumberFormatException ex) {
             return null;
@@ -67,17 +63,14 @@ public class Calculator {
     public Calculator negativo() {
         try {
             switch (this.tipo) {
-                case INTEIRO: {
-                    long a = Long.parseLong(this.valor);
-                    return new Calculator(this.tipo, String.valueOf( (-a) ));
-                }
-                case REAL: {
-                    double a = Double.parseDouble(valor);
-                    return new Calculator(this.tipo, String.valueOf( (-a) ));
-                }
-                default: {
+                case INTEIRO:
+                    long l = Long.parseLong(this.valor);
+                    return new Calculator(this.tipo, String.valueOf( (-l) ));
+                case REAL:
+                    double d = Double.parseDouble(valor);
+                    return new Calculator(this.tipo, String.valueOf( (-d) ));
+                default:
                     return null;
-                }
             }
         } catch (NumberFormatException ex) {
             return null;
@@ -88,7 +81,7 @@ public class Calculator {
         TipoDado tipoR;
         try {
             switch (this.tipo) {
-                case INTEIRO: {
+                case INTEIRO:
                     long a = Long.parseLong(this.valor);
                     if (c.tipo == TipoDado.INTEIRO) {
                         tipoR = TipoDado.INTEIRO;
@@ -99,21 +92,18 @@ public class Calculator {
                         double b = Double.parseDouble(c.valor);
                         return new Calculator(tipoR, String.valueOf( (a + b) ));
                     }
-                }
-                case REAL: {
+                case REAL: 
                     tipoR = TipoDado.REAL;
-                    double a = Double.parseDouble(valor);
+                    double d = Double.parseDouble(valor);
                     if (c.tipo == TipoDado.INTEIRO) {
                         long b = Long.parseLong(c.valor);
-                        return new Calculator(tipoR, String.valueOf( (a + b) ));
+                        return new Calculator(tipoR, String.valueOf( (d + b) ));
                     } else {
                         double b = Double.parseDouble(c.valor);
-                        return new Calculator(tipoR, String.valueOf( (a + b) ));
+                        return new Calculator(tipoR, String.valueOf( (d + b) ));
                     }
-                }
-                default: {
+                default:
                     return null;
-                }
             }
         } catch (NumberFormatException ex) {
             return null;
