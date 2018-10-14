@@ -3,8 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package alog.instrucao;
+package alog.modulo;
 
+import alog.instrucao.Bloco;
+import alog.instrucao.TipoInstrucao;
 import alog.token.FuncaoToken;
 import alog.token.TipoToken;
 import alog.token.Token;

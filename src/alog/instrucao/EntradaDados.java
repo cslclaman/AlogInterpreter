@@ -16,25 +16,24 @@ public class EntradaDados extends Instrucao {
 
     protected Token nome;
     protected LinkedList<Token> parametros;
+    protected int numParametros;
     
     public EntradaDados() {
         super();
         tipo = TipoInstrucao.ENTRADA_DE_DADOS;
         parametros = new LinkedList<>();
+        numParametros = 0;
     }
     
     public void setTokenNome(Token token){
-        if (nome == null) {
-            nome = token;
-            super.addToken(token);
-        }
+        nome = token;
+        super.addToken(token);
     }
     
     public void addVariavel(Token token) {
-        if (nome != null) {
-            parametros.add(token);
-            super.addToken(token);
-        }
+        parametros.add(token);
+        numParametros ++;
+        super.addToken(token);
     }
 
     public Token getNome() {
@@ -45,8 +44,20 @@ public class EntradaDados extends Instrucao {
         return parametros;
     }
     
+    public Token getParametroAt(int index) {
+        if (parametros.isEmpty()) {
+            return null;
+        } else {
+            if (index >= 0 && index < numParametros) {
+                return parametros.get(index);
+            } else {
+                return null;
+            } 
+        }
+    }
+    
     public int getNumParametros() {
-        return parametros.size();
+        return numParametros;
     }
     
     @Override

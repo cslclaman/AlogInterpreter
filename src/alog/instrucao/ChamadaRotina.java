@@ -47,6 +47,18 @@ public class ChamadaRotina extends Instrucao {
         return parametros;
     }
     
+    public Expressao getParametroAt(int index) {
+        if (parametros.isEmpty()) {
+            return null;
+        } else {
+            if (index >= 0 && index < numParametros) {
+                return parametros.get(index);
+            } else {
+                return null;
+            } 
+        }
+    }
+    
     public int getNumParametros() {
         return numParametros;
     }

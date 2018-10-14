@@ -1,5 +1,6 @@
 package alog.control;
 
+import alog.modulo.ModuloPrincipal;
 import alog.analise.Erro;
 import alog.analise.TipoErro;
 import alog.expressao.*;

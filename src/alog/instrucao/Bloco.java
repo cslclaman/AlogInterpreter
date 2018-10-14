@@ -67,6 +67,18 @@ public class Bloco extends Instrucao {
         return numInstrucoes;
     }
     
+    public Instrucao getInstrucaoAt(int index) {
+        if (instrucoes.isEmpty()) {
+            return null;
+        } else {
+            if (index >= 0 && index < numInstrucoes) {
+                return instrucoes.get(index);
+            } else {
+                return null;
+            } 
+        }
+    }
+    
     @Override
     public void finaliza() {
         if (valida) {

@@ -7,6 +7,7 @@ package alog.view;
 
 import alog.analise.Erro;
 import alog.analise.TipoErro;
+import alog.config.ConfigInterpreter;
 import alog.control.InterfaceExecucao;
 import alog.control.Interpreter;
 import alog.control.Parser;
@@ -30,6 +31,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -47,6 +50,10 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     
     private Interpreter interpreter = null;
     private boolean emExecucao = false;
+    
+    private boolean modoEntradaDados = false;
+    private boolean modoSaidaDados = false;
+    private boolean modoExpressao = false;
     
     StyleContext sc;
     private final Style stylePlain;
@@ -562,7 +569,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                 } else {
                 
                     JOptionPane.showMessageDialog(this, "Nenhum erro encontrado - pronto para execução", "Verificação concluída", JOptionPane.INFORMATION_MESSAGE);
-
+                    
                     lblPosCaret.setText("Em execução");
                     emExecucao = true;
 
@@ -582,7 +589,15 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     //btnVerificar.setEnabled(false);
                     //btnInicioPerc.setEnabled(false);
                     
-                    interpreter = new Interpreter(this, instrucoes);
+                    ConfigInterpreter confInterpreter = new ConfigInterpreter();
+                    confInterpreter.setLeiaAutoProx(true);
+                    confInterpreter.setEscrevaAutoProx(true);
+                    confInterpreter.setExecConstAutoProx(true);
+                    confInterpreter.setExecVarAutoProx(false);
+                    confInterpreter.setPushExprAutoProx(true);
+                    
+                    interpreter = new Interpreter(this, processor.getPrograma());
+                    interpreter.setConfigInterpreter(confInterpreter);
                     btnProxPerc.setEnabled(interpreter.existeProxima());
                     variaveis = new LinkedList<>();
                 }
@@ -604,6 +619,17 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         interpreter.proxima();
         btnProxPerc.setEnabled(interpreter.existeProxima());
         emExecucao = interpreter.existeProxima();
+        
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException ex) {
+            
+        }
+        
+        if (emExecucao) {
+            
+        }
+        
     }//GEN-LAST:event_btnEntradaConfirmaActionPerformed
 
     private void txpEntradaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txpEntradaKeyPressed
@@ -797,9 +823,6 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
     @Override
     public void atualizaInstrucao() {
-        if (!txpSaida.getText().isEmpty()){
-            txpSaida.setText(txpSaida.getText() + "\n");
-        }
     }
 
     @Override

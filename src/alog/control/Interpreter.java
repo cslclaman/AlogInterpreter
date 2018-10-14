@@ -5,18 +5,20 @@
  */
 package alog.control;
 
+import alog.modulo.ModuloPrincipal;
 import alog.analise.Erro;
 import alog.analise.TipoErro;
+import alog.config.ConfigInterpreter;
 import alog.instrucao.*;
 import alog.expressao.*;
 import alog.model.TipoDado;
 import alog.model.Variavel;
+import alog.modulo.Programa;
 import alog.token.TipoToken;
 import alog.token.Token;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 /**
@@ -27,11 +29,13 @@ public class Interpreter extends Verificator {
     
     private class Executavel {
         Instrucao instrucao;
+        int passo;
         int total;
         int count;
         
         public Executavel(Instrucao instrucao){
             this.instrucao = instrucao;
+            this.passo = 0;
             this.total = 0;
             this.count = 0;
         }
@@ -40,52 +44,58 @@ public class Interpreter extends Verificator {
         public String toString() {
             return instrucao.getTipo() + " (" + count + " de " + total + ")";
         }
-        
-        
     }
     
     private InterfaceExecucao interfaceExecucao;
+    private ConfigInterpreter configInterpreter;
     private HashMap<String, Variavel> variaveis;
-    private List<Instrucao> programa;
-    private LinkedList<Instrucao> filaInstrucoes;
+    private Programa programa;
+    //private LinkedList<Instrucao> filaInstrucoes;
     private LinkedList<Executavel> pilhaExecucao;
-    private int pos;
-    private int tam;
+    //private int pos;
+    //private int tam;
+    private boolean executed;
     private boolean canGo;
     private boolean runNext;
+    private boolean locked;
 
-    public Interpreter(InterfaceExecucao interfaceExecucao, List<Instrucao> programa) {
+    public Interpreter(InterfaceExecucao interfaceExecucao, Programa programa) {
         super();
+        this.configInterpreter = new ConfigInterpreter();
         this.interfaceExecucao = interfaceExecucao;
         this.programa = programa;
         variaveis = new HashMap<>();
-        filaInstrucoes = new LinkedList<>();
+        //filaInstrucoes = new LinkedList<>();
         pilhaExecucao = new LinkedList<>();
-        tam = programa.size();
-        pos = 0;
+        executed = false;
         canGo = true;
         runNext = false;
+        locked = false;
+    }
+
+    public void setConfigInterpreter(ConfigInterpreter configInterpreter) {
+        this.configInterpreter = configInterpreter;
     }
     
     public boolean existeProxima() {
-        return canGo && (!pilhaExecucao.isEmpty() || pos < tam);
+        return canGo && (!executed || !pilhaExecucao.isEmpty());
     }
     
     public void proxima () {
-        if (!canGo) return;
+        if (locked) return;
+        locked = true;
         
+        runNext = false;
+        do {
+        if (!canGo) return;
+        if (runNext) runNext = false;
         if (pilhaExecucao.isEmpty()) {
-            if (filaInstrucoes.isEmpty()) {
-                if (pos < tam) {
-                    filaInstrucoes.add(programa.get(pos++));
-                    pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
-                    interfaceExecucao.atualizaInstrucao();
-                } else {
-                    return;
-                }
-            } else {
-                pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
+            if (!executed) {
+                pilhaExecucao.push(new Executavel(programa.getModuloPrincipal()));
+                executed = true;
                 interfaceExecucao.atualizaInstrucao();
+            } else {
+                return;
             }
         }
         
@@ -175,10 +185,9 @@ public class Interpreter extends Verificator {
                 "Instrução \"" + exec.instrucao.getTipo() + "\" não esperada"));
         }
         
-        if (runNext) {
-            runNext = false;
-            proxima();
-        }
+        } while (runNext) ;
+        
+        locked = false;
     }
     
     private void executaModuloPrincipal (Executavel exec) {
@@ -198,18 +207,14 @@ public class Interpreter extends Verificator {
                 break;
             case 1:
                 interfaceExecucao.atualizaPassoAtual(moduloPrincipal.getInicio());
-                for (Instrucao sub : moduloPrincipal.listaInstrucoes()) {
-                    filaInstrucoes.add(sub);
-                }
                 exec.count ++;
                 pilhaExecucao.push(exec);
-                pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
-                interfaceExecucao.atualizaInstrucao();
                 break;
             case 2:
-                if (!filaInstrucoes.isEmpty()) {
+                Instrucao instrucao = moduloPrincipal.getInstrucaoAt(exec.passo++);
+                if (instrucao != null) {
                     pilhaExecucao.push(exec);
-                    pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
+                    pilhaExecucao.push(new Executavel(instrucao));
                     interfaceExecucao.atualizaInstrucao();
                 } else {
                     exec.count ++;
@@ -228,28 +233,24 @@ public class Interpreter extends Verificator {
         Bloco bloco = (Bloco) exec.instrucao;
         if (exec.total == 0) {
             exec.total = 3;
-        }
+        } 
         switch (exec.count) {
             case 0:
                 interfaceExecucao.atualizaPassoAtual(bloco.getInicio());
-                for (Instrucao sub : bloco.listaInstrucoes()) {
-                    filaInstrucoes.add(sub);
-                }
                 exec.count ++;
                 pilhaExecucao.push(exec);
-                pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
-                interfaceExecucao.atualizaInstrucao();
                 break;
             case 1:
-                if (!filaInstrucoes.isEmpty()) {
+                Instrucao instrucao = bloco.getInstrucaoAt(exec.passo++);
+                if (instrucao != null) {
                     pilhaExecucao.push(exec);
-                    pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
+                    pilhaExecucao.push(new Executavel(instrucao));
                     interfaceExecucao.atualizaInstrucao();
-                    runNext = true;
                 } else {
                     exec.count ++;
                     pilhaExecucao.push(exec);
                 }
+                runNext = true;
                 break;
             case 2:
                 interfaceExecucao.atualizaPassoAtual(bloco.getFim());
@@ -281,21 +282,19 @@ public class Interpreter extends Verificator {
     private void executaEntradaDados(Executavel exec) {
         EntradaDados entradaDados = (EntradaDados) exec.instrucao;
         if (exec.total == 0) {
-            exec.total = entradaDados.getNumParametros();
+            exec.total = 2;
         }
-        int nvar = exec.count % exec.total;
-        int passo = exec.count / exec.total;
         
-        Token token = entradaDados.getParametros().get(nvar);
+        Token token = entradaDados.getParametroAt(exec.passo);
         Variavel variavel = variaveis.get(token.nome());
         interfaceExecucao.atualizaPassoAtual(entradaDados.getNome(), token);
         interfaceExecucao.selecionaVariavel(variavel);
         
-        if (nvar < exec.total) {
-            switch (passo) {
+        if (exec.count < exec.total) {
+            switch (exec.count) {
                 case 0:
                     interfaceExecucao.entradaDados(variavel);
-                    exec.count += exec.total;
+                    exec.count ++;
                     break;
                 case 1:
                     String retorno = interfaceExecucao.entradaDadosRetorno();
@@ -307,6 +306,7 @@ public class Interpreter extends Verificator {
                         canGo = false;
                         return;
                     } 
+                    exec.count = 0;
                     try {
                         switch (variavel.getTipo()){
                             case INTEIRO:
@@ -322,9 +322,15 @@ public class Interpreter extends Verificator {
                                 variavel.setValor(retorno);
                                 break;
                         }
-                        exec.count = ++nvar;
+                        
+                        exec.passo ++;
                         variaveis.replace(token.nome(), variavel);
                         interfaceExecucao.defineValorVariavel(token, variavel);
+                        
+                        if (configInterpreter.isLeiaAutoProx() && 
+                                exec.passo < entradaDados.getNumParametros()) {
+                            runNext = true;
+                        }
                     } catch (NumberFormatException ex) {
                         erros.add(new Erro(TipoErro.DEVEL, token, String.format(
                             "Conversão não realizada para tipo %s: %s - %s", 
@@ -333,14 +339,15 @@ public class Interpreter extends Verificator {
                             "Valor informado não era do tipo " + variavel.getTipo().toString() + " - tente novamente");
                         erros.add(erro);
                         interfaceExecucao.erroEntradaDados(variavel, erro);
-                        exec.count = nvar;
                         runNext = true;
                     }
                     break;
             } 
         }
-        if (nvar < exec.total) {
+        if (exec.passo < entradaDados.getNumParametros()) {
             pilhaExecucao.push(exec);
+        } else {
+            exec.count ++;
         }
     }
     
@@ -352,20 +359,27 @@ public class Interpreter extends Verificator {
         if (exec.count < exec.total) {
             Expressao expressao = removeExpressaoDaPilha();
             if (expressao == null) {
-                expressao = saidaDados.getParametros().get(exec.count);
+                expressao = saidaDados.getParametroAt(exec.count);
                 pilhaExecucao.push(exec);
                 pilhaExecucao.push(new Executavel(expressao));
                 interfaceExecucao.atualizaPassoAtual(saidaDados.getTokenNome(), expressao.getAsToken());
+                if (configInterpreter.isEscrevaAutoProx()) {
+                    runNext = true;
+                }
             } else {
+                interfaceExecucao.atualizaPassoAtual(saidaDados.getTokenNome(), expressao.getAsToken());
                 if (expressao.getTipoResultado() == TipoDado.CARACTER) {
                     interfaceExecucao.saidaDados(expressao.getResultadoCaracter());
                 } else {
                     interfaceExecucao.saidaDados(expressao.getResultado());
                 }
-                
                 exec.count++;
                 if (exec.count < exec.total) {
                     pilhaExecucao.push(exec);
+                } else {
+                    if (configInterpreter.isEscrevaQuebraLinha()) {
+                        interfaceExecucao.saidaDados("\n");
+                    }
                 }
             }
         }
@@ -437,6 +451,9 @@ public class Interpreter extends Verificator {
                 pilhaExecucao.push(exec);
                 pilhaExecucao.push(new Executavel(expressao));
                 interfaceExecucao.atualizaPassoAtual(condicional.getTokenSe(), expressao.getAsToken());
+                if (configInterpreter.isPushExprAutoProx()) {
+                    runNext = true;
+                }
             } else {
                 if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
                     erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
@@ -459,22 +476,20 @@ public class Interpreter extends Verificator {
             }
         }
         
-        switch (exec.count) { // Senão INSTRUÇÃO
-            case 1:
+        switch (exec.count) { 
+            case 1: // Então INSTRUÇÃO
                 //interfaceExecucao.atualizaPassoAtual(condicional.getTokenEntao());
-                filaInstrucoes.add(condicional.getInstrucaoSe());
                 exec.count += 2;
                 if (condicional.isComposta()) {
                     pilhaExecucao.push(exec);
                 }
-                pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
+                pilhaExecucao.push(new Executavel(condicional.getInstrucaoSe()));
                 interfaceExecucao.atualizaInstrucao();
                 break;
-            case 2:
+            case 2: // Senão INSTRUÇÃO (caso seja composta)
                 if (condicional.isComposta()) {
                     interfaceExecucao.atualizaPassoAtual(condicional.getTokenSenao());
-                    filaInstrucoes.add(condicional.getInstrucaoSenao());
-                    pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
+                    pilhaExecucao.push(new Executavel(condicional.getInstrucaoSenao()));
                     interfaceExecucao.atualizaInstrucao();
                     exec.count ++;
                 }
@@ -496,7 +511,10 @@ public class Interpreter extends Verificator {
                     expressao = repetitiva.getCondicao();
                     pilhaExecucao.push(exec);
                     pilhaExecucao.push(new Executavel(expressao));
-                    interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+                    interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenEnquanto(), expressao.getAsToken());
+                    if (configInterpreter.isPushExprAutoProx()) {
+                        runNext = true;
+                    }
                 } else {
                     if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
                         erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
@@ -521,10 +539,9 @@ public class Interpreter extends Verificator {
                 break;
             case 1: // Instrução a ser repetida
                 //interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenFaca());
-                filaInstrucoes.add(repetitiva.getInstrucao());
                 exec.count = 0; // para repetir
                 pilhaExecucao.push(exec);
-                pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
+                pilhaExecucao.push(new Executavel(repetitiva.getInstrucao()));
                 interfaceExecucao.atualizaInstrucao();
                 break;
         } 
@@ -543,10 +560,9 @@ public class Interpreter extends Verificator {
                 pilhaExecucao.push(exec);
                 break;
             case 1: // Instrução a ser repetida
-                filaInstrucoes.add(repetitiva.getInstrucao());
                 exec.count ++;
                 pilhaExecucao.push(exec);
-                pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
+                pilhaExecucao.push(new Executavel(repetitiva.getInstrucao()));
                 interfaceExecucao.atualizaInstrucao();
                 break;
             case 2: // Enquanto
@@ -555,6 +571,9 @@ public class Interpreter extends Verificator {
                     expressao = repetitiva.getCondicao();
                     pilhaExecucao.push(exec);
                     pilhaExecucao.push(new Executavel(expressao));
+                    if (configInterpreter.isPushExprAutoProx()) {
+                        runNext = true;
+                    }
                     interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
                 } else {
                     if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
@@ -594,10 +613,9 @@ public class Interpreter extends Verificator {
                 pilhaExecucao.push(exec);
                 break;
             case 1: // Instrução a ser repetida
-                filaInstrucoes.add(repetitiva.getInstrucao());
                 exec.count ++;
                 pilhaExecucao.push(exec);
-                pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
+                pilhaExecucao.push(new Executavel(repetitiva.getInstrucao()));
                 interfaceExecucao.atualizaInstrucao();
                 break;
             case 2: // Até
@@ -607,6 +625,9 @@ public class Interpreter extends Verificator {
                     pilhaExecucao.push(exec);
                     pilhaExecucao.push(new Executavel(expressao));
                     interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+                    if (configInterpreter.isPushExprAutoProx()) {
+                        runNext = true;
+                    }
                 } else {
                     if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
                         erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
@@ -668,6 +689,9 @@ public class Interpreter extends Verificator {
                     pilhaExecucao.push(exec);
                     pilhaExecucao.push(new Executavel(expressao));
                     interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+                    if (configInterpreter.isPushExprAutoProx()) {
+                        runNext = true;
+                    }
                 } else {
                     TipoDado[] esperados;
                     if (variavel.getTipo() == TipoDado.INTEIRO) {
@@ -703,6 +727,9 @@ public class Interpreter extends Verificator {
                     pilhaExecucao.push(exec);
                     pilhaExecucao.push(new Executavel(expressao));
                     interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+                    if (configInterpreter.isPushExprAutoProx()) {
+                        runNext = true;
+                    }
                 } else {
                     TipoDado[] esperados;
                     if (variavel.getTipo() == TipoDado.INTEIRO) {
@@ -780,6 +807,9 @@ public class Interpreter extends Verificator {
                     pilhaExecucao.push(exec);
                     pilhaExecucao.push(new Executavel(expressao));
                     interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+                    if (configInterpreter.isPushExprAutoProx()) {
+                        runNext = true;
+                    }
                 } else {
                     if (expressao.getResultadoLogico()) {
                         exec.count += 1;
@@ -793,9 +823,8 @@ public class Interpreter extends Verificator {
             case 4:
                 //interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenFaca());
                 exec.count = 3; // para repetir
-                filaInstrucoes.add(repetitiva.getInstrucao());
                 pilhaExecucao.push(exec);
-                pilhaExecucao.push(new Executavel(filaInstrucoes.poll()));
+                pilhaExecucao.push(new Executavel(repetitiva.getInstrucao()));
                 interfaceExecucao.atualizaInstrucao();
                 break;
         } 
@@ -841,7 +870,9 @@ public class Interpreter extends Verificator {
         exec.instrucao = operando;
         exec.count ++;
         pilhaExecucao.push(exec);
-        runNext = true;
+        if (configInterpreter.isExecConstAutoProx()) {
+            runNext = true;
+        }
     }
     
     private void executaExpressaoOperandoVariavel(Executavel exec) {
@@ -866,6 +897,9 @@ public class Interpreter extends Verificator {
             exec.instrucao = operando;
             exec.count ++;
             pilhaExecucao.push(exec);
+            if (configInterpreter.isExecVarAutoProx()) {
+                runNext = true;
+            }
         }
     }
     
@@ -898,6 +932,9 @@ public class Interpreter extends Verificator {
                 pilhaExecucao.push(exec);
                 pilhaExecucao.push(new Executavel(expressao));
                 interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+                if (configInterpreter.isPushExprAutoProx()) {
+                    runNext = true;
+                }
             } else {
                 if (tiposDadosCorretos(expressao.getTipoResultado(), esperadosPorFuncao(nome.nome())[exec.count])) {
                     chamadaFuncao.atualizaParametro(exec.count, expressao);
@@ -957,6 +994,9 @@ public class Interpreter extends Verificator {
                 pilhaExecucao.push(exec);
                 pilhaExecucao.push(new Executavel(expressao));
                 interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+                if (configInterpreter.isPushExprAutoProx()) {
+                    runNext = true;
+                }
             } else {
                 Calculator calc = new Calculator(expressao);
                 Calculator res = null;
@@ -1005,6 +1045,9 @@ public class Interpreter extends Verificator {
                         expressao = operacao.getExpressaoEsq();
                         pilhaExecucao.push(exec);
                         pilhaExecucao.push(new Executavel(expressao));
+                        if (configInterpreter.isPushExprAutoProx()) {
+                            runNext = true;
+                        }
                         interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
                     } else {
                         operacao.atualizaExpressaoEsq(expressao);
@@ -1017,6 +1060,9 @@ public class Interpreter extends Verificator {
                     if (expressao == null) {
                         expressao = operacao.getExpressaoDir();
                         pilhaExecucao.push(exec);
+                        if (configInterpreter.isPushExprAutoProx()) {
+                            runNext = true;
+                        }
                         pilhaExecucao.push(new Executavel(expressao));
                         interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
                     } else {

@@ -10,6 +10,8 @@ import alog.analise.TipoErro;
 import alog.expressao.*;
 import alog.instrucao.*;
 import alog.model.TipoDado;
+import alog.modulo.ModuloPrincipal;
+import alog.modulo.Programa;
 import alog.token.Token;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -68,7 +70,8 @@ public class PreProcessor extends Verificator {
         }
     }
     
-    private List<Instrucao> programa;
+    private List<Instrucao> instrucoes;
+    private Programa programa;
     private HashMap <String, VariavelVerif> variaveis;
     private HashMap <String, FuncaoVerif> funcoes;
     private int pos;
@@ -78,10 +81,11 @@ public class PreProcessor extends Verificator {
     /**
      * Constrói um novo verificador e passa o programa a ser processado.
      * O programa consiste nas instruções já tratadas pelo Parser.
-     * @param programa O programa (conjunto de instruções geradas pelo Parser) a ser verificado.
+     * @param instrucoes Lista de instruções a serem verificadas.
      */
-    public PreProcessor(List<Instrucao> programa) {
-        this.programa = programa;
+    public PreProcessor(List<Instrucao> instrucoes) {
+        this.instrucoes = instrucoes;
+        programa = new Programa();
         
         erros = new LinkedList<>();
         variaveis = new HashMap<>();
@@ -91,7 +95,7 @@ public class PreProcessor extends Verificator {
         funcoes.put("raiz", new FuncaoVerif(new TipoDado[]{TipoDado.REAL}, TipoDado.REAL));
         
         pos = 0;
-        len = programa.size();
+        len = instrucoes.size();
         contFilho = 0;
     }
 
@@ -101,12 +105,21 @@ public class PreProcessor extends Verificator {
      */
     public void verificaPrograma(){
         while (pos < len) {
-            Instrucao instrucao = programa.get(pos++);
+            if (contFilho == 0) {
+                variaveis.clear();
+            }
+            
+            Instrucao instrucao = instrucoes.get(pos++);
             verificaInstrucao(instrucao);
+            
+            if (contFilho == 0) {
+                geraErroVariavelNaoUsada();
+            }
         }
-        if (contFilho == 0) {
-            geraErroVariavelNaoUsada();
-        }
+    }
+
+    public Programa getPrograma() {
+        return programa;
     }
     
     private void verificaInstrucao(Instrucao instrucao) {
@@ -121,8 +134,12 @@ public class PreProcessor extends Verificator {
             return;
         }
         switch (instrucao.getTipo()) {
-            case BLOCO:
             case MODULO_PRINCIPAL:
+                verificaBloco(instrucao);
+                programa.setModuloPrincipal((ModuloPrincipal)instrucao);
+                break;
+                
+            case BLOCO:
                 verificaBloco(instrucao);
                 break;
 
@@ -171,6 +188,7 @@ public class PreProcessor extends Verificator {
     private void verificaBloco (Instrucao instrucao) {
         Bloco bloco = (Bloco) instrucao;
         PreProcessor verificadorInterno = new PreProcessor(bloco.listaInstrucoes());
+        verificadorInterno.programa = this.programa;
         verificadorInterno.erros = this.erros;
         verificadorInterno.variaveis = this.variaveis;
         verificadorInterno.funcoes = this.funcoes;
