@@ -306,6 +306,9 @@ public class PreProcessor extends Verificator {
             case OPERACAO_LOGICA:
                 verificaOperacaoLogica(expressao);
                 break;
+            case OPERANDO_CONSTANTE:
+                verificaOperandoConstante(expressao);
+                break;
             case OPERANDO_VARIAVEL:
                 verificaOperandoVariavel(expressao);
                 break;
@@ -453,6 +456,12 @@ public class PreProcessor extends Verificator {
         if (nerr == 0) {
             operacao.setTipoResultado(TipoDado.LOGICO);
         }
+    }
+    
+    private void verificaOperandoConstante(Expressao expressao) {
+        Operando operando = (Operando)expressao;
+        Token token = operando.getOperando();
+        operando.setTipoResultado(TipoDado.mapTokenToVariavel(token));
     }
     
     private void verificaOperandoVariavel(Expressao expressao) {
