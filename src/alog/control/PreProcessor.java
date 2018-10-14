@@ -303,9 +303,10 @@ public class PreProcessor extends Verificator {
             nerr += geraErroTipoDadoCondicional(repetitiva.getTokenPara(), valorDe.getTipoResultado(),esperados);
             nerr += geraErroTipoDadoCondicional(repetitiva.getTokenPara(), valorAte.getTipoResultado(),esperados);
             if (nerr == 0) {
-                verificaInstrucao(repetitiva.getInstrucao());
+                varVerif.inicializada = true;
                 varVerif.chamadas += 1;
                 variaveis.replace(variavel.nome(), varVerif);
+                verificaInstrucao(repetitiva.getInstrucao());
             }
         }
     }
