@@ -125,4 +125,11 @@ public interface InterfaceExecucao {
      */
     void erroFatal(Erro erro);
     
+    /**
+     * Indica que a interpretação terminou com sucesso.
+     * Mais especificamente, esse método é chamado quando a instrução "FIM"
+     * do módulo principal do algoritmo é processada.
+     */
+    void finalizado();
+    
 }

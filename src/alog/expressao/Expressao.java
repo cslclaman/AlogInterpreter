@@ -1,8 +1,10 @@
 package alog.expressao;
 
+import alog.control.Calculator;
 import alog.instrucao.Instrucao;
 import alog.instrucao.TipoInstrucao;
 import alog.model.TipoDado;
+import alog.model.Variavel;
 import alog.token.Token;
 
 /**
@@ -16,12 +18,14 @@ public abstract class Expressao extends Instrucao {
     protected String resultado;
     protected Token parentesesAbre;
     protected Token parentesesFecha;
+    protected boolean resolvida;
     
     protected Expressao() {
         super();
         tipo = TipoInstrucao.EXPRESSAO;
         tipoExpressao = TipoExpressao._INDEFINIDO;
         tipoResultado = null;
+        resolvida = false;
     }
 
     public TipoExpressao getTipoExpressao() {
@@ -66,6 +70,17 @@ public abstract class Expressao extends Instrucao {
 
     public void setResultado(String resultado) {
         this.resultado = resultado;
+        this.resolvida = true;
+    }
+    
+    public void setResultado(Variavel variavel) {
+        setTipoResultado(variavel.getTipo());
+        setResultado(variavel.getValor());
+    }
+    
+    public void setResultado(Calculator calc) {
+        setTipoResultado(calc.getTipo());
+        setResultado(calc.getValor());
     }
 
     public Token getParentesesAbre() {
@@ -86,6 +101,10 @@ public abstract class Expressao extends Instrucao {
         this.parentesesFecha = parentesesFecha;
         tokens.addLast(parentesesFecha);
         texto.append(parentesesFecha.getPalavra());
+    }
+
+    public boolean isResolvida() {
+        return resolvida;
     }
 
     @Override

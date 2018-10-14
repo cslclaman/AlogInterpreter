@@ -219,6 +219,7 @@ public class Interpreter extends Verificator {
                 break;
             case 3:
                 interfaceExecucao.atualizaPassoAtual(moduloPrincipal.getFim());
+                interfaceExecucao.finalizado();
                 break;
         }
     }
@@ -346,16 +347,7 @@ public class Interpreter extends Verificator {
             exec.total = saidaDados.getNumParametros();
         }
         if (exec.count < exec.total) {
-            Expressao expressao = null;
-            if (!pilhaExecucao.isEmpty()) {
-                Executavel instr = pilhaExecucao.pop();
-                if (instr.instrucao instanceof Expressao) {
-                    expressao = (Expressao)instr.instrucao;
-                } else {
-                    pilhaExecucao.push(instr);
-                }
-            } 
-            
+            Expressao expressao = removeExpressaoDaPilha();
             if (expressao == null) {
                 expressao = saidaDados.getParametros().get(exec.count);
                 pilhaExecucao.push(exec);
@@ -383,16 +375,7 @@ public class Interpreter extends Verificator {
         }
         if (exec.total == exec.count) return;
         
-        Expressao expressao = null;
-        if (!pilhaExecucao.isEmpty()) {
-            Executavel instr = pilhaExecucao.pop();
-            if (instr.instrucao instanceof Expressao) {
-                expressao = (Expressao)instr.instrucao;
-            } else {
-                pilhaExecucao.push(instr);
-            }
-        } 
-
+        Expressao expressao = removeExpressaoDaPilha();
         if (expressao == null) {
             expressao = atribuicao.getExpressao();
             pilhaExecucao.push(exec);
@@ -445,16 +428,7 @@ public class Interpreter extends Verificator {
             exec.total = condicional.isComposta() ? 3 : 2;
         }
         if (exec.count == 0) { // SE (Condição)
-            Expressao expressao = null;
-            if (!pilhaExecucao.isEmpty()) {
-                Executavel instr = pilhaExecucao.pop();
-                if (instr.instrucao instanceof Expressao) {
-                    expressao = (Expressao)instr.instrucao;
-                } else {
-                    pilhaExecucao.push(instr);
-                }
-            } 
-
+            Expressao expressao = removeExpressaoDaPilha();
             if (expressao == null) {
                 expressao = condicional.getCondicao();
                 pilhaExecucao.push(exec);
@@ -514,16 +488,7 @@ public class Interpreter extends Verificator {
         }
         switch (exec.count) {
             case 0: // Enquanto...
-                Expressao expressao = null;
-                if (!pilhaExecucao.isEmpty()) {
-                    Executavel instr = pilhaExecucao.pop();
-                    if (instr.instrucao instanceof Expressao) {
-                        expressao = (Expressao)instr.instrucao;
-                    } else {
-                        pilhaExecucao.push(instr);
-                    }
-                } 
-
+                Expressao expressao = removeExpressaoDaPilha();
                 if (expressao == null) {
                     expressao = repetitiva.getCondicao();
                     pilhaExecucao.push(exec);
@@ -582,16 +547,7 @@ public class Interpreter extends Verificator {
                 interfaceExecucao.atualizaInstrucao();
                 break;
             case 2: // Enquanto
-                Expressao expressao = null;
-                if (!pilhaExecucao.isEmpty()) {
-                    Executavel instr = pilhaExecucao.pop();
-                    if (instr.instrucao instanceof Expressao) {
-                        expressao = (Expressao)instr.instrucao;
-                    } else {
-                        pilhaExecucao.push(instr);
-                    }
-                } 
-
+                Expressao expressao = removeExpressaoDaPilha();
                 if (expressao == null) {
                     expressao = repetitiva.getCondicao();
                     pilhaExecucao.push(exec);
@@ -642,16 +598,7 @@ public class Interpreter extends Verificator {
                 interfaceExecucao.atualizaInstrucao();
                 break;
             case 2: // Até
-                Expressao expressao = null;
-                if (!pilhaExecucao.isEmpty()) {
-                    Executavel instr = pilhaExecucao.pop();
-                    if (instr.instrucao instanceof Expressao) {
-                        expressao = (Expressao)instr.instrucao;
-                    } else {
-                        pilhaExecucao.push(instr);
-                    }
-                } 
-
+                Expressao expressao = removeExpressaoDaPilha();
                 if (expressao == null) {
                     expressao = repetitiva.getCondicao();
                     pilhaExecucao.push(exec);
@@ -712,15 +659,7 @@ public class Interpreter extends Verificator {
                 pilhaExecucao.push(exec);
                 break;
             case 1: // De EXPRESSAO
-                Expressao expressao = null;
-                if (!pilhaExecucao.isEmpty()) {
-                    Executavel instr = pilhaExecucao.pop();
-                    if (instr.instrucao instanceof Expressao) {
-                        expressao = (Expressao)instr.instrucao;
-                    } else {
-                        pilhaExecucao.push(instr);
-                    }
-                } 
+                Expressao expressao = removeExpressaoDaPilha();
                 if (expressao == null) {
                     expressao = repetitiva.getExpressaoDe();
                     pilhaExecucao.push(exec);
@@ -755,15 +694,7 @@ public class Interpreter extends Verificator {
                 break;
             case 2: // Até EXPRESSAO 
                 Token result = null;
-                expressao = null;
-                if (!pilhaExecucao.isEmpty()) {
-                    Executavel instr = pilhaExecucao.pop();
-                    if (instr.instrucao instanceof Expressao) {
-                        expressao = (Expressao)instr.instrucao;
-                    } else {
-                        pilhaExecucao.push(instr);
-                    }
-                } 
+                expressao = removeExpressaoDaPilha();
                 if (expressao == null) {
                     expressao = repetitiva.getExpressaoAte();
                     pilhaExecucao.push(exec);
@@ -900,6 +831,10 @@ public class Interpreter extends Verificator {
         interfaceExecucao.atualizaExpressaoAtual(operando);
         interfaceExecucao.atualizaPassoAtual(operando.getOperando());
         
+        Token token = operando.getOperando();
+        operando.setTipoResultado(TipoDado.mapTokenToVariavel(token));
+        operando.setResultado(token.getPalavra());
+        
         exec.instrucao = operando;
         exec.count ++;
         pilhaExecucao.push(exec);
@@ -923,8 +858,7 @@ public class Interpreter extends Verificator {
             canGo = false;
             interfaceExecucao.erroFatal(fatal);
         } else {
-            operando.setTipoResultado(variavel.getTipo());
-            operando.setResultado(variavel.getValor());
+            operando.setResultado(variavel);
             exec.instrucao = operando;
             exec.count ++;
             pilhaExecucao.push(exec);
@@ -954,15 +888,7 @@ public class Interpreter extends Verificator {
         }
         
         if (exec.count < exec.total - 1) {
-            Expressao expressao = null;
-            if (!pilhaExecucao.isEmpty()) {
-                Executavel instr = pilhaExecucao.pop();
-                if (instr.instrucao instanceof Expressao) {
-                    expressao = (Expressao)instr.instrucao;
-                } else {
-                    pilhaExecucao.push(instr);
-                }
-            } 
+            Expressao expressao = removeExpressaoDaPilha();
             if (expressao == null) {
                 expressao = chamadaFuncao.getParametros().get(exec.count);
                 pilhaExecucao.push(exec);
@@ -1005,6 +931,7 @@ public class Interpreter extends Verificator {
                         break;
                 }
                 
+                chamadaFuncao.setTipoResultado(TipoDado.REAL);
                 chamadaFuncao.setResultado(String.valueOf(result));
                 exec.count ++;
                 pilhaExecucao.push(exec);
@@ -1020,15 +947,7 @@ public class Interpreter extends Verificator {
         }
         
         if (exec.count < exec.total) {
-            Expressao expressao = null;
-            if (!pilhaExecucao.isEmpty()) {
-                Executavel instr = pilhaExecucao.pop();
-                if (instr.instrucao instanceof Expressao) {
-                    expressao = (Expressao)instr.instrucao;
-                } else {
-                    pilhaExecucao.push(instr);
-                }
-            } 
+            Expressao expressao = removeExpressaoDaPilha();
             if (expressao == null) {
                 expressao = operacaoUnaria.getExpressao();
                 pilhaExecucao.push(exec);
@@ -1056,8 +975,7 @@ public class Interpreter extends Verificator {
                     erros.add(erro);
                     canGo = false;
                 } else {
-                    operacaoUnaria.setTipoResultado(res.getTipo());
-                    operacaoUnaria.setResultado(res.getValor());
+                    operacaoUnaria.setResultado(res);
                     exec.instrucao = operacaoUnaria;
                     exec.count ++;
                     pilhaExecucao.push(exec);
@@ -1078,14 +996,7 @@ public class Interpreter extends Verificator {
             
             switch (exec.count) {
                 case 0:
-                    if (!pilhaExecucao.isEmpty()) {
-                        Executavel instr = pilhaExecucao.pop();
-                        if (instr.instrucao instanceof Expressao) {
-                            expressao = (Expressao)instr.instrucao;
-                        } else {
-                            pilhaExecucao.push(instr);
-                        }
-                    } 
+                    expressao = removeExpressaoDaPilha();
                     if (expressao == null) {
                         expressao = operacao.getExpressaoEsq();
                         pilhaExecucao.push(exec);
@@ -1098,14 +1009,7 @@ public class Interpreter extends Verificator {
                     }
                     break;
                 case 1:
-                    if (!pilhaExecucao.isEmpty()) {
-                        Executavel instr = pilhaExecucao.pop();
-                        if (instr.instrucao instanceof Expressao) {
-                            expressao = (Expressao)instr.instrucao;
-                        } else {
-                            pilhaExecucao.push(instr);
-                        }
-                    } 
+                    expressao = removeExpressaoDaPilha();
                     if (expressao == null) {
                         expressao = operacao.getExpressaoDir();
                         pilhaExecucao.push(exec);
@@ -1168,13 +1072,12 @@ public class Interpreter extends Verificator {
                             break;
                     }
                     if (res == null) {
-                        Erro erro = new Erro(TipoErro.ERRO, expressao.getAsToken(), "Expressão sem resultado");
+                        Erro erro = new Erro(TipoErro.ERRO, operacao.getAsToken(), "Expressão sem resultado");
                         interfaceExecucao.erroFatal(erro);
                         erros.add(erro);
                         canGo = false;
                     } else {
-                        operacao.setTipoResultado(res.getTipo());
-                        operacao.setResultado(res.getValor());
+                        operacao.setResultado(res);
                         exec.instrucao = operacao;
                         exec.count ++;
                         pilhaExecucao.push(exec);
@@ -1182,6 +1085,21 @@ public class Interpreter extends Verificator {
                     break;
             }
         }
+    }
+    
+    private Expressao removeExpressaoDaPilha() {
+        Expressao expressao = null;
+        if (!pilhaExecucao.isEmpty()) {
+            Executavel instr = pilhaExecucao.pop();
+            if (
+                    instr.instrucao instanceof Expressao &&
+                    ((Expressao)instr.instrucao).isResolvida()) {
+                expressao = (Expressao)instr.instrucao;
+            } else {
+                pilhaExecucao.push(instr);
+            }
+        }
+        return expressao;
     }
         
     private boolean tiposDadosCorretos (TipoDado encontrado, TipoDado... esperados){
