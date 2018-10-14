@@ -67,24 +67,29 @@ public interface InterfaceExecucao {
     default void defineValorVariavel(Variavel variavel){};
     
     /**
+     * Indica que o valor de uma variável acabou de ser alterado.
+     * Pode ser chamado em atribuições ou entradas de dados.
+     * @param identificador O token com o identificador da variável.
+     * @param variavel A variável que acabou de ter o valor alterado.
+     */
+    default void defineValorVariavel(Token identificador, Variavel variavel){};
+    
+    /**
      * Realiza a leitura de dados para uma variável anteriormente declarada.
      * Assim como no método {@link declaracaoVariavel(alog.model.Variavel) },
      * esse método terá uma chamada para cada variável informada como parâmetro.
+     * <br>Após a leitura, o interpretador chamará o método {@link #entradaDadosRetorno() }
+     * para obter o valor que foi informado por algum tipo de entrada de dados.
      * <br>Caso o tipo do valor lido não possa ser convertido para o tipo da variável,
      * será chamado o método {@link erroEntradaDados(alog.model.Variavel, alog.analise.Erro)}
      * e depois tornará a chamar este mesmo método.
-     * <br><b>Nota: caso a interface não consiga causar uma interrupção para retornar
-     * o valor lido, este método <u><i>DEVE</i></u> retornar <code>null</code> e depois
-     * chamar o método {@link #entradaDadosRetorno() }</b>
      * @param variavel A variável (tipo Inteiro) que receberá o valor lido.
-     * @return String com o valor lido a ser salvo na variável ou
-     * <code>null</code> caso a interface não tenha poder de fazer o interpretador esperar.
      */
-    String entradaDados(Variavel variavel);
+    void entradaDados(Variavel variavel);
     
     /**
      * Retorna o valor a ser armazenado em uma variável durante uma entrada de dados.
-     * Esse método será usado caso o método {@link #entradaDados(alog.model.Variavel) } retorne <code>null</code>.
+     * Esse método será usado após o método {@link #entradaDados(alog.model.Variavel) }.
      * @return String com o valor lido a ser salvo na variável. Se for <code>null</code>, encerra a interpretação.
      */
     String entradaDadosRetorno();

@@ -29,7 +29,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -54,6 +53,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private final int FORMAT_PLAIN = 0;
     
     private final Style stylePerc;
+    private final Style styleVarS;
     private final Style styleOper;
     private final int FORMAT_PERC = 1;
     
@@ -79,6 +79,8 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         
         stylePerc = sc.addStyle("percurso", null);
         stylePerc.addAttribute(StyleConstants.Background, Color.YELLOW);
+        styleVarS = sc.addStyle("variavel", null);
+        styleVarS.addAttribute(StyleConstants.Background, Color.GREEN);
         
         styleRes = sc.addStyle("percursoRes", null);
         styleRes.addAttribute(StyleConstants.Foreground, Color.BLUE);
@@ -133,6 +135,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         jLabel5 = new javax.swing.JLabel();
         lblLogo = new javax.swing.JLabel();
         lblLogo1 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         mnuArquivo = new javax.swing.JMenu();
         mitAbrir = new javax.swing.JMenuItem();
@@ -140,6 +143,16 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         mitSalvarComo = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
         mitSair = new javax.swing.JMenuItem();
+        mnuEditar = new javax.swing.JMenu();
+        jMenuItem2 = new javax.swing.JMenuItem();
+        jMenuItem4 = new javax.swing.JMenuItem();
+        jMenuItem3 = new javax.swing.JMenuItem();
+        jMenuItem1 = new javax.swing.JMenuItem();
+        mnuVerificar = new javax.swing.JMenu();
+        jMenuItem5 = new javax.swing.JMenuItem();
+        jMenuItem6 = new javax.swing.JMenuItem();
+        mnuAjuda = new javax.swing.JMenu();
+        jMenuItem7 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Interpreter");
@@ -275,6 +288,8 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
         lblLogo1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/img/logo-cps-64.png"))); // NOI18N
 
+        jLabel4.setText("Editor");
+
         mnuArquivo.setText("Arquivo");
 
         mitAbrir.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
@@ -315,6 +330,45 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
         jMenuBar1.add(mnuArquivo);
 
+        mnuEditar.setText("Editar");
+        mnuEditar.setEnabled(false);
+
+        jMenuItem2.setText("Desfazer");
+        mnuEditar.add(jMenuItem2);
+
+        jMenuItem4.setText("Copiar");
+        mnuEditar.add(jMenuItem4);
+
+        jMenuItem3.setText("Recortar");
+        mnuEditar.add(jMenuItem3);
+
+        jMenuItem1.setText("Colar");
+        mnuEditar.add(jMenuItem1);
+
+        jMenuBar1.add(mnuEditar);
+
+        mnuVerificar.setText("Verificar");
+
+        jMenuItem5.setText("Verificar algoritmo");
+        jMenuItem5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem5ActionPerformed(evt);
+            }
+        });
+        mnuVerificar.add(jMenuItem5);
+
+        jMenuItem6.setText("Exibir erros");
+        mnuVerificar.add(jMenuItem6);
+
+        jMenuBar1.add(mnuVerificar);
+
+        mnuAjuda.setText("Ajuda");
+
+        jMenuItem7.setText("Sobre");
+        mnuAjuda.add(jMenuItem7);
+
+        jMenuBar1.add(mnuAjuda);
+
         setJMenuBar(jMenuBar1);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -346,7 +400,8 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(btnVerificar)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnProxPerc, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(btnProxPerc, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jLabel4))
                         .addGap(0, 107, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -364,11 +419,13 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(jLabel5)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel5)
+                        .addComponent(jLabel4))
                     .addComponent(lblLogo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(lblLogo1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(btnProxPerc, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 44, Short.MAX_VALUE)
+                        .addComponent(btnProxPerc, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 48, Short.MAX_VALUE)
                         .addComponent(btnVerificar, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -444,8 +501,6 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         Scanner scanner = new Scanner(oldText);
         List<Token> tokens = scanner.listaTokens();
         
-        System.err.println(scanner.printErros(TipoErro.DEVEL));
-        
         if (scanner.getNumErros(TipoErro.DEVEL) > 0){
             JOptionPane.showMessageDialog(
                     this,
@@ -456,6 +511,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             formatacao = FORMAT_ERROR;
             for (Erro e : scanner.getErros(TipoErro.DEVEL)){
                 Token t = e.getToken();
+                System.out.println(e.toString());
                 docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
             }
             
@@ -467,14 +523,13 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
             instrucoes = parser.listaInstrucoes();
 
-            System.err.println(parser.printErros(TipoErro.DEVEL));
-
             if (parser.getNumErros(TipoErro.DEVEL) > 0){
                 JOptionPane.showMessageDialog(this, parser.getNumErros(TipoErro.DEVEL) + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
                 formatacao = FORMAT_ERROR;
                 for (Erro e : parser.getErros(TipoErro.DEVEL)){
                     Token t = e.getToken();
                     docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
+                    System.out.println(e.toString());
                 }
                 btnProxPerc.setEnabled(false);
                 //btnInicioPerc.setEnabled(false);
@@ -492,6 +547,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                             docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
                         else
                             docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleWarn, true);
+                        System.out.println(e.toString());
                     }
                     btnProxPerc.setEnabled(false);
                     //btnInicioPerc.setEnabled(false);
@@ -665,6 +721,10 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             mitSalvarActionPerformed(evt);
         }
     }//GEN-LAST:event_mitSalvarComoActionPerformed
+
+    private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
+        btnVerificarActionPerformed(evt);
+    }//GEN-LAST:event_jMenuItem5ActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEntradaConfirma;
@@ -674,8 +734,16 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JMenuBar jMenuBar1;
+    private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JMenuItem jMenuItem3;
+    private javax.swing.JMenuItem jMenuItem4;
+    private javax.swing.JMenuItem jMenuItem5;
+    private javax.swing.JMenuItem jMenuItem6;
+    private javax.swing.JMenuItem jMenuItem7;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
@@ -690,7 +758,10 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private javax.swing.JMenuItem mitSair;
     private javax.swing.JMenuItem mitSalvar;
     private javax.swing.JMenuItem mitSalvarComo;
+    private javax.swing.JMenu mnuAjuda;
     private javax.swing.JMenu mnuArquivo;
+    private javax.swing.JMenu mnuEditar;
+    private javax.swing.JMenu mnuVerificar;
     private javax.swing.JTable tblVariaveis;
     private javax.swing.JTextPane txpEntrada;
     private javax.swing.JTextPane txpIde;
@@ -717,6 +788,13 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private File arquivo;
 
     @Override
+    public void atualizaInstrucao() {
+        if (!txpSaida.getText().isEmpty()){
+            txpSaida.setText(txpSaida.getText() + "\n");
+        }
+    }
+
+    @Override
     public void atualizaPassoAtual(Token token) {
         tblVariaveis.clearSelection();
         while (!tokensAnt.isEmpty()){
@@ -737,6 +815,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     @Override
     public void atualizaExpressaoAtual(Expressao expressao) {
         txpProcessamento.setText(expressao.getTexto());
+        //System.out.println(expressao.imprimeExpressao());
     }
 
     @Override
@@ -754,7 +833,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     }
 
     @Override
-    public String entradaDados(Variavel variavel) {
+    public void entradaDados(Variavel variavel) {
         lblVariavelEntrada.setText("Variável " + variavel.getNome() + " (tipo " + variavel.getTipo() + "):");
         btnProxPerc.setEnabled(false);
             
@@ -766,8 +845,6 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         Caret caret = txpEntrada.getCaret();
         caret.setDot(0);
         txpEntrada.setCaret(caret);
-        
-        return null;
     }
 
     @Override
@@ -797,6 +874,17 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         txpSaida.setText(txpSaida.getText() + saida);
     }
 
+    @Override
+    public void defineValorVariavel(Token identificador, Variavel variavel) {
+        tokensAnt.push(identificador);
+        docIde.setCharacterAttributes(identificador.getPosicao(), identificador.getTamanho(), styleVarS, true);
+        int i = variaveis.indexOf(variavel);
+        variaveis.set(i, variavel);
+        tblVariaveis.setValueAt(variavel.getValor(),i,2);
+        tblVariaveis.setSelectionBackground(Color.GREEN);
+        tblVariaveis.addRowSelectionInterval(i, i);
+    }
+    
     @Override
     public void defineValorVariavel(Variavel variavel) {
         int i = variaveis.indexOf(variavel);
