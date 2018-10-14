@@ -34,7 +34,7 @@ public abstract class Verificator {
      * @return 
      */
     public boolean hasErros() {
-        return erros.isEmpty();
+        return !erros.isEmpty();
     }
     
     /**
