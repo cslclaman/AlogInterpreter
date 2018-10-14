@@ -471,6 +471,10 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         emExecucao = enabled;
         if (!enabled) {
             JOptionPane.showMessageDialog(this, "Execução finalizada", "Execução finalizada", JOptionPane.INFORMATION_MESSAGE);
+            limpaSelecaoVariaveis();
+            limpaTokensPercurso();
+            txpSaida.setText("");
+            txpSaida.setBackground(backgroundDisabled);
         }
         
     }//GEN-LAST:event_btnProxPercActionPerformed
@@ -796,11 +800,8 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
     @Override
     public void atualizaPassoAtual(Token token) {
-        tblVariaveis.clearSelection();
-        while (!tokensAnt.isEmpty()){
-            Token tokenAnt = tokensAnt.pop();
-            docIde.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
-        }
+        limpaSelecaoVariaveis();
+        limpaTokensPercurso();
         tokensAnt.push(token);
         docIde.setCharacterAttributes(token.getPosicao(), token.getTamanho(), stylePerc, true);
     }
@@ -875,17 +876,6 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     }
 
     @Override
-    public void defineValorVariavel(Token identificador, Variavel variavel) {
-        tokensAnt.push(identificador);
-        docIde.setCharacterAttributes(identificador.getPosicao(), identificador.getTamanho(), styleVarS, true);
-        int i = variaveis.indexOf(variavel);
-        variaveis.set(i, variavel);
-        tblVariaveis.setValueAt(variavel.getValor(),i,2);
-        tblVariaveis.setSelectionBackground(Color.GREEN);
-        tblVariaveis.addRowSelectionInterval(i, i);
-    }
-    
-    @Override
     public void defineValorVariavel(Variavel variavel) {
         int i = variaveis.indexOf(variavel);
         variaveis.set(i, variavel);
@@ -894,6 +884,13 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         tblVariaveis.addRowSelectionInterval(i, i);
     }
 
+    @Override
+    public void defineValorVariavel(Token identificador, Variavel variavel) {
+        defineValorVariavel(variavel);
+        tokensAnt.push(identificador);
+        docIde.setCharacterAttributes(identificador.getPosicao(), identificador.getTamanho(), styleVarS, true);
+    }
+    
     @Override
     public void selecionaVariavel(Variavel variavel) {
         tblVariaveis.setSelectionBackground(Color.YELLOW);
@@ -908,7 +905,19 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         emExecucao = false;
     }
     
+    @Override
+    public void finalizado() {
+        lblPosCaret.setText("Finalizado");
+    }
     
+    private void limpaSelecaoVariaveis() {
+        tblVariaveis.clearSelection();
+    }
     
-    
+    private void limpaTokensPercurso() {
+        while (!tokensAnt.isEmpty()){
+            Token tokenAnt = tokensAnt.pop();
+            docIde.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
+        }
+    }
 }
