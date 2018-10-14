@@ -475,6 +475,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             limpaTokensPercurso();
             txpSaida.setText("");
             txpSaida.setBackground(backgroundDisabled);
+            tabVariaveis.setRowCount(0);
         }
         
     }//GEN-LAST:event_btnProxPercActionPerformed
@@ -513,6 +514,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     "Verificação concluída",
                     JOptionPane.WARNING_MESSAGE);
             formatacao = FORMAT_ERROR;
+            System.out.println("SCANNER (Análise Léxica)");
             for (Erro e : scanner.getErros(TipoErro.DEVEL)){
                 Token t = e.getToken();
                 System.out.println(e.toString());
@@ -530,6 +532,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             if (parser.getNumErros(TipoErro.DEVEL) > 0){
                 JOptionPane.showMessageDialog(this, parser.getNumErros(TipoErro.DEVEL) + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
                 formatacao = FORMAT_ERROR;
+                System.out.println("PARSER (Análise Sintática)");
                 for (Erro e : parser.getErros(TipoErro.DEVEL)){
                     Token t = e.getToken();
                     docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
@@ -545,6 +548,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                 if (processor.getNumErros(TipoErro.DEVEL) > 0){
                     JOptionPane.showMessageDialog(this, processor.getNumErros(TipoErro.DEVEL) + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
                     formatacao = FORMAT_ERROR;
+                    System.out.println("PRE PROCESSOR (Análise Semântica)");
                     for (Erro e : processor.getErros(TipoErro.DEVEL)){
                         Token t = e.getToken();
                         if (e.getTipo() == TipoErro.ERRO) 
