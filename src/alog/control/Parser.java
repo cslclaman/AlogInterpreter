@@ -488,7 +488,7 @@ public class Parser extends Verificator {
                     break;
                     
                 case RES_COND_ENTAO:
-                    condicional.addToken(token);
+                    condicional.setTokenEntao(token);
                     funcoesEsperadas.clear();
                     
                     Parser parserInterno = new Parser(tokens);

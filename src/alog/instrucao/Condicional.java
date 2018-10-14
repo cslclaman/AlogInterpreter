@@ -8,6 +8,7 @@ import alog.token.Token;
  */
 public class Condicional extends EstruturaControle {
     private Token tokenSe;
+    private Token tokenEntao;
     private boolean composta;
     private Token tokenSenao;
     private Instrucao instrucaoSenao;
@@ -21,6 +22,11 @@ public class Condicional extends EstruturaControle {
     public void setTokenSe(Token tokenSe) {
         this.tokenSe = tokenSe;
         super.addToken(tokenSe);
+    }
+    
+    public void setTokenEntao(Token tokenEntao) {
+        this.tokenEntao = tokenEntao;
+        super.addToken(tokenEntao);
     }
 
     public void setInstrucaoSe(Instrucao instrucaoSe) {
@@ -46,6 +52,10 @@ public class Condicional extends EstruturaControle {
 
     public Token getTokenSe() {
         return tokenSe;
+    }
+
+    public Token getTokenEntao() {
+        return tokenEntao;
     }
 
     public Instrucao getInstrucaoSe() {
