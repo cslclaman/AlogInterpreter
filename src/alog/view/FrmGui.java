@@ -14,6 +14,7 @@ import alog.control.Parser;
 import alog.control.PreProcessor;
 import alog.control.Scanner;
 import alog.expressao.Expressao;
+import alog.expressao.ImpressoraExpressao;
 import alog.instrucao.Instrucao;
 import alog.token.Token;
 import alog.model.Variavel;
@@ -426,14 +427,16 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel5)
-                        .addComponent(jLabel4))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(btnVerificar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(btnProxPerc, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel5)
+                            .addComponent(jLabel4)))
                     .addComponent(lblLogo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lblLogo1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(btnProxPerc, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 48, Short.MAX_VALUE)
-                        .addComponent(btnVerificar, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(lblLogo1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)
@@ -820,9 +823,15 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private boolean execProx;
     
     private File arquivo;
+    
+    private ImpressoraExpressao impressoraExpressao;
 
     @Override
     public void atualizaInstrucao() {
+        impressoraExpressao = null;
+        docProc.setCharacterAttributes(0, txpProcessamento.getText().length(), stylePlain, true);
+        txpProcessamento.setText("");
+        txpProcessamento.setBackground(backgroundDisabled);
     }
 
     @Override
@@ -842,7 +851,20 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
     @Override
     public void atualizaExpressaoAtual(Expressao expressao) {
-        txpProcessamento.setText(expressao.getTexto());
+        
+        docProc.setCharacterAttributes(0, txpProcessamento.getText().length(), stylePlain, true);
+        if (impressoraExpressao == null) {
+            txpProcessamento.setBackground(backgroundEnabled);
+            impressoraExpressao = new ImpressoraExpressao(expressao);
+        } else {
+            impressoraExpressao.setExpressaoAtual(expressao);
+        }
+        txpProcessamento.setText(impressoraExpressao.getTexto());
+        
+        Token tokenExpr = impressoraExpressao.getTokenExprAtual();
+        Token tokenRes = impressoraExpressao.getTokenResultado();
+        docProc.setCharacterAttributes(tokenExpr.getPosicao(), tokenExpr.getTamanho(), styleOper, true);
+        docProc.setCharacterAttributes(tokenRes.getPosicao(), tokenRes.getTamanho(), styleRes, true);
         //System.out.println(expressao.imprimeExpressao());
     }
 
@@ -899,6 +921,11 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     public void saidaDados(String saida) {
         txpSaida.setBackground(backgroundEnabled);
         txpSaida.setText(txpSaida.getText() + saida);
+        
+        impressoraExpressao = null;
+        docProc.setCharacterAttributes(0, txpProcessamento.getText().length(), stylePlain, true);
+        txpProcessamento.setText("");
+        txpProcessamento.setBackground(backgroundDisabled);
     }
 
     @Override
