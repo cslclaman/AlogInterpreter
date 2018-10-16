@@ -160,14 +160,13 @@ public class Interpreter extends Verificator {
 
             case EXPRESSAO:
                 if (exec.total == 0 || exec.count < exec.total) {
-                    interfaceExecucao.atualizaExpressaoAtual((Expressao)exec.instrucao);
                     executaExpressao(exec);
                 } else {
                     try {
                         Executavel inst = pilhaExecucao.pop();
                         pilhaExecucao.push(exec);
                         pilhaExecucao.push(inst);
-                        runNext = true;
+                        interfaceExecucao.atualizaExpressaoAtual((Expressao)exec.instrucao);
                     } catch (NoSuchElementException ex) {
                         erros.add(new Erro(TipoErro.DEVEL, ' ', 1, 1, 1, String.format(
                             "Pilha sem elemento de instrução: %s - %s",ex.getClass().getName(), ex.getMessage())));
@@ -398,7 +397,7 @@ public class Interpreter extends Verificator {
             pilhaExecucao.push(exec);
             pilhaExecucao.push(new Executavel(expressao));
             interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
-            runNext = true;
+            interfaceExecucao.atualizaExpressaoAtual(expressao);
         } else {
             Token token = atribuicao.getVariavel();
             Variavel variavel = variaveis.get(token.nome());
@@ -451,9 +450,7 @@ public class Interpreter extends Verificator {
                 pilhaExecucao.push(exec);
                 pilhaExecucao.push(new Executavel(expressao));
                 interfaceExecucao.atualizaPassoAtual(condicional.getTokenSe(), expressao.getAsToken());
-                if (configInterpreter.isPushExprAutoProx()) {
-                    runNext = true;
-                }
+                interfaceExecucao.atualizaExpressaoAtual(expressao);
             } else {
                 if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
                     erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
@@ -478,7 +475,6 @@ public class Interpreter extends Verificator {
         
         switch (exec.count) { 
             case 1: // Então INSTRUÇÃO
-                //interfaceExecucao.atualizaPassoAtual(condicional.getTokenEntao());
                 exec.count += 2;
                 if (condicional.isComposta()) {
                     pilhaExecucao.push(exec);
@@ -512,9 +508,7 @@ public class Interpreter extends Verificator {
                     pilhaExecucao.push(exec);
                     pilhaExecucao.push(new Executavel(expressao));
                     interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenEnquanto(), expressao.getAsToken());
-                    if (configInterpreter.isPushExprAutoProx()) {
-                        runNext = true;
-                    }
+                    interfaceExecucao.atualizaExpressaoAtual(expressao);
                 } else {
                     if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
                         erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
@@ -538,7 +532,6 @@ public class Interpreter extends Verificator {
                 }
                 break;
             case 1: // Instrução a ser repetida
-                //interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenFaca());
                 exec.count = 0; // para repetir
                 pilhaExecucao.push(exec);
                 pilhaExecucao.push(new Executavel(repetitiva.getInstrucao()));
@@ -571,10 +564,8 @@ public class Interpreter extends Verificator {
                     expressao = repetitiva.getCondicao();
                     pilhaExecucao.push(exec);
                     pilhaExecucao.push(new Executavel(expressao));
-                    if (configInterpreter.isPushExprAutoProx()) {
-                        runNext = true;
-                    }
                     interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+                    interfaceExecucao.atualizaExpressaoAtual(expressao);
                 } else {
                     if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
                         erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
@@ -625,9 +616,7 @@ public class Interpreter extends Verificator {
                     pilhaExecucao.push(exec);
                     pilhaExecucao.push(new Executavel(expressao));
                     interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
-                    if (configInterpreter.isPushExprAutoProx()) {
-                        runNext = true;
-                    }
+                    interfaceExecucao.atualizaExpressaoAtual(expressao);
                 } else {
                     if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
                         erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
@@ -689,9 +678,7 @@ public class Interpreter extends Verificator {
                     pilhaExecucao.push(exec);
                     pilhaExecucao.push(new Executavel(expressao));
                     interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
-                    if (configInterpreter.isPushExprAutoProx()) {
-                        runNext = true;
-                    }
+                    interfaceExecucao.atualizaExpressaoAtual(expressao);
                 } else {
                     TipoDado[] esperados;
                     if (variavel.getTipo() == TipoDado.INTEIRO) {
@@ -727,9 +714,7 @@ public class Interpreter extends Verificator {
                     pilhaExecucao.push(exec);
                     pilhaExecucao.push(new Executavel(expressao));
                     interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
-                    if (configInterpreter.isPushExprAutoProx()) {
-                        runNext = true;
-                    }
+                    interfaceExecucao.atualizaExpressaoAtual(expressao);
                 } else {
                     TipoDado[] esperados;
                     if (variavel.getTipo() == TipoDado.INTEIRO) {
@@ -807,9 +792,7 @@ public class Interpreter extends Verificator {
                     pilhaExecucao.push(exec);
                     pilhaExecucao.push(new Executavel(expressao));
                     interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
-                    if (configInterpreter.isPushExprAutoProx()) {
-                        runNext = true;
-                    }
+                    interfaceExecucao.atualizaExpressaoAtual(expressao);
                 } else {
                     if (expressao.getResultadoLogico()) {
                         exec.count += 1;
@@ -821,7 +804,6 @@ public class Interpreter extends Verificator {
                 break;
                 
             case 4:
-                //interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenFaca());
                 exec.count = 3; // para repetir
                 pilhaExecucao.push(exec);
                 pilhaExecucao.push(new Executavel(repetitiva.getInstrucao()));
@@ -860,9 +842,6 @@ public class Interpreter extends Verificator {
         if (exec.total == 0) {
             exec.total = 1;
         }
-        interfaceExecucao.atualizaExpressaoAtual(operando);
-        interfaceExecucao.atualizaPassoAtual(operando.getOperando());
-        
         Token token = operando.getOperando();
         operando.setTipoResultado(TipoDado.mapTokenToVariavel(token));
         operando.setResultado(token.getPalavra());
@@ -880,9 +859,6 @@ public class Interpreter extends Verificator {
         if (exec.total == 0) {
             exec.total = 1;
         }
-        interfaceExecucao.atualizaExpressaoAtual(operando);
-        interfaceExecucao.atualizaPassoAtual(operando.getOperando());
-        
         Token token = operando.getOperando();
         Variavel variavel = variaveis.get(token.nome());
         interfaceExecucao.selecionaVariavel(variavel);
@@ -931,7 +907,6 @@ public class Interpreter extends Verificator {
                 expressao = chamadaFuncao.getParametros().get(exec.count);
                 pilhaExecucao.push(exec);
                 pilhaExecucao.push(new Executavel(expressao));
-                interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
                 if (configInterpreter.isPushExprAutoProx()) {
                     runNext = true;
                 }
@@ -940,7 +915,6 @@ public class Interpreter extends Verificator {
                     chamadaFuncao.atualizaParametro(exec.count, expressao);
                     exec.count ++;
                     pilhaExecucao.push(exec);
-                    interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
                 } else {
                     erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
                         "Não interpretou resultado %s (%s) como parâmetro %d de função %s",
@@ -993,7 +967,6 @@ public class Interpreter extends Verificator {
                 expressao = operacaoUnaria.getExpressao();
                 pilhaExecucao.push(exec);
                 pilhaExecucao.push(new Executavel(expressao));
-                interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
                 if (configInterpreter.isPushExprAutoProx()) {
                     runNext = true;
                 }
@@ -1045,14 +1018,13 @@ public class Interpreter extends Verificator {
                         expressao = operacao.getExpressaoEsq();
                         pilhaExecucao.push(exec);
                         pilhaExecucao.push(new Executavel(expressao));
-                        if (configInterpreter.isPushExprAutoProx()) {
-                            runNext = true;
-                        }
-                        interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
                     } else {
                         operacao.atualizaExpressaoEsq(expressao);
                         exec.count ++;
                         pilhaExecucao.push(exec);
+                    }
+                    if (configInterpreter.isPushExprAutoProx()) {
+                        runNext = true;
                     }
                     break;
                 case 1:
@@ -1060,15 +1032,14 @@ public class Interpreter extends Verificator {
                     if (expressao == null) {
                         expressao = operacao.getExpressaoDir();
                         pilhaExecucao.push(exec);
-                        if (configInterpreter.isPushExprAutoProx()) {
-                            runNext = true;
-                        }
                         pilhaExecucao.push(new Executavel(expressao));
-                        interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
                     } else {
                         operacao.atualizaExpressaoDir(expressao);
                         exec.count ++;
                         pilhaExecucao.push(exec);
+                    }
+                    if (configInterpreter.isPushExprAutoProx()) {
+                        runNext = true;
                     }
                     break;
                 case 2:
