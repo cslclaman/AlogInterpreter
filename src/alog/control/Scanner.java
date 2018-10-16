@@ -237,6 +237,7 @@ public class Scanner extends Verificator{
         switch (token.getFuncaoToken()){
             case OP_MAT_SUBTRACAO:
                 if (last != null && (
+                    last.getFuncaoToken().getCategoria() == CategoriaToken.PALAVRA_RESERVADA ||
                     last.getFuncaoToken().getCategoria() == CategoriaToken.OPERADOR ||
                     last.getFuncaoToken() == FuncaoToken.DELIM_COLCHETES_ABRE ||
                     last.getFuncaoToken() == FuncaoToken.DELIM_PARENTESES_ABRE ||
@@ -247,6 +248,7 @@ public class Scanner extends Verificator{
                 break;
             case OP_MAT_SOMA:
                 if (last != null && (
+                    last.getFuncaoToken().getCategoria() == CategoriaToken.PALAVRA_RESERVADA ||
                     last.getFuncaoToken().getCategoria() == CategoriaToken.OPERADOR ||
                     last.getFuncaoToken() == FuncaoToken.DELIM_COLCHETES_ABRE ||
                     last.getFuncaoToken() == FuncaoToken.DELIM_PARENTESES_ABRE ||
