@@ -15,8 +15,8 @@ import java.util.List;
  */
 public class ImpressoraExpressao {
     private final Token tokenVazio;
-    private final int ordem;
-    private final int pos;
+    private int ordemIni;
+    private int ordemFim;
     private Token[] tokens;
     private String texto;
     private Expressao expressao;
@@ -35,8 +35,8 @@ public class ImpressoraExpressao {
             tokens[i] = tokenVazio;
         }
         
-        pos = expressao.listaTokens().get(0).getPosicao();
-        ordem = expressao.listaTokens().get(0).getOrdem();
+        ordemIni = expressao.listaTokens().get(0).getOrdem();
+        ordemFim = expressao.listaTokens().get(expressao.listaTokens().size()-1).getOrdem();
         
         exprAtual = tokenVazio;
         resultado = tokenVazio;
@@ -45,6 +45,7 @@ public class ImpressoraExpressao {
     
     public void setExpressaoAtual(Expressao expressao) {
         this.expressao = expressao;
+        validaOrdem(expressao);
         System.out.println(expressao + " - " + (expressao.isResolvida() ? "Result " + expressao.getResultado() : " nres"));
         defineTexto();
     }
@@ -57,53 +58,58 @@ public class ImpressoraExpressao {
         Token espec = new Token(0,0,0,-1);
         LinkedList<Integer> ordens = new LinkedList<>();
         
-        if (!expressao.isResolvida()) {
-            for (Token t : expressao.listaTokens()) {
-                int ord = t.getOrdem() - ordem;
-                res = new Token(0, 0, 0, ord);
-                res.setPalavra(t.getPalavra());
-                tokens[ord] = res;
-                ordens.offer(ord);
-            }
-        } else {
-            Token first = expressao.listaTokens().get(0);
-            int ord = 0;
-            for (Token t : expressao.listaTokens()) {
-                ord = t.getOrdem() - ordem;
-                tokens[ord] = tokenVazio;
-            }
-            ord = first.getOrdem() - ordem;
-            ordens.offer(ord);
-            res = new Token(0, 0, 0, ord);
-            res.setPalavra(expressao.getResultado());
-            tokens[ord] = res;
-        }
-        StringBuilder print = new StringBuilder();
-        int c = 0;
-        for (int i = 0; i < tokens.length; i++) {
-            Token t = tokens[i];
-            if (!t.getPalavra().isEmpty()) {
-                print.append(t.getPalavra()).append(" ");
-            }
-            t.setPosicao(c);
-            c += print.length();
-            tokens[i] = t;
-            if (ordens.contains(i)){
-                if (espec.getOrdem() == -1) {
-                    espec.setPosicao(t.getPosicao());
-                    espec.setOrdem(t.getOrdem());
-                    espec.setColuna(t.getColuna());
+        try {
+            if (!expressao.isResolvida()) {
+                for (Token t : expressao.listaTokens()) {
+                    int ord = t.getOrdem() - ordemIni;
+                    res = new Token(0, 0, 0, ord);
+                    res.setPalavra(t.getPalavra());
+                    tokens[ord] = res;
+                    ordens.offer(ord);
                 }
-                espec.atualizaPalavra(t.getPalavra() + " ");
+            } else {
+                Token first = expressao.listaTokens().get(0);
+                int ord = 0;
+                for (Token t : expressao.listaTokens()) {
+                    ord = t.getOrdem() - ordemIni;
+                    tokens[ord] = tokenVazio;
+                }
+                ord = first.getOrdem() - ordemIni;
+                ordens.offer(ord);
+                res = new Token(0, 0, 0, ord);
+                res.setPalavra(expressao.getResultado());
+                tokens[ord] = res;
             }
+            StringBuilder print = new StringBuilder();
+            int c = 0;
+            for (int i = 0; i < tokens.length; i++) {
+                Token t = tokens[i];
+                if (!t.getPalavra().isEmpty()) {
+                    print.append(t.getPalavra()).append(" ");
+                }
+                t.setPosicao(c);
+                c += print.length();
+                tokens[i] = t;
+                if (ordens.contains(i)){
+                    if (espec.getOrdem() == -1) {
+                        espec.setPosicao(t.getPosicao());
+                        espec.setOrdem(t.getOrdem());
+                        espec.setColuna(t.getColuna());
+                    }
+                    espec.atualizaPalavra(t.getPalavra() + " ");
+                }
+            }
+            espec.setPalavra(espec.getPalavra().trim());
+            if (!expressao.isResolvida()) {
+                exprAtual = espec;
+            } else {
+                resultado = espec;
+            }
+            texto = print.toString().trim();
+        } catch (ArrayIndexOutOfBoundsException ex) {
+            System.err.println(ex.getMessage() + "\nOrdem: " + ordemIni + " / " + ordemFim);
+            texto = expressao.toString();
         }
-        espec.setPalavra(espec.getPalavra().trim());
-        if (!expressao.isResolvida()) {
-            exprAtual = espec;
-        } else {
-            resultado = espec;
-        }
-        texto = print.toString().trim();
     }
 
     public String getTexto() {
@@ -116,6 +122,18 @@ public class ImpressoraExpressao {
 
     public Token getTokenResultado() {
         return resultado;
+    }
+    
+    private void validaOrdem (Expressao expressao) {
+        int ini = expressao.listaTokens().get(0).getOrdem();
+        if (ini < ordemIni || ini > ordemFim) {
+            ordemIni = expressao.listaTokens().get(0).getOrdem();
+            ordemFim = expressao.listaTokens().get(expressao.listaTokens().size()-1).getOrdem();
+            tokens = new Token[expressao.listaTokens().size()];
+            for (int i = 0; i < tokens.length; i++) {
+                tokens[i] = tokenVazio;
+            }
+        }
     }
     
 }

@@ -18,13 +18,14 @@ public abstract class Expressao extends Instrucao {
     protected String resultado;
     protected Token parentesesAbre;
     protected Token parentesesFecha;
-    protected boolean resolvida;
+    private boolean resolvida;
     
     protected Expressao() {
         super();
         tipo = TipoInstrucao.EXPRESSAO;
         tipoExpressao = TipoExpressao._INDEFINIDO;
         tipoResultado = null;
+        resultado = "";
         resolvida = false;
     }
 
@@ -113,6 +114,11 @@ public abstract class Expressao extends Instrucao {
     }
 
     public abstract String imprimeExpressao();
+    
+    public void redefine() {
+        resolvida = false;
+        resultado = "";
+    }
     
     @Override
     public void finaliza() {

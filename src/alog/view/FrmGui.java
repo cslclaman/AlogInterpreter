@@ -596,13 +596,15 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     confInterpreter.setLeiaAutoProx(true);
                     confInterpreter.setEscrevaAutoProx(true);
                     confInterpreter.setExecConstAutoProx(true);
-                    confInterpreter.setExecVarAutoProx(false);
+                    confInterpreter.setExecVarAutoProx(true);
+                    confInterpreter.setExecBinFinAutoProx(true);
                     confInterpreter.setPushExprAutoProx(true);
                     
                     interpreter = new Interpreter(this, processor.getPrograma());
                     interpreter.setConfigInterpreter(confInterpreter);
                     btnProxPerc.setEnabled(interpreter.existeProxima());
                     variaveis = new LinkedList<>();
+                    impressoraExpressao = null;
                 }
             }
         }
@@ -728,7 +730,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
     private void mitSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitSalvarActionPerformed
         if (arquivo == null){
-            String caminho = System.getProperty("user.home") + File.separator + "algoritmo.alg";
+            String caminho = System.getProperty("user.home") + File.separator + "algoritmo.txt";
             arquivo = new File(caminho);
             
             mitSalvarComoActionPerformed(evt);
@@ -755,6 +757,10 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         
         if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION){
             arquivo = fileChooser.getSelectedFile();
+            int pontoIndex = arquivo.getName().lastIndexOf(".");
+            if (pontoIndex < 0) {
+                arquivo = new File(arquivo.getPath() + ".txt");
+            }
             mitSalvarActionPerformed(evt);
         }
     }//GEN-LAST:event_mitSalvarComoActionPerformed
@@ -828,16 +834,28 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
     @Override
     public void atualizaInstrucao() {
-        impressoraExpressao = null;
+        //impressoraExpressao = null;
         docProc.setCharacterAttributes(0, txpProcessamento.getText().length(), stylePlain, true);
         txpProcessamento.setText("");
         txpProcessamento.setBackground(backgroundDisabled);
     }
 
     @Override
+    public void expressaoFinalizada() {
+        //impressoraExpressao = null;
+        docProc.setCharacterAttributes(0, txpProcessamento.getText().length(), stylePlain, true);
+        txpProcessamento.setText("");
+        txpProcessamento.setBackground(backgroundDisabled);
+    }
+    
+    @Override
     public void atualizaPassoAtual(Token token) {
         limpaSelecaoVariaveis();
         limpaTokensPercurso();
+        addTokenPercurso(token);
+    }
+    
+    private void addTokenPercurso(Token token) {
         tokensAnt.push(token);
         docIde.setCharacterAttributes(token.getPosicao(), token.getTamanho(), stylePerc, true);
     }
@@ -848,13 +866,24 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         tokensAnt.push(controle);
         docIde.setCharacterAttributes(controle.getPosicao(), controle.getTamanho(), styleRes, true);
     }
+    
+    @Override
+    public void atualizaPassoAtual(Token controle, Token... tokens) {
+        limpaSelecaoVariaveis();
+        limpaTokensPercurso();
+        for (Token token : tokens) {
+            addTokenPercurso(token);
+        }
+        tokensAnt.push(controle);
+        docIde.setCharacterAttributes(controle.getPosicao(), controle.getTamanho(), styleRes, true);
+    }
 
     @Override
     public void atualizaExpressaoAtual(Expressao expressao) {
         
         docProc.setCharacterAttributes(0, txpProcessamento.getText().length(), stylePlain, true);
+        txpProcessamento.setBackground(backgroundEnabled);
         if (impressoraExpressao == null) {
-            txpProcessamento.setBackground(backgroundEnabled);
             impressoraExpressao = new ImpressoraExpressao(expressao);
         } else {
             impressoraExpressao.setExpressaoAtual(expressao);
@@ -922,7 +951,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         txpSaida.setBackground(backgroundEnabled);
         txpSaida.setText(txpSaida.getText() + saida);
         
-        impressoraExpressao = null;
+        //impressoraExpressao = null;
         docProc.setCharacterAttributes(0, txpProcessamento.getText().length(), stylePlain, true);
         txpProcessamento.setText("");
         txpProcessamento.setBackground(backgroundDisabled);

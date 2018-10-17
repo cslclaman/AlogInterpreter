@@ -7,7 +7,6 @@ package alog.control;
 
 import alog.analise.Erro;
 import alog.expressao.Expressao;
-import alog.instrucao.Instrucao;
 import alog.model.Variavel;
 import alog.token.Token;
 
@@ -42,10 +41,23 @@ public interface InterfaceExecucao {
     void atualizaPassoAtual(Token controle, Token token);
     
     /**
+     * Atualiza à interface os tokens sendo executados dentro da instrução atual. Para fins de controle.
+     * Permite um token de controle (por exemplo, SE, PARA, FUNÇÃO...) e diversos tokens de passo.
+     * @param controle token da instrução 
+     * @param token Array com tokens do passo atual.
+     */
+    void atualizaPassoAtual(Token controle, Token... token);
+    
+    /**
      * Atualiza à interface uma expressão que esteja sendo executada dentro da instrução atual. Para fins de controle.
      * @param expressao expressão sendo executada.
      */
     void atualizaExpressaoAtual(Expressao expressao);
+    
+    /**
+     * Indica que uma expressão foi completamente finalizada.
+     */
+    void expressaoFinalizada();
     
     /**
      * Indica uma declaração de variável e informa a variável que acabou de ser criada.

@@ -15,6 +15,7 @@ public class ConfigInterpreter {
     private boolean escrevaQuebraLinha;
     private boolean execConstAutoProx;
     private boolean execVarAutoProx;
+    private boolean execBinFinAutoProx;
     private boolean pushExprAutoProx;
     
     public ConfigInterpreter() {
@@ -23,6 +24,7 @@ public class ConfigInterpreter {
         this.escrevaQuebraLinha = true;
         this.execConstAutoProx = true;
         this.execVarAutoProx = false;
+        this.execBinFinAutoProx = false;
         this.pushExprAutoProx = false;
     }
 
@@ -44,6 +46,10 @@ public class ConfigInterpreter {
 
     public void setExecVarAutoProx(boolean ExecVarAutoProx) {
         this.execVarAutoProx = ExecVarAutoProx;
+    }
+
+    public void setExecBinFinAutoProx(boolean execBinFinAutoProx) {
+        this.execBinFinAutoProx = execBinFinAutoProx;
     }
 
     public void setPushExprAutoProx(boolean pushExprAutoProx) {
@@ -68,6 +74,10 @@ public class ConfigInterpreter {
 
     public boolean isExecVarAutoProx() {
         return execVarAutoProx;
+    }
+
+    public boolean isExecBinFinAutoProx() {
+        return execBinFinAutoProx;
     }
 
     public boolean isPushExprAutoProx() {
