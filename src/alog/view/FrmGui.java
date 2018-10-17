@@ -73,6 +73,8 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private final Color backgroundDisabled = javax.swing.UIManager.getDefaults().getColor("FormattedTextField.disabledBackground");
     private final Color backgroundEnabled = javax.swing.UIManager.getDefaults().getColor("FormattedTextField.background");
     
+    private FrmListaErros frmListaErros;
+    
     /**
      * Creates new form FrmTeste
      */
@@ -110,6 +112,8 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         
         tabVariaveis = (DefaultTableModel)tblVariaveis.getModel();
         tokensAnt = new LinkedList<>();
+        
+        frmListaErros = new FrmListaErros();
     }
 
     /**
@@ -138,12 +142,10 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         btnEntradaConfirma = new javax.swing.JButton();
         btnVerificar = new javax.swing.JButton();
         lblVariavelEntrada = new javax.swing.JLabel();
-        btnProcContinuar = new javax.swing.JButton();
         lblPosCaret = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         lblLogo = new javax.swing.JLabel();
         lblLogo1 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         mnuArquivo = new javax.swing.JMenu();
         mitAbrir = new javax.swing.JMenuItem();
@@ -151,16 +153,11 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         mitSalvarComo = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
         mitSair = new javax.swing.JMenuItem();
-        mnuEditar = new javax.swing.JMenu();
-        jMenuItem2 = new javax.swing.JMenuItem();
-        jMenuItem4 = new javax.swing.JMenuItem();
-        jMenuItem3 = new javax.swing.JMenuItem();
-        jMenuItem1 = new javax.swing.JMenuItem();
         mnuVerificar = new javax.swing.JMenu();
-        jMenuItem5 = new javax.swing.JMenuItem();
-        jMenuItem6 = new javax.swing.JMenuItem();
+        mitVerificarAlgoritmo = new javax.swing.JMenuItem();
+        mitExibirErros = new javax.swing.JMenuItem();
         mnuAjuda = new javax.swing.JMenu();
-        jMenuItem7 = new javax.swing.JMenuItem();
+        mitSobre = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Interpreter");
@@ -176,10 +173,10 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             }
         });
         txpIde.addInputMethodListener(new java.awt.event.InputMethodListener() {
+            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
+            }
             public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
                 txpIdeCaretPositionChanged(evt);
-            }
-            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
             }
         });
         txpIde.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -194,8 +191,9 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
         jScrollPane2.setRowHeaderView(new TextLineNumber(txpIde, 2));
 
-        btnProxPerc.setText(">> Próximo passo");
+        btnProxPerc.setActionCommand("Próximo passo >>");
         btnProxPerc.setEnabled(false);
+        btnProxPerc.setLabel("Próximo passo >>");
         btnProxPerc.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnProxPercActionPerformed(evt);
@@ -277,14 +275,6 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
         lblVariavelEntrada.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
 
-        btnProcContinuar.setText("Continuar");
-        btnProcContinuar.setEnabled(false);
-        btnProcContinuar.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnProcContinuarActionPerformed(evt);
-            }
-        });
-
         lblPosCaret.setFont(new java.awt.Font("Consolas", 0, 11)); // NOI18N
         lblPosCaret.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
         lblPosCaret.setText("Linha 1, Coluna 1");
@@ -295,8 +285,6 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         lblLogo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/img/logo-fatecso-64.png"))); // NOI18N
 
         lblLogo1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/img/logo-cps-64.png"))); // NOI18N
-
-        jLabel4.setText("Editor");
 
         mnuArquivo.setText("Arquivo");
 
@@ -338,42 +326,31 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
         jMenuBar1.add(mnuArquivo);
 
-        mnuEditar.setText("Editar");
-        mnuEditar.setEnabled(false);
-
-        jMenuItem2.setText("Desfazer");
-        mnuEditar.add(jMenuItem2);
-
-        jMenuItem4.setText("Copiar");
-        mnuEditar.add(jMenuItem4);
-
-        jMenuItem3.setText("Recortar");
-        mnuEditar.add(jMenuItem3);
-
-        jMenuItem1.setText("Colar");
-        mnuEditar.add(jMenuItem1);
-
-        jMenuBar1.add(mnuEditar);
-
         mnuVerificar.setText("Verificar");
 
-        jMenuItem5.setText("Verificar algoritmo");
-        jMenuItem5.addActionListener(new java.awt.event.ActionListener() {
+        mitVerificarAlgoritmo.setText("Verificar algoritmo");
+        mitVerificarAlgoritmo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem5ActionPerformed(evt);
+                mitVerificarAlgoritmoActionPerformed(evt);
             }
         });
-        mnuVerificar.add(jMenuItem5);
+        mnuVerificar.add(mitVerificarAlgoritmo);
 
-        jMenuItem6.setText("Exibir erros");
-        mnuVerificar.add(jMenuItem6);
+        mitExibirErros.setText("Exibir erros da última verificação");
+        mitExibirErros.setEnabled(false);
+        mitExibirErros.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mitExibirErrosActionPerformed(evt);
+            }
+        });
+        mnuVerificar.add(mitExibirErros);
 
         jMenuBar1.add(mnuVerificar);
 
         mnuAjuda.setText("Ajuda");
 
-        jMenuItem7.setText("Sobre");
-        mnuAjuda.add(jMenuItem7);
+        mitSobre.setText("Sobre");
+        mnuAjuda.add(mitSobre);
 
         jMenuBar1.add(mnuAjuda);
 
@@ -394,9 +371,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                             .addComponent(jScrollPane3)
                             .addComponent(jScrollPane6))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(btnEntradaConfirma, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(btnProcContinuar, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(btnEntradaConfirma, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -406,40 +381,35 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                             .addComponent(jLabel2)
                             .addComponent(jLabel3)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnVerificar)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnProxPerc, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(jLabel4))
-                        .addGap(0, 107, Short.MAX_VALUE)))
+                                .addComponent(btnVerificar, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(31, 31, 31)
+                                .addComponent(btnProxPerc, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 109, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel5)
-                        .addGap(46, 46, 46)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(lblLogo)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(18, 18, 18)
                         .addComponent(lblLogo1))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(btnVerificar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(btnProxPerc, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel5)
-                            .addComponent(jLabel4)))
-                    .addComponent(lblLogo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lblLogo1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(btnProxPerc, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 48, Short.MAX_VALUE)
+                        .addComponent(btnVerificar, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(lblLogo)
+                    .addComponent(lblLogo1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel5)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 364, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
                     .addComponent(jScrollPane2))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblPosCaret)
@@ -454,13 +424,11 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel2)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jScrollPane7, javax.swing.GroupLayout.DEFAULT_SIZE, 41, Short.MAX_VALUE)
-                    .addComponent(btnProcContinuar, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -501,6 +469,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             }
         }
         
+        emExecucao = false;
         while (!tokensAnt.isEmpty()){
             Token tokenAnt = tokensAnt.pop();
             docIde.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
@@ -509,7 +478,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         oldText = txpIde.getText();
         
         if (oldText.isEmpty()){
-            JOptionPane.showMessageDialog(this, "Nada para verificar - algoritmo vazio", "Verificação concluída", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Nada para verificar - algoritmo vazio", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
             return;
         }
         
@@ -522,7 +491,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     scanner.getNumErros(TipoErro.DEVEL) +
                             " erros encontrados - verifique seu algoritmo",
                     "Verificação concluída",
-                    JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.ERROR_MESSAGE);
             formatacao = FORMAT_ERROR;
             System.out.println("SCANNER (Análise Léxica)");
             for (Erro e : scanner.getErros(TipoErro.DEVEL)){
@@ -532,7 +501,11 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             }
             
             btnProxPerc.setEnabled(false);
-            //btnInicioPerc.setEnabled(false);
+
+            mitExibirErros.setEnabled(true);
+            frmListaErros.setListaErros(scanner.getErros(TipoErro.ALERTA));
+            frmListaErros.setVisible(true);
+            
         } else {
             Parser parser = new Parser(tokens);
             instrucoes = new LinkedList<>();
@@ -540,7 +513,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             instrucoes = parser.listaInstrucoes();
 
             if (parser.getNumErros(TipoErro.DEVEL) > 0){
-                JOptionPane.showMessageDialog(this, parser.getNumErros(TipoErro.DEVEL) + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this, parser.getNumErros(TipoErro.DEVEL) + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.ERROR_MESSAGE);
                 formatacao = FORMAT_ERROR;
                 System.out.println("PARSER (Análise Sintática)");
                 for (Erro e : parser.getErros(TipoErro.DEVEL)){
@@ -549,29 +522,47 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     System.out.println(e.toString());
                 }
                 btnProxPerc.setEnabled(false);
-                //btnInicioPerc.setEnabled(false);
+                
+                mitExibirErros.setEnabled(true);
+                frmListaErros.setListaErros(parser.getErros(TipoErro.ALERTA));
+                frmListaErros.setVisible(true);
+                
             } else {
                 
                 PreProcessor processor = new PreProcessor(instrucoes);
                 processor.verificaPrograma();
                 
-                if (processor.getNumErros(TipoErro.DEVEL) > 0){
-                    JOptionPane.showMessageDialog(this, processor.getNumErros(TipoErro.DEVEL) + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
+                int nfl = processor.getNumErros(TipoErro.ALERTA);
+                int nerrpp = processor.getNumErros(TipoErro.ERRO);
+                int nalepp = nfl - nerrpp;
+                
+                if (nerrpp > 0){
+                    JOptionPane.showMessageDialog(this, nerrpp + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.ERROR_MESSAGE);
                     formatacao = FORMAT_ERROR;
                     System.out.println("PRE PROCESSOR (Análise Semântica)");
-                    for (Erro e : processor.getErros(TipoErro.DEVEL)){
+                    for (Erro e : processor.getErros(TipoErro.ERRO)){
                         Token t = e.getToken();
-                        if (e.getTipo() == TipoErro.ERRO) 
-                            docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
-                        else
-                            docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleWarn, true);
-                        System.out.println(e.toString());
+                        docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
                     }
                     btnProxPerc.setEnabled(false);
-                    //btnInicioPerc.setEnabled(false);
+                    mitExibirErros.setEnabled(true);
+                    frmListaErros.setListaErros(processor.getErros(TipoErro.ALERTA));
+                    frmListaErros.setVisible(true);
                 } else {
-                
-                    JOptionPane.showMessageDialog(this, "Nenhum erro encontrado - pronto para execução", "Verificação concluída", JOptionPane.INFORMATION_MESSAGE);
+                    if (nalepp > 0) {
+                        for (Erro e : processor.getErros(TipoErro.ALERTA)){
+                            Token t = e.getToken();
+                            if (e.getTipo() == TipoErro.ALERTA) {
+                                docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleWarn, true);
+                            }
+                        }
+                        mitExibirErros.setEnabled(true);
+                        frmListaErros.setListaErros(processor.getErros(TipoErro.ALERTA));
+                        frmListaErros.setVisible(false);
+                        JOptionPane.showMessageDialog(this, nalepp + " alertas detectados - pronto para execução", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Nenhum erro encontrado - pronto para execução", "Verificação concluída", JOptionPane.INFORMATION_MESSAGE);
+                    }
                     
                     lblPosCaret.setText("Em execução");
                     emExecucao = true;
@@ -588,10 +579,8 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
                     txpSaida.setText("");
                     txpSaida.setBackground(backgroundDisabled);
+                    mitExibirErros.setEnabled(false);
 
-                    //btnVerificar.setEnabled(false);
-                    //btnInicioPerc.setEnabled(false);
-                    
                     ConfigInterpreter confInterpreter = new ConfigInterpreter();
                     confInterpreter.setLeiaAutoProx(true);
                     confInterpreter.setEscrevaAutoProx(true);
@@ -643,10 +632,6 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             btnEntradaConfirmaActionPerformed(null);
         }
     }//GEN-LAST:event_txpEntradaKeyPressed
-
-    private void btnProcContinuarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProcContinuarActionPerformed
-        interpreter.proxima();
-    }//GEN-LAST:event_btnProcContinuarActionPerformed
 
     private void txpIdeKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txpIdeKeyPressed
         switch (evt.getKeyCode()){
@@ -765,28 +750,23 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         }
     }//GEN-LAST:event_mitSalvarComoActionPerformed
 
-    private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
+    private void mitVerificarAlgoritmoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitVerificarAlgoritmoActionPerformed
         btnVerificarActionPerformed(evt);
-    }//GEN-LAST:event_jMenuItem5ActionPerformed
+    }//GEN-LAST:event_mitVerificarAlgoritmoActionPerformed
+
+    private void mitExibirErrosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitExibirErrosActionPerformed
+        frmListaErros.setVisible(true);
+    }//GEN-LAST:event_mitExibirErrosActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEntradaConfirma;
-    private javax.swing.JButton btnProcContinuar;
     private javax.swing.JButton btnProxPerc;
     private javax.swing.JButton btnVerificar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JMenuBar jMenuBar1;
-    private javax.swing.JMenuItem jMenuItem1;
-    private javax.swing.JMenuItem jMenuItem2;
-    private javax.swing.JMenuItem jMenuItem3;
-    private javax.swing.JMenuItem jMenuItem4;
-    private javax.swing.JMenuItem jMenuItem5;
-    private javax.swing.JMenuItem jMenuItem6;
-    private javax.swing.JMenuItem jMenuItem7;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
@@ -798,12 +778,14 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private javax.swing.JLabel lblPosCaret;
     private javax.swing.JLabel lblVariavelEntrada;
     private javax.swing.JMenuItem mitAbrir;
+    private javax.swing.JMenuItem mitExibirErros;
     private javax.swing.JMenuItem mitSair;
     private javax.swing.JMenuItem mitSalvar;
     private javax.swing.JMenuItem mitSalvarComo;
+    private javax.swing.JMenuItem mitSobre;
+    private javax.swing.JMenuItem mitVerificarAlgoritmo;
     private javax.swing.JMenu mnuAjuda;
     private javax.swing.JMenu mnuArquivo;
-    private javax.swing.JMenu mnuEditar;
     private javax.swing.JMenu mnuVerificar;
     private javax.swing.JTable tblVariaveis;
     private javax.swing.JTextPane txpEntrada;
