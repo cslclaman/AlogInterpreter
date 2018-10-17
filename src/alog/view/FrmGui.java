@@ -5,6 +5,7 @@
  */
 package alog.view;
 
+import alog.Principal;
 import alog.analise.Erro;
 import alog.analise.TipoErro;
 import alog.config.ConfigInterpreter;
@@ -114,6 +115,9 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         tokensAnt = new LinkedList<>();
         
         frmListaErros = new FrmListaErros();
+        
+        this.setTitle(String.format("Interpretador de Algoritmos - versão %s do TG do aluno"
+                + "Caíque de Souza Lima Siqueira - %s", Principal.VERSAO_NUM, Principal.VERSAO_DATA));
     }
 
     /**
@@ -350,6 +354,11 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         mnuAjuda.setText("Ajuda");
 
         mitSobre.setText("Sobre");
+        mitSobre.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mitSobreActionPerformed(evt);
+            }
+        });
         mnuAjuda.add(mitSobre);
 
         jMenuBar1.add(mnuAjuda);
@@ -757,6 +766,10 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private void mitExibirErrosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitExibirErrosActionPerformed
         frmListaErros.setVisible(true);
     }//GEN-LAST:event_mitExibirErrosActionPerformed
+
+    private void mitSobreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitSobreActionPerformed
+        new FrmSobre().setVisible(true);
+    }//GEN-LAST:event_mitSobreActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEntradaConfirma;

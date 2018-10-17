@@ -24,6 +24,10 @@ import java.util.List;
  */
 public class Principal {
 
+    public static final String VERSAO_NUM = "1.0.0";
+    public static final String VERSAO_DATA = "17/10/2018";
+    public static final int VERSAO_BUILD = 3;
+    
     /**
      * @param args the command line arguments
      */
