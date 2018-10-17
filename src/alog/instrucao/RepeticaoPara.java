@@ -15,9 +15,11 @@ import alog.token.Token;
  */
 public class RepeticaoPara extends EstruturaControle {
     private Token tokenPara;
+    private Token tokenFaca;
     private Token variavelCont;
     private Expressao expressaoDe;
     private Expressao expressaoAte;
+    private Expressao expressaoPasso;
     
     public RepeticaoPara() {
         super();
@@ -26,6 +28,11 @@ public class RepeticaoPara extends EstruturaControle {
 
     public void setTokenPara(Token tokenPara) {
         this.tokenPara = tokenPara;
+        super.addToken(tokenPara);
+    }
+
+    public void setTokenFaca(Token tokenFaca) {
+        this.tokenFaca = tokenFaca;
         super.addToken(tokenPara);
     }
 
@@ -48,8 +55,16 @@ public class RepeticaoPara extends EstruturaControle {
         texto.append(expressaoAte.toString()).append(" ");
     }
 
+    public void setExpressaoPasso(Expressao expressaoPasso) {
+        this.expressaoPasso = expressaoPasso;
+    }
+    
     public Token getTokenPara() {
         return tokenPara;
+    }
+
+    public Token getTokenFaca() {
+        return tokenFaca;
     }
 
     public Token getVariavelCont() {
@@ -62,6 +77,10 @@ public class RepeticaoPara extends EstruturaControle {
 
     public Expressao getExpressaoAte() {
         return expressaoAte;
+    }
+
+    public Expressao getExpressaoPasso() {
+        return expressaoPasso;
     }
     
     @Override

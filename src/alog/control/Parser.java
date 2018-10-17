@@ -720,7 +720,7 @@ public class Parser extends Verificator {
                     break;
                     
                 case RES_REP_FACA:
-                    repetitiva.addToken(token);
+                    repetitiva.setTokenFaca(token);
                     funcoesEsperadas.clear();
                     
                     Parser parserInterno = new Parser(tokens);
