@@ -35,6 +35,9 @@ public class Interpreter extends Verificator {
         
         public Executavel(Instrucao instrucao){
             this.instrucao = instrucao;
+            if (instrucao instanceof Expressao) {
+                ((Expressao)instrucao).redefine();
+            }
             this.passo = 0;
             this.total = 0;
             this.count = 0;
@@ -362,10 +365,12 @@ public class Interpreter extends Verificator {
                 pilhaExecucao.push(exec);
                 pilhaExecucao.push(new Executavel(expressao));
                 interfaceExecucao.atualizaPassoAtual(saidaDados.getTokenNome(), expressao.getAsToken());
+                interfaceExecucao.atualizaExpressaoAtual(expressao);
                 if (configInterpreter.isEscrevaAutoProx()) {
                     runNext = true;
                 }
             } else {
+                interfaceExecucao.expressaoFinalizada();
                 interfaceExecucao.atualizaPassoAtual(saidaDados.getTokenNome(), expressao.getAsToken());
                 if (expressao.getTipoResultado() == TipoDado.CARACTER) {
                     interfaceExecucao.saidaDados(expressao.getResultadoCaracter());
@@ -399,6 +404,7 @@ public class Interpreter extends Verificator {
             interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
             interfaceExecucao.atualizaExpressaoAtual(expressao);
         } else {
+            interfaceExecucao.expressaoFinalizada();
             Token token = atribuicao.getVariavel();
             Variavel variavel = variaveis.get(token.nome());
             interfaceExecucao.selecionaVariavel(variavel);
@@ -452,6 +458,7 @@ public class Interpreter extends Verificator {
                 interfaceExecucao.atualizaPassoAtual(condicional.getTokenSe(), expressao.getAsToken());
                 interfaceExecucao.atualizaExpressaoAtual(expressao);
             } else {
+                interfaceExecucao.expressaoFinalizada();
                 if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
                     erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
                         "Não interpretou resultado %s (%s) como lógico para condicional",
@@ -510,6 +517,7 @@ public class Interpreter extends Verificator {
                     interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenEnquanto(), expressao.getAsToken());
                     interfaceExecucao.atualizaExpressaoAtual(expressao);
                 } else {
+                    interfaceExecucao.expressaoFinalizada();
                     if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
                         erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
                             "Não interpretou resultado %s (%s) como lógico para repetição",
@@ -567,6 +575,7 @@ public class Interpreter extends Verificator {
                     interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
                     interfaceExecucao.atualizaExpressaoAtual(expressao);
                 } else {
+                    interfaceExecucao.expressaoFinalizada();
                     if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
                         erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
                             "Não interpretou resultado %s (%s) como lógico para repetição",
@@ -618,6 +627,7 @@ public class Interpreter extends Verificator {
                     interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
                     interfaceExecucao.atualizaExpressaoAtual(expressao);
                 } else {
+                    interfaceExecucao.expressaoFinalizada();
                     if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
                         erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
                             "Não interpretou resultado %s (%s) como lógico para repetição",
@@ -654,7 +664,7 @@ public class Interpreter extends Verificator {
         switch (exec.count) {
             case 0: // Para VARIAVEL
                 interfaceExecucao.selecionaVariavel(variavel);
-                interfaceExecucao.atualizaPassoAtual(tokenVarCont);
+                interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenPara(), tokenVarCont);
                 
                 if (!tiposDadosCorretos(variavel.getTipo(), TipoDado.INTEIRO, TipoDado.REAL)){
                     erros.add(new Erro(TipoErro.DEVEL, tokenVarCont, String.format(
@@ -677,9 +687,10 @@ public class Interpreter extends Verificator {
                     expressao = repetitiva.getExpressaoDe();
                     pilhaExecucao.push(exec);
                     pilhaExecucao.push(new Executavel(expressao));
-                    interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+                    interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenPara(), expressao.getAsToken());
                     interfaceExecucao.atualizaExpressaoAtual(expressao);
                 } else {
+                    interfaceExecucao.expressaoFinalizada();
                     TipoDado[] esperados;
                     if (variavel.getTipo() == TipoDado.INTEIRO) {
                         esperados = new TipoDado[] {TipoDado.INTEIRO};
@@ -690,9 +701,9 @@ public class Interpreter extends Verificator {
                     if (tiposDadosCorretos(expressao.getTipoResultado(), esperados)) {
                         variavel.setValor(expressao.getResultado());
                         variaveis.replace(tokenVarCont.nome(), variavel);
-                        interfaceExecucao.defineValorVariavel(variavel);
+                        interfaceExecucao.defineValorVariavel(tokenVarCont, variavel);
                         exec.count ++;
-                        
+                        pilhaExecucao.push(exec);
                     } else {
                         erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
                             "Não interpretou resultado %s (%s) como numérico para repetição",
@@ -713,9 +724,10 @@ public class Interpreter extends Verificator {
                     expressao = repetitiva.getExpressaoAte();
                     pilhaExecucao.push(exec);
                     pilhaExecucao.push(new Executavel(expressao));
-                    interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+                    interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenPara(), expressao.getAsToken());
                     interfaceExecucao.atualizaExpressaoAtual(expressao);
                 } else {
+                    interfaceExecucao.expressaoFinalizada();
                     TipoDado[] esperados;
                     if (variavel.getTipo() == TipoDado.INTEIRO) {
                         esperados = new TipoDado[] {TipoDado.INTEIRO};
@@ -732,6 +744,64 @@ public class Interpreter extends Verificator {
                         );
                         result.setPalavra(expressao.getResultado());
                         result.setTipoToken(TipoToken.NUMERICO);
+
+                        Operando operVar = new Operando();
+                        operVar.setOperando(tokenVarCont);
+                        operVar.setTipoResultado(variavel.getTipo());
+
+                        Operando operLim = new Operando();
+                        operLim.setOperando(result);
+                        operLim.setResultado(result.getPalavra());
+                        operLim.setTipoResultado(TipoDado.mapTokenToVariavel(result));
+
+                        Token sig = new Token(
+                                tokenVarCont.getLinha(),
+                                tokenVarCont.getColuna() + tokenVarCont.getTamanho() + 2,
+                                tokenVarCont.getPosicao() + tokenVarCont.getTamanho() + 2,
+                                tokenVarCont.getOrdem() + 1
+                        );
+                        
+                        Token pas = new Token(0,0,0,0);
+                        
+                        boolean passoAsc;
+                        if (variavel.getTipo() == TipoDado.INTEIRO) {
+                            if (operLim.getTipoResultado() == TipoDado.INTEIRO) {
+                                passoAsc = variavel.getValorInteiro() <= operLim.getResultadoInteiro();
+                            } else {
+                                passoAsc = variavel.getValorInteiro() <= operLim.getResultadoReal();
+                            }
+                        } else {
+                            if (operLim.getTipoResultado() == TipoDado.INTEIRO) {
+                                passoAsc = variavel.getValorReal() <= operLim.getResultadoInteiro();
+                            } else {
+                                passoAsc = variavel.getValorReal() <= operLim.getResultadoReal();
+                            }
+                        }
+                        if (passoAsc){
+                            sig.setPalavra("<=");
+                            pas.setPalavra("1");
+                        } else {
+                            sig.setPalavra(">=");
+                            pas.setPalavra("-1");
+                        }
+                        sig.setTipoToken(TipoToken.OPERADOR);
+                        pas.setTipoToken(TipoToken.NUMERICO);
+                        
+                        Operando operPas = new Operando();
+                        operPas.setOperando(pas);
+                        operPas.setTipoResultado(TipoDado.mapTokenToVariavel(pas));
+                        operPas.setResultado(pas.getPalavra());
+                        
+                        Operacao condicao = new Operacao();
+                        condicao.setExpressaoEsq(operVar);
+                        condicao.setExpressaoDir(operLim);
+                        condicao.setOperador(sig);
+
+                        repetitiva.setExpressaoPasso(operPas);
+                        repetitiva.setExpressao(condicao);
+                        exec.instrucao = repetitiva;
+                        exec.count ++;
+                        pilhaExecucao.push(exec);
                     } else {
                         erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
                             "Não interpretou resultado %s (%s) como numérico para repetição",
@@ -742,61 +812,35 @@ public class Interpreter extends Verificator {
                         interfaceExecucao.erroFatal(erro);
                         erros.add(erro);
                         canGo = false;
-                        return;
                     }
                 }
-                Operando operVar = new Operando();
-                operVar.setOperando(tokenVarCont);
-                operVar.setTipoResultado(variavel.getTipo());
-                
-                Operando operLim = new Operando();
-                operLim.setOperando(result);
-                
-                Token sig = new Token(
-                        tokenVarCont.getLinha(),
-                        tokenVarCont.getColuna() + tokenVarCont.getTamanho() + 2,
-                        tokenVarCont.getPosicao() + tokenVarCont.getTamanho() + 2,
-                        tokenVarCont.getOrdem() + 1
-                );
-                if (variavel.getValorReal() <= operLim.getResultadoReal()){
-                    sig.setPalavra("<=");
-                } else {
-                    sig.setPalavra(">=");
-                }
-                sig.setTipoToken(TipoToken.OPERADOR);
-                
-                Operacao condicao = new Operacao();
-                condicao.setExpressaoEsq(operVar);
-                condicao.setExpressaoDir(operLim);
-                condicao.setOperador(sig);
-                
-                repetitiva.setExpressao(condicao);
-                exec.instrucao = repetitiva;
-                exec.count ++;
-                pilhaExecucao.push(exec);
-                
                 break;
                
             case 3: // Faça INSTRUÇÕES
-                expressao = null;
-                if (!pilhaExecucao.isEmpty()) {
-                    Executavel instr = pilhaExecucao.pop();
-                    if (instr.instrucao instanceof Expressao) {
-                        expressao = (Expressao)instr.instrucao;
-                    } else {
-                        pilhaExecucao.push(instr);
-                    }
-                } 
+                expressao = removeExpressaoDaPilha();
                 if (expressao == null) {
+                    if (exec.passo > 0) {
+                        Calculator novoValor = new Calculator(variavel);
+                        novoValor = novoValor.soma(new Calculator(repetitiva.getExpressaoPasso()));
+                        variavel.setValor(novoValor.getValor());
+                        variaveis.replace(tokenVarCont.nome(), variavel);
+                        interfaceExecucao.defineValorVariavel(tokenVarCont, variavel);
+                    }
+                    exec.passo ++;
                     expressao = repetitiva.getCondicao();
                     pilhaExecucao.push(exec);
                     pilhaExecucao.push(new Executavel(expressao));
-                    interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+                    interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenPara(), 
+                            tokenVarCont, repetitiva.getExpressaoAte().getAsToken());
                     interfaceExecucao.atualizaExpressaoAtual(expressao);
                 } else {
+                    
+                    interfaceExecucao.expressaoFinalizada();
                     if (expressao.getResultadoLogico()) {
+                        interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenPara(), repetitiva.getTokenFaca());
                         exec.count += 1;
                         pilhaExecucao.push(exec);
+                        runNext = true;
                     } else {
                         exec.count += 2;
                     }
@@ -915,6 +959,7 @@ public class Interpreter extends Verificator {
                     chamadaFuncao.atualizaParametro(exec.count, expressao);
                     exec.count ++;
                     pilhaExecucao.push(exec);
+                    runNext = true;
                 } else {
                     erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
                         "Não interpretou resultado %s (%s) como parâmetro %d de função %s",
@@ -1102,6 +1147,9 @@ public class Interpreter extends Verificator {
                         exec.instrucao = operacao;
                         exec.count ++;
                         pilhaExecucao.push(exec);
+                        if (configInterpreter.isExecBinFinAutoProx()) {
+                            runNext = true;
+                        }
                     }
                     break;
             }
