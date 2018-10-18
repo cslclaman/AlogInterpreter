@@ -23,6 +23,11 @@ import java.util.LinkedList;
 import javax.swing.text.DefaultStyledDocument;
 import alog.view.append.TextLineNumber;
 import java.awt.Color;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.File;
@@ -68,6 +73,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     
     private final Style styleError;
     private final Style styleWarn;
+    private final Style styleInfo;
     private final Style styleRes;
     private final int FORMAT_ERROR = 2;
     
@@ -101,9 +107,10 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         
         styleError = sc.addStyle("tokenErrado", null);
         styleError.addAttribute(StyleConstants.Background, Color.RED);
-        
         styleWarn = sc.addStyle("tokenAlerta", null);
         styleWarn.addAttribute(StyleConstants.Background, Color.ORANGE);
+        styleInfo = sc.addStyle("tokenInfo", null);
+        styleInfo.addAttribute(StyleConstants.Background, Color.LIGHT_GRAY);
         
         initComponents();
         txpIde.setDocument(new DefaultStyledDocument());
@@ -115,6 +122,9 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         tokensAnt = new LinkedList<>();
         
         frmListaErros = new FrmListaErros();
+        
+        alteracoesAnt = new LinkedList<>();
+        alteracoesProx = new LinkedList<>();
         
         this.setTitle(String.format("Interpretador de Algoritmos - versão %s do TG do aluno"
                 + "Caíque de Souza Lima Siqueira - %s", Principal.VERSAO_NUM, Principal.VERSAO_DATA));
@@ -157,6 +167,9 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         mitSalvarComo = new javax.swing.JMenuItem();
         jSeparator1 = new javax.swing.JPopupMenu.Separator();
         mitSair = new javax.swing.JMenuItem();
+        mnuEditar = new javax.swing.JMenu();
+        mitDesfazer = new javax.swing.JMenuItem();
+        mitRefazer = new javax.swing.JMenuItem();
         mnuVerificar = new javax.swing.JMenu();
         mitVerificarAlgoritmo = new javax.swing.JMenuItem();
         mitExibirErros = new javax.swing.JMenuItem();
@@ -166,7 +179,6 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Interpreter");
         setMinimumSize(new java.awt.Dimension(800, 600));
-        setPreferredSize(new java.awt.Dimension(950, 720));
 
         jScrollPane2.setVerifyInputWhenFocusTarget(false);
 
@@ -177,10 +189,10 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             }
         });
         txpIde.addInputMethodListener(new java.awt.event.InputMethodListener() {
-            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
-            }
             public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
                 txpIdeCaretPositionChanged(evt);
+            }
+            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
             }
         });
         txpIde.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -329,6 +341,28 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         mnuArquivo.add(mitSair);
 
         jMenuBar1.add(mnuArquivo);
+
+        mnuEditar.setText("Editar");
+
+        mitDesfazer.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Z, java.awt.event.InputEvent.CTRL_MASK));
+        mitDesfazer.setText("Desfazer");
+        mitDesfazer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mitDesfazerActionPerformed(evt);
+            }
+        });
+        mnuEditar.add(mitDesfazer);
+
+        mitRefazer.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Y, java.awt.event.InputEvent.CTRL_MASK));
+        mitRefazer.setText("Refazer");
+        mitRefazer.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mitRefazerActionPerformed(evt);
+            }
+        });
+        mnuEditar.add(mitRefazer);
+
+        jMenuBar1.add(mnuEditar);
 
         mnuVerificar.setText("Verificar");
 
@@ -517,7 +551,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             
         } else {
             Parser parser = new Parser(tokens);
-            instrucoes = new LinkedList<>();
+            LinkedList<Instrucao> instrucoes = new LinkedList<>();
 
             instrucoes = parser.listaInstrucoes();
 
@@ -541,7 +575,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                 PreProcessor processor = new PreProcessor(instrucoes);
                 processor.verificaPrograma();
                 
-                int nfl = processor.getNumErros(TipoErro.ALERTA);
+                int nfl = processor.getNumErros(TipoErro.INFO);
                 int nerrpp = processor.getNumErros(TipoErro.ERRO);
                 int nalepp = nfl - nerrpp;
                 
@@ -564,13 +598,18 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                             if (e.getTipo() == TipoErro.ALERTA) {
                                 docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleWarn, true);
                             }
+                            if (e.getTipo() == TipoErro.INFO) {
+                                docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleInfo, true);
+                            }
                         }
                         mitExibirErros.setEnabled(true);
-                        frmListaErros.setListaErros(processor.getErros(TipoErro.ALERTA));
-                        frmListaErros.setVisible(false);
+                        frmListaErros.setListaErros(processor.getErros(TipoErro.INFO));
+                        frmListaErros.setVisible(true);
                         JOptionPane.showMessageDialog(this, nalepp + " alertas detectados - pronto para execução", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
+                        mitExibirErros.setEnabled(false);
                     } else {
                         JOptionPane.showMessageDialog(this, "Nenhum erro encontrado - pronto para execução", "Verificação concluída", JOptionPane.INFORMATION_MESSAGE);
+                        mitExibirErros.setEnabled(false);
                     }
                     
                     lblPosCaret.setText("Em execução");
@@ -588,8 +627,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
                     txpSaida.setText("");
                     txpSaida.setBackground(backgroundDisabled);
-                    mitExibirErros.setEnabled(false);
-
+                    
                     ConfigInterpreter confInterpreter = new ConfigInterpreter();
                     confInterpreter.setLeiaAutoProx(true);
                     confInterpreter.setEscrevaAutoProx(true);
@@ -612,27 +650,20 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         String text = txpIde.getText();
         if (!text.equals(oldText)){
             btnVerificar.setEnabled(true);
+            alteracoesProx.clear();
+            System.out.printf("Add \"%s\"\n", oldText);
+            alteracoesAnt.push(oldText);
         }
         if (formatacao != FORMAT_PLAIN){
             docIde.setCharacterAttributes(0, docIde.getLength(), stylePlain, true);
         }
+        oldText = text;
     }//GEN-LAST:event_txpIdeKeyReleased
     
     private void btnEntradaConfirmaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEntradaConfirmaActionPerformed
         interpreter.proxima();
         btnProxPerc.setEnabled(interpreter.existeProxima());
         emExecucao = interpreter.existeProxima();
-        
-        try {
-            Thread.sleep(300);
-        } catch (InterruptedException ex) {
-            
-        }
-        
-        if (emExecucao) {
-            
-        }
-        
     }//GEN-LAST:event_btnEntradaConfirmaActionPerformed
 
     private void txpEntradaKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txpEntradaKeyPressed
@@ -662,6 +693,37 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     String txtb = txpIde.getText().substring(pos);
                     txpIde.setText(txta + "\n" + txtb);
                     txpIde.setCaretPosition(pos + 1);
+                }
+                break;
+            case KeyEvent.VK_V:
+                if (evt.isControlDown()) {
+                    evt.consume();
+                    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                    try {
+                        String text = clipboard.getData(DataFlavor.stringFlavor).toString();
+                        int pos = txpIde.getCaretPosition();
+                        String txta = txpIde.getText().substring(0, pos);
+                        String txtb = txpIde.getText().substring(pos);
+                        
+                        String subst;
+                        if (text.contains("\r")) {
+                            if (text.contains("\n")) {
+                                subst = "";
+                            } else {
+                                subst = "\n";
+                            }
+                            text = text.replace("\r", subst);
+                        }
+                        text = text.replace("\t", "    ");
+                        txpIde.setText(txta + text + txtb);
+                        txpIde.setCaretPosition(pos + text.length());
+                    } catch (IOException | UnsupportedFlavorException ex) {
+                        JOptionPane.showMessageDialog(this,
+                                "Conteúdo a ser colado não suportado",
+                                "Erro ao colar texto",
+                                JOptionPane.WARNING_MESSAGE);
+                        System.err.println(ex.getClass().getName() + " - " + ex.getMessage());
+                    }
                 }
                 break;
             default:
@@ -770,6 +832,33 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private void mitSobreActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitSobreActionPerformed
         new FrmSobre().setVisible(true);
     }//GEN-LAST:event_mitSobreActionPerformed
+
+    private void mitDesfazerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitDesfazerActionPerformed
+        if (!alteracoesAnt.isEmpty()) {
+            String text = alteracoesAnt.pop();
+            txpIde.setText(text);
+            
+            /* Se necessário caso a pilha de alterações estoure a memória...
+            if (alteracoesProx.size() >= 100) {
+                alteracoesProx.poll();
+            } */
+            alteracoesProx.push(text);
+            oldText = text;
+        }
+    }//GEN-LAST:event_mitDesfazerActionPerformed
+
+    private void mitRefazerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitRefazerActionPerformed
+        if (!alteracoesProx.isEmpty()) {
+            String text = alteracoesProx.pop();
+            txpIde.setText(text);
+            
+            /* Se necessário caso a pilha de alterações estoure a memória...
+            if (alteracoesAnt.size() >= 100) {
+                alteracoesAnt.poll();
+            } */
+            alteracoesAnt.push(text);
+        }
+    }//GEN-LAST:event_mitRefazerActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEntradaConfirma;
@@ -791,7 +880,9 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private javax.swing.JLabel lblPosCaret;
     private javax.swing.JLabel lblVariavelEntrada;
     private javax.swing.JMenuItem mitAbrir;
+    private javax.swing.JMenuItem mitDesfazer;
     private javax.swing.JMenuItem mitExibirErros;
+    private javax.swing.JMenuItem mitRefazer;
     private javax.swing.JMenuItem mitSair;
     private javax.swing.JMenuItem mitSalvar;
     private javax.swing.JMenuItem mitSalvarComo;
@@ -799,6 +890,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private javax.swing.JMenuItem mitVerificarAlgoritmo;
     private javax.swing.JMenu mnuAjuda;
     private javax.swing.JMenu mnuArquivo;
+    private javax.swing.JMenu mnuEditar;
     private javax.swing.JMenu mnuVerificar;
     private javax.swing.JTable tblVariaveis;
     private javax.swing.JTextPane txpEntrada;
@@ -806,11 +898,10 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private javax.swing.JTextPane txpProcessamento;
     private javax.swing.JTextPane txpSaida;
     // End of variables declaration//GEN-END:variables
-    private LinkedList<Instrucao> instrucoes;
     private LinkedList<Variavel> variaveis;
     private LinkedList<Token> tokensAnt;
-    private Instrucao expressao;
-    private int exprIndex;
+    private LinkedList<String> alteracoesAnt;
+    private LinkedList<String> alteracoesProx;
     private DefaultStyledDocument docIde;
     private DefaultStyledDocument docProc;
     private int formatacao;
