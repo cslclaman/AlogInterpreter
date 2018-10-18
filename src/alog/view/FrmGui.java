@@ -126,8 +126,8 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         alteracoesAnt = new LinkedList<>();
         alteracoesProx = new LinkedList<>();
         
-        this.setTitle(String.format("Interpretador de Algoritmos - versão %s do TG do aluno"
-                + "Caíque de Souza Lima Siqueira - %s", Principal.VERSAO_NUM, Principal.VERSAO_DATA));
+        this.setTitle(String.format("Interpretador de Algoritmos - versão %s do TG do aluno %s - %s",
+                Principal.VERSAO_NUM, "Caíque de Souza Lima Siqueira", Principal.VERSAO_DATA));
     }
 
     /**
@@ -209,9 +209,11 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
         jScrollPane2.setRowHeaderView(new TextLineNumber(txpIde, 2));
 
+        btnProxPerc.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/img/icon-next-arrow-24.png"))); // NOI18N
+        btnProxPerc.setText("Próximo passo");
         btnProxPerc.setActionCommand("Próximo passo >>");
         btnProxPerc.setEnabled(false);
-        btnProxPerc.setLabel("Próximo passo >>");
+        btnProxPerc.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
         btnProxPerc.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnProxPercActionPerformed(evt);
@@ -284,6 +286,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             }
         });
 
+        btnVerificar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/img/icon-check1-24.png"))); // NOI18N
         btnVerificar.setText("Verificar algoritmo");
         btnVerificar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -304,6 +307,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
         lblLogo1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/img/logo-cps-64.png"))); // NOI18N
 
+        btnSair.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/img/icon-exit-door-24.png"))); // NOI18N
         btnSair.setText("Sair");
         btnSair.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -442,8 +446,8 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                             .addComponent(jLabel2)
                             .addComponent(jLabel3)
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnVerificar, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(31, 31, 31)
+                                .addComponent(btnVerificar, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(btnProxPerc, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 94, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -454,7 +458,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                         .addComponent(lblLogo1))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel5)
-                    .addComponent(btnSair, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(btnSair, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(

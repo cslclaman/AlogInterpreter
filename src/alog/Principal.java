@@ -5,18 +5,7 @@
  */
 package alog;
 
-import alog.control.Interpreter;
-import alog.control.Parser;
-import alog.control.Scanner;
-import alog.instrucao.Instrucao;
-import alog.token.Token;
 import alog.view.FrmGui;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  *
@@ -25,7 +14,7 @@ import java.util.List;
 public class Principal {
 
     public static final String VERSAO_NUM = "1.0.0";
-    public static final String VERSAO_DATA = "17/10/2018";
+    public static final String VERSAO_DATA = "Out/2018";
     public static final int VERSAO_BUILD = 3;
     
     /**
