@@ -651,7 +651,6 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         if (!text.equals(oldText)){
             btnVerificar.setEnabled(true);
             alteracoesProx.clear();
-            System.out.printf("Add \"%s\"\n", oldText);
             alteracoesAnt.push(oldText);
         }
         if (formatacao != FORMAT_PLAIN){
@@ -835,28 +834,27 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
     private void mitDesfazerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitDesfazerActionPerformed
         if (!alteracoesAnt.isEmpty()) {
-            String text = alteracoesAnt.pop();
-            txpIde.setText(text);
-            
             /* Se necessário caso a pilha de alterações estoure a memória...
             if (alteracoesProx.size() >= 100) {
                 alteracoesProx.poll();
             } */
+            String text = txpIde.getText();
             alteracoesProx.push(text);
-            oldText = text;
+            oldText = alteracoesAnt.pop();
+            txpIde.setText(oldText);
         }
     }//GEN-LAST:event_mitDesfazerActionPerformed
 
     private void mitRefazerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitRefazerActionPerformed
         if (!alteracoesProx.isEmpty()) {
-            String text = alteracoesProx.pop();
-            txpIde.setText(text);
-            
             /* Se necessário caso a pilha de alterações estoure a memória...
             if (alteracoesAnt.size() >= 100) {
                 alteracoesAnt.poll();
             } */
+            String text = txpIde.getText();
             alteracoesAnt.push(text);
+            oldText = alteracoesProx.pop();
+            txpIde.setText(oldText);
         }
     }//GEN-LAST:event_mitRefazerActionPerformed
     
