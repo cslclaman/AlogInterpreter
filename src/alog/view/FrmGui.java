@@ -160,6 +160,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         jLabel5 = new javax.swing.JLabel();
         lblLogo = new javax.swing.JLabel();
         lblLogo1 = new javax.swing.JLabel();
+        btnSair = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         mnuArquivo = new javax.swing.JMenu();
         mitAbrir = new javax.swing.JMenuItem();
@@ -173,6 +174,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         mnuVerificar = new javax.swing.JMenu();
         mitVerificarAlgoritmo = new javax.swing.JMenuItem();
         mitExibirErros = new javax.swing.JMenuItem();
+        mitProximoPasso = new javax.swing.JMenuItem();
         mnuAjuda = new javax.swing.JMenu();
         mitSobre = new javax.swing.JMenuItem();
 
@@ -302,6 +304,13 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
         lblLogo1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/img/logo-cps-64.png"))); // NOI18N
 
+        btnSair.setText("Sair");
+        btnSair.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSairActionPerformed(evt);
+            }
+        });
+
         mnuArquivo.setText("Arquivo");
 
         mitAbrir.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
@@ -383,6 +392,15 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         });
         mnuVerificar.add(mitExibirErros);
 
+        mitProximoPasso.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F5, 0));
+        mitProximoPasso.setText("Próximo passo");
+        mitProximoPasso.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mitProximoPassoActionPerformed(evt);
+            }
+        });
+        mnuVerificar.add(mitProximoPasso);
+
         jMenuBar1.add(mnuVerificar);
 
         mnuAjuda.setText("Ajuda");
@@ -427,7 +445,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                                 .addComponent(btnVerificar, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(31, 31, 31)
                                 .addComponent(btnProxPerc, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 109, Short.MAX_VALUE)))
+                        .addGap(0, 94, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
@@ -435,7 +453,8 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                         .addGap(18, 18, 18)
                         .addComponent(lblLogo1))
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 311, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel5))
+                    .addComponent(jLabel5)
+                    .addComponent(btnSair, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 106, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -471,7 +490,9 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel3)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 58, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSair, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -488,7 +509,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             interpreter.proxima();
             enabled = interpreter.existeProxima();
         }
-        btnProxPerc.setEnabled(enabled);
+        btnProxPerc.setEnabled(enabled && !btnEntradaConfirma.isEnabled());
         emExecucao = enabled;
         if (!enabled) {
             JOptionPane.showMessageDialog(this, "Execução finalizada", "Execução finalizada", JOptionPane.INFORMATION_MESSAGE);
@@ -661,7 +682,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     
     private void btnEntradaConfirmaActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEntradaConfirmaActionPerformed
         interpreter.proxima();
-        btnProxPerc.setEnabled(interpreter.existeProxima());
+        btnProxPerc.setEnabled(interpreter.existeProxima() && !btnEntradaConfirma.isEnabled());
         emExecucao = interpreter.existeProxima();
     }//GEN-LAST:event_btnEntradaConfirmaActionPerformed
 
@@ -748,7 +769,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     }//GEN-LAST:event_txpIdeCaretUpdate
 
     private void mitSairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitSairActionPerformed
-        System.exit(0);
+        encerra();
     }//GEN-LAST:event_mitSairActionPerformed
 
     private void mitAbrirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitAbrirActionPerformed
@@ -857,10 +878,21 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             txpIde.setText(oldText);
         }
     }//GEN-LAST:event_mitRefazerActionPerformed
+
+    private void mitProximoPassoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitProximoPassoActionPerformed
+        if (btnProxPerc.isEnabled()) {
+            btnProxPercActionPerformed(evt);
+        }
+    }//GEN-LAST:event_mitProximoPassoActionPerformed
+
+    private void btnSairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSairActionPerformed
+        encerra();
+    }//GEN-LAST:event_btnSairActionPerformed
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEntradaConfirma;
     private javax.swing.JButton btnProxPerc;
+    private javax.swing.JButton btnSair;
     private javax.swing.JButton btnVerificar;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -880,6 +912,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private javax.swing.JMenuItem mitAbrir;
     private javax.swing.JMenuItem mitDesfazer;
     private javax.swing.JMenuItem mitExibirErros;
+    private javax.swing.JMenuItem mitProximoPasso;
     private javax.swing.JMenuItem mitRefazer;
     private javax.swing.JMenuItem mitSair;
     private javax.swing.JMenuItem mitSalvar;
@@ -906,11 +939,6 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private String oldText;
     
     private DefaultTableModel tabVariaveis;
-    
-    private int blocoAtual = 0;
-    private boolean operacaoCondicional = false;
-    private LinkedList<Boolean> condicionaisResult;
-    private boolean execProx;
     
     private File arquivo;
     
@@ -1019,7 +1047,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         txpEntrada.setText("");
         txpEntrada.setEditable(false);
         txpEntrada.setBackground(backgroundDisabled);
-        btnProxPerc.setEnabled(true);
+        btnProxPerc.setEnabled(interpreter.existeProxima());
         btnProxPerc.requestFocus();
         
         return linha;
@@ -1085,5 +1113,9 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             Token tokenAnt = tokensAnt.pop();
             docIde.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
         }
+    }
+    
+    private void encerra() {
+        System.exit(0);
     }
 }

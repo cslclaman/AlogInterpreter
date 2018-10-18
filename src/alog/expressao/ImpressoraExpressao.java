@@ -7,7 +7,6 @@ package alog.expressao;
 
 import alog.token.Token;
 import java.util.LinkedList;
-import java.util.List;
 
 /**
  *
@@ -29,7 +28,6 @@ public class ImpressoraExpressao {
         tokenVazio.setPalavra("");
         
         this.expressao = expressao;
-        System.out.println(expressao + " - " + (expressao.isResolvida() ? "Result " + expressao.getResultado() : " nres"));
         tokens = new Token[expressao.listaTokens().size()];
         for (int i = 0; i < tokens.length; i++) {
             tokens[i] = tokenVazio;
@@ -46,7 +44,6 @@ public class ImpressoraExpressao {
     public void setExpressaoAtual(Expressao expressao) {
         this.expressao = expressao;
         validaOrdem(expressao);
-        System.out.println(expressao + " - " + (expressao.isResolvida() ? "Result " + expressao.getResultado() : " nres"));
         defineTexto();
     }
     
