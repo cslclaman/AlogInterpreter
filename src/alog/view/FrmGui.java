@@ -676,6 +676,10 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         if (!text.equals(oldText)){
             btnVerificar.setEnabled(true);
             alteracoesProx.clear();
+            // para garantir que não vai estourar a pilha
+            if (alteracoesAnt.size() > 100) {
+                alteracoesAnt.poll();
+            }
             alteracoesAnt.push(oldText);
         }
         if (formatacao != FORMAT_PLAIN){
@@ -859,10 +863,10 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
     private void mitDesfazerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitDesfazerActionPerformed
         if (!alteracoesAnt.isEmpty()) {
-            /* Se necessário caso a pilha de alterações estoure a memória...
+            // Se necessário caso a pilha de alterações estoure a memória...
             if (alteracoesProx.size() >= 100) {
                 alteracoesProx.poll();
-            } */
+            } 
             String text = txpIde.getText();
             alteracoesProx.push(text);
             oldText = alteracoesAnt.pop();
@@ -872,10 +876,10 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
     private void mitRefazerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitRefazerActionPerformed
         if (!alteracoesProx.isEmpty()) {
-            /* Se necessário caso a pilha de alterações estoure a memória...
+            // Se necessário caso a pilha de alterações estoure a memória...
             if (alteracoesAnt.size() >= 100) {
                 alteracoesAnt.poll();
-            } */
+            } 
             String text = txpIde.getText();
             alteracoesAnt.push(text);
             oldText = alteracoesProx.pop();
