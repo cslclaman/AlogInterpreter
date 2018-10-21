@@ -5,7 +5,7 @@
  */
 package alog.view;
 
-import alog.Principal;
+import fatec.alg.Principal;
 import alog.analise.Erro;
 import alog.analise.TipoErro;
 import alog.config.ConfigInterpreter;
@@ -189,7 +189,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
         jScrollPane2.setVerifyInputWhenFocusTarget(false);
 
-        txpIde.setFont(new java.awt.Font("Consolas", 0, 12)); // NOI18N
+        txpIde.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
         txpIde.addCaretListener(new javax.swing.event.CaretListener() {
             public void caretUpdate(javax.swing.event.CaretEvent evt) {
                 txpIdeCaretUpdate(evt);
@@ -252,7 +252,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
         txpEntrada.setEditable(false);
         txpEntrada.setBackground(javax.swing.UIManager.getDefaults().getColor("FormattedTextField.disabledBackground"));
-        txpEntrada.setFont(new java.awt.Font("Consolas", 0, 12)); // NOI18N
+        txpEntrada.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
         txpEntrada.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 txpEntradaKeyPressed(evt);
@@ -267,7 +267,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
         txpProcessamento.setEditable(false);
         txpProcessamento.setBackground(javax.swing.UIManager.getDefaults().getColor("FormattedTextField.disabledBackground"));
-        txpProcessamento.setFont(new java.awt.Font("Consolas", 0, 12)); // NOI18N
+        txpProcessamento.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
         jScrollPane7.setViewportView(txpProcessamento);
 
         jLabel3.setText("Saída");
@@ -277,7 +277,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
         txpSaida.setEditable(false);
         txpSaida.setBackground(javax.swing.UIManager.getDefaults().getColor("FormattedTextField.disabledBackground"));
-        txpSaida.setFont(new java.awt.Font("Consolas", 0, 12)); // NOI18N
+        txpSaida.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
         txpSaida.setMinimumSize(new java.awt.Dimension(13, 66));
         txpSaida.setName(""); // NOI18N
         txpSaida.setPreferredSize(new java.awt.Dimension(13, 66));
