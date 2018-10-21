@@ -26,7 +26,6 @@ import java.awt.Color;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
@@ -38,8 +37,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -81,12 +78,14 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private final Color backgroundEnabled = javax.swing.UIManager.getDefaults().getColor("FormattedTextField.background");
     
     private FrmListaErros frmListaErros;
+    private String textoOrig;
     
     /**
      * Creates new form FrmTeste
      */
     public FrmGui() {
         oldText = "";
+        textoOrig = "";
         
         sc = new StyleContext();
         
@@ -163,6 +162,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         btnSair = new javax.swing.JButton();
         jMenuBar1 = new javax.swing.JMenuBar();
         mnuArquivo = new javax.swing.JMenu();
+        mitNovo = new javax.swing.JMenuItem();
         mitAbrir = new javax.swing.JMenuItem();
         mitSalvar = new javax.swing.JMenuItem();
         mitSalvarComo = new javax.swing.JMenuItem();
@@ -178,9 +178,14 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         mnuAjuda = new javax.swing.JMenu();
         mitSobre = new javax.swing.JMenuItem();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("Interpreter");
         setMinimumSize(new java.awt.Dimension(800, 600));
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         jScrollPane2.setVerifyInputWhenFocusTarget(false);
 
@@ -210,7 +215,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         jScrollPane2.setRowHeaderView(new TextLineNumber(txpIde, 2));
 
         btnProxPerc.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/img/icon-next-arrow-24.png"))); // NOI18N
-        btnProxPerc.setText("Próximo passo");
+        btnProxPerc.setText("Próximo passo (seta p/ baixo)");
         btnProxPerc.setActionCommand("Próximo passo >>");
         btnProxPerc.setEnabled(false);
         btnProxPerc.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
@@ -317,6 +322,15 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
         mnuArquivo.setText("Arquivo");
 
+        mitNovo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_MASK));
+        mitNovo.setText("Novo");
+        mitNovo.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mitNovoActionPerformed(evt);
+            }
+        });
+        mnuArquivo.add(mitNovo);
+
         mitAbrir.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
         mitAbrir.setText("Abrir");
         mitAbrir.addActionListener(new java.awt.event.ActionListener() {
@@ -396,7 +410,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         });
         mnuVerificar.add(mitExibirErros);
 
-        mitProximoPasso.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_F5, 0));
+        mitProximoPasso.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_DOWN, 0));
         mitProximoPasso.setText("Próximo passo");
         mitProximoPasso.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -532,7 +546,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     this,
                     "Deseja interromper a execução e verificar novamente o programa?",
                     "Reiniciar",
-                    JOptionPane.YES_NO_CANCEL_OPTION)) {
+                    JOptionPane.YES_NO_OPTION)) {
                 return;
             }
         }
@@ -803,7 +817,8 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     }
                     codigofonte.append("\n");
                 }
-                txpIde.setText(codigofonte.toString());
+                textoOrig = codigofonte.toString();
+                txpIde.setText(textoOrig);
                 br.close();
             } catch (IOException ex){
                 JOptionPane.showMessageDialog(this, "Não foi possível carregar o arquivo especificado", "Erro ao abrir arquivo", JOptionPane.ERROR_MESSAGE);
@@ -814,19 +829,20 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
     private void mitSalvarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitSalvarActionPerformed
         if (arquivo == null){
-            String caminho = System.getProperty("user.home") + File.separator + "algoritmo.txt";
+            String caminho = System.getProperty("user.home") + File.separator + "algoritmo.alg";
             arquivo = new File(caminho);
             
             mitSalvarComoActionPerformed(evt);
         } else {
             try {
+                textoOrig = txpIde.getText();
                 FileOutputStream fos = new FileOutputStream(arquivo, false);
                 OutputStreamWriter wr = new OutputStreamWriter(fos,"UTF-8");
-                wr.write(txpIde.getText());
+                wr.write(textoOrig);
                 wr.close();
                 fos.close();
             } catch (IOException ex){
-                JOptionPane.showMessageDialog(this, "Não foi possível carregar o arquivo especificado", "Erro ao abrir arquivo", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Não foi possível salvar o arquivo especificado", "Erro ao salvar arquivo", JOptionPane.ERROR_MESSAGE);
                 System.err.println(ex.toString()); 
             }
         }
@@ -834,7 +850,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
     private void mitSalvarComoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitSalvarComoActionPerformed
         JFileChooser fileChooser = new JFileChooser(arquivo);
-        fileChooser.setFileFilter(new FileNameExtensionFilter("Arquivos de texto", "txt", "alg"));
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Arquivos de texto", "alg"));
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
         fileChooser.setMultiSelectionEnabled(false);
         fileChooser.setSelectedFile(arquivo);
@@ -843,7 +859,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             arquivo = fileChooser.getSelectedFile();
             int pontoIndex = arquivo.getName().lastIndexOf(".");
             if (pontoIndex < 0) {
-                arquivo = new File(arquivo.getPath() + ".txt");
+                arquivo = new File(arquivo.getPath() + ".alg");
             }
             mitSalvarActionPerformed(evt);
         }
@@ -896,6 +912,27 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private void btnSairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSairActionPerformed
         encerra();
     }//GEN-LAST:event_btnSairActionPerformed
+
+    private void mitNovoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitNovoActionPerformed
+        String atual = txpIde.getText();
+        if (!textoOrig.equals(atual)) {
+            if (JOptionPane.OK_OPTION == JOptionPane.showConfirmDialog(
+                    this,
+                    "Deseja salvar o seu código atual?",
+                    "Novo programa",
+                    JOptionPane.YES_NO_OPTION)) {
+                mitSalvarActionPerformed(evt);
+            }
+        }
+        docIde.setCharacterAttributes(0, atual.length(), stylePlain, true);
+        textoOrig = "";
+        txpIde.setText("");
+        oldText = "";
+    }//GEN-LAST:event_mitNovoActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        encerra();
+    }//GEN-LAST:event_formWindowClosing
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEntradaConfirma;
@@ -920,6 +957,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private javax.swing.JMenuItem mitAbrir;
     private javax.swing.JMenuItem mitDesfazer;
     private javax.swing.JMenuItem mitExibirErros;
+    private javax.swing.JMenuItem mitNovo;
     private javax.swing.JMenuItem mitProximoPasso;
     private javax.swing.JMenuItem mitRefazer;
     private javax.swing.JMenuItem mitSair;
@@ -1124,6 +1162,16 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     }
     
     private void encerra() {
+        String atual = txpIde.getText();
+        if (!textoOrig.equals(atual)) {
+            if (JOptionPane.OK_OPTION == JOptionPane.showConfirmDialog(
+                    this,
+                    "Deseja salvar o seu código atual antes de sair?",
+                    "Fechar programa",
+                    JOptionPane.YES_NO_OPTION)) {
+                mitSalvarActionPerformed(null);
+            }
+        }
         System.exit(0);
     }
 }
