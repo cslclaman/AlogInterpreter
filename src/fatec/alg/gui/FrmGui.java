@@ -717,28 +717,38 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
     private void txpIdeKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_txpIdeKeyPressed
         switch (evt.getKeyCode()){
-            case KeyEvent.VK_TAB:
+            case KeyEvent.VK_TAB: {
                 evt.consume();
-                {
+                if (!evt.isShiftDown()) {
                     int pos = txpIde.getCaretPosition();
                     String txta = txpIde.getText().substring(0, pos);
                     String txtb = txpIde.getText().substring(pos);
                     txpIde.setText(txta + "    " + txtb);
                     txpIde.setCaretPosition(pos + 4);
-                }
-                break;
-            case KeyEvent.VK_ENTER:
-                evt.consume();
-                {
+                } else {
                     int pos = txpIde.getCaretPosition();
                     String txta = txpIde.getText().substring(0, pos);
                     String txtb = txpIde.getText().substring(pos);
-                    txpIde.setText(txta + "\n" + txtb);
-                    txpIde.setCaretPosition(pos + 1);
+                    if (txta.length() >= 4 && txta.substring(pos - 4, pos).equals("    ")) {
+                        txpIde.setText(txta.substring(0, pos - 4) + txtb);
+                        txpIde.setCaretPosition(pos - 4);
+                    }
                 }
+                break; 
+            }
+            case KeyEvent.VK_ENTER: {
+                evt.consume();
+                int pos = txpIde.getCaretPosition();
+                String txta = txpIde.getText().substring(0, pos);
+                String txtb = txpIde.getText().substring(pos);
+                txpIde.setText(txta + "\n" + txtb);
+                txpIde.setCaretPosition(pos + 1);
                 break;
-            case KeyEvent.VK_V:
-                if (evt.isControlDown()) {
+            } 
+            case KeyEvent.VK_INSERT:
+            case KeyEvent.VK_V: {
+                if ((evt.getKeyCode() == KeyEvent.VK_V && evt.isControlDown()) || 
+                    (evt.getKeyCode() == KeyEvent.VK_INSERT && evt.isShiftDown()) ) {
                     evt.consume();
                     Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
                     try {
@@ -768,6 +778,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     }
                 }
                 break;
+            }
             default:
                 break;
         }
