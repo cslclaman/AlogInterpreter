@@ -88,7 +88,7 @@ public class EntradaDados extends Instrucao {
      * Valida se o token identificador não é nulo e se há pelo menos um parâmetro.
      */
     @Override
-    public void finaliza() {
+    public void fazValidacao() {
         if (valida) {
             valida = 
                 nome != null &&

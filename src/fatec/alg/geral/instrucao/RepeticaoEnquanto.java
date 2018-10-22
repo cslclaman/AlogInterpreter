@@ -39,7 +39,7 @@ public class RepeticaoEnquanto extends EstruturaControle {
      * Valida se o token Enquanto não é nulo e se a condição e a instrução são válidas.
      */
     @Override
-    public void finaliza() {
+    public void fazValidacao() {
         if (valida) {
             valida =
                 tokenEnquanto != null &&

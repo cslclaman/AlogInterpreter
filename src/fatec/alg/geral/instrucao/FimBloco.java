@@ -32,7 +32,7 @@ public class FimBloco extends Instrucao {
      * Valida se o token Fim não é nulo.
      */
     @Override
-    public void finaliza() {
+    public void fazValidacao() {
         if (valida){
             valida = fim != null;
         }

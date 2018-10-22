@@ -19,8 +19,8 @@ public class SaidaDados extends ChamadaRotina {
      * Valida se a saída de dados possui pelo menos um parâmetro.
      */
     @Override
-    public void finaliza() {
-        super.finaliza();
+    public void fazValidacao() {
+        super.fazValidacao();
         if (valida) {
             valida = numParametros > 0;
         }

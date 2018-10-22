@@ -99,9 +99,9 @@ public abstract class Instrucao {
     }
     
     /**
-     * Finaliza a instrução. Isso pode implicar em validar atributos e definir validade.
+     * Valida a instrução, incluindo atributos e listas internas.
      */
-    public abstract void finaliza();
+    public abstract void fazValidacao();
     
     /**
      * Retorna descrição da expressão e o texto armazenado.

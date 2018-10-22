@@ -267,6 +267,10 @@ public enum TipoInstrucao {
         this.exibicao = exibicao;
     }
     
+    /**
+     * Retorna texto de exibição
+     * @return
+     */
     @Override
     public String toString() {
         return exibicao;

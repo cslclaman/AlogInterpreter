@@ -103,7 +103,7 @@ public class ChamadaRotina extends Instrucao {
      * todas as expressões/parâmetros são válidas.
      */
     @Override
-    public void finaliza() {
+    public void fazValidacao() {
         if (valida) {
             int numValidos = 0;
             for (Expressao expressao : parametros) {

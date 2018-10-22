@@ -111,7 +111,7 @@ public class Bloco extends Instrucao {
      * e se todas as instruções são válidas.
      */
     @Override
-    public void finaliza() {
+    public void fazValidacao() {
         if (valida) {
             int instrValidas = 0;
             for (Instrucao instrucao : instrucoes) {

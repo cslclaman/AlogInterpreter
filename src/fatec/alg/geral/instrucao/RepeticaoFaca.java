@@ -58,7 +58,7 @@ public class RepeticaoFaca extends EstruturaControle {
      * Valida se o token Faça não é nulo e se a condição e a instrução são válidas.
      */
     @Override
-    public void finaliza() {
+    public void fazValidacao() {
         if (valida) {
             valida =
                 tokenFaca != null &&

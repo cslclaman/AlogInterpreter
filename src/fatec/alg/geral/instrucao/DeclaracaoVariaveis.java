@@ -81,7 +81,7 @@ public class DeclaracaoVariaveis extends Instrucao {
      * Valida se foi definido um tipo válido e se há pelo menos um nome de variável informado.
      */
     @Override
-    public void finaliza() {
+    public void fazValidacao() {
         if (valida) {
             valida = 
                 tipoVariavel != null && 

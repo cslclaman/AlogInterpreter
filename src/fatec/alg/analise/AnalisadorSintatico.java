@@ -100,7 +100,7 @@ public class AnalisadorSintatico extends Verificador {
                 erros.add(new Erro(TipoErro.ALERTA, tokens.get(size - 1),
                         "Fim do programa atingido"));
             }
-            instrucao.finaliza();
+            instrucao.fazValidacao();
             return instrucao;
         } 
         
@@ -108,7 +108,7 @@ public class AnalisadorSintatico extends Verificador {
         if (!funcaoValida(token)){
             pos++;
             instrucao.addToken(token);
-            instrucao.finaliza();
+            instrucao.fazValidacao();
             return instrucao;
         }
         
@@ -229,7 +229,7 @@ public class AnalisadorSintatico extends Verificador {
                 break;
         }
         
-        instrucao.finaliza();
+        instrucao.fazValidacao();
         return instrucao;
     }
     

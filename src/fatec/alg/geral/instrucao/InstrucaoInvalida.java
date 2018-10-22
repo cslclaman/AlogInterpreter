@@ -20,6 +20,6 @@ public class InstrucaoInvalida extends Instrucao {
      * Sem ação.
      */
     @Override
-    public void finaliza() {
+    public void fazValidacao() {
     }
 }

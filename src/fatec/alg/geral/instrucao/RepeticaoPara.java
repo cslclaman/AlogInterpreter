@@ -133,7 +133,7 @@ public class RepeticaoPara extends EstruturaControle {
      * Valida se as expressões e a instrução não são nulas e são válidas.
      */
     @Override
-    public void finaliza() {
+    public void fazValidacao() {
         if (valida) {
             valida =
                 tokenPara != null &&

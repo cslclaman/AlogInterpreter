@@ -63,7 +63,7 @@ public class RepeticaoRepita extends EstruturaControle {
      * Valida se o token Repita não é nulo e se a condição e a instrução são válidas.
      */
     @Override
-    public void finaliza() {
+    public void fazValidacao() {
         if (valida) {
             valida =
                 tokenRepita != null &&

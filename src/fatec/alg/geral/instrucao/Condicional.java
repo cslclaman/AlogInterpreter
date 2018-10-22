@@ -123,7 +123,7 @@ public class Condicional extends EstruturaControle {
      * as expressões e instruções são válidas.
      */
     @Override
-    public void finaliza() {
+    public void fazValidacao() {
         if (valida) {
             boolean compostaValida = 
                 (!composta) ||

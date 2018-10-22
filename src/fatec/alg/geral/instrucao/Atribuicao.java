@@ -61,7 +61,7 @@ public class Atribuicao extends Instrucao {
      * é uma expressão válida.
      */
     @Override
-    public void finaliza() {
+    public void fazValidacao() {
         if (valida) {
             valida = 
                 variavel != null &&
