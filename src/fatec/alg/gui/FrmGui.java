@@ -1058,11 +1058,11 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             impressoraExpressao.setExpressaoAtual(expressao);
         }
         txpProcessamento.setText(impressoraExpressao.getTexto());
-        
+        /*
         Token tokenExpr = impressoraExpressao.getTokenExprAtual();
         Token tokenRes = impressoraExpressao.getTokenResultado();
         docProc.setCharacterAttributes(tokenExpr.getPosicao(), tokenExpr.getTamanho(), styleOper, true);
-        docProc.setCharacterAttributes(tokenRes.getPosicao(), tokenRes.getTamanho(), styleRes, true);
+        docProc.setCharacterAttributes(tokenRes.getPosicao(), tokenRes.getTamanho(), styleRes, true);*/
         //System.out.println(expressao.imprimeExpressao());
     }
 
