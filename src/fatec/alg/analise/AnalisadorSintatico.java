@@ -973,6 +973,7 @@ public class AnalisadorSintatico extends Verificador {
         funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
         funcoesEsperadas.add(FuncaoToken.OP_SIG_NEGATIVO);
         funcoesEsperadas.add(FuncaoToken.OP_SIG_POSITIVO);
+        funcoesEsperadas.add(FuncaoToken.OP_LOG_NAO);
                     
         while (existeProxima()){
             token = tokens.get(pos++);
@@ -1002,6 +1003,7 @@ public class AnalisadorSintatico extends Verificador {
                     balancParenteses ++;
                     funcoesEsperadas.add(FuncaoToken.OP_SIG_NEGATIVO);
                     funcoesEsperadas.add(FuncaoToken.OP_SIG_POSITIVO);
+                    funcoesEsperadas.add(FuncaoToken.OP_LOG_NAO);
                     break;
                     
                 case CONST_CARACTER:
@@ -1214,6 +1216,7 @@ public class AnalisadorSintatico extends Verificador {
                     funcoesEsperadas.add(FuncaoToken.LIB_MATH_RAIZ);
                     funcoesEsperadas.add(FuncaoToken.OP_SIG_NEGATIVO);
                     funcoesEsperadas.add(FuncaoToken.OP_SIG_POSITIVO);
+                    funcoesEsperadas.add(FuncaoToken.OP_LOG_NAO);
                     break;
                     
                 case DELIM_PARENTESES_FECHA:
