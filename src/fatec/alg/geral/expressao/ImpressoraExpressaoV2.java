@@ -30,7 +30,7 @@ public class ImpressoraExpressaoV2 {
     
     private LinkedList<Impressao> expressoes;
     private Expressao inicial;
-    private String texto;
+    private StringBuffer texto;
     private Token selecionado;
     private Token resolvido;
     private int posicao;
@@ -62,15 +62,16 @@ public class ImpressoraExpressaoV2 {
     
     private void defineTexto(Expressao exprAtual){
         posicao = 0;
+        texto = new StringBuffer();
         imprime(inicial, null);
         for (Impressao i : expressoes) {
-            if (i.expressao == inicial) {
-                texto = i.token.getPalavra();
-            }
             if (i.expressao == exprAtual) {
+                System.out.println(i.expressao);
                 selecionado = (i.anterior == null ? i.token : i.anterior.token);
                 if (exprAtual.isResolvida()) {
                     resolvido = i.token;
+                } else {
+                    resolvido = new Token(0, 0, 0, 0);
                 }
                 break;
             }
@@ -83,25 +84,29 @@ public class ImpressoraExpressaoV2 {
             i.anterior = a;
         }
         if (e.isResolvida()) {
-            i.token = geraToken(e.getResultado());
+            i.token = geraToken(e.getResultado() + " ");
             posicao += i.token.getTamanho() + 1;
+            texto.append(i.token.getPalavra());
         } else {
-            StringBuffer buf = new StringBuffer();
+            String tp;
             if (e.getParentesesAbre() != null) {
-                buf.append(e.getParentesesAbre().getPalavra()).append(" ");
-                posicao += e.getParentesesAbre().getTamanho() + 1;
+                tp = e.getParentesesAbre().getPalavra() + " ";
+                texto.append(tp);
+                posicao += tp.length();
             }
             switch (e.tipoExpressao) {
                 case OPERANDO_CONSTANTE:
                 case OPERANDO_VARIAVEL:
                     Operando operando = (Operando)e;
-                    buf.append(operando.getOperando().getPalavra()).append(" ");
-                    posicao += operando.getOperando().getTamanho() + 1;
+                    tp = operando.getOperando().getPalavra() + " ";
+                    texto.append(tp);
+                    posicao += tp.length();
                     break;
                 case OPERACAO_UNARIA:
                     OperacaoUnaria operacaoUnaria = (OperacaoUnaria)e;
-                    buf.append(operacaoUnaria.getOperador().getPalavra()).append(" ");
-                    posicao += operacaoUnaria.getOperador().getTamanho() + 1;
+                    tp = operacaoUnaria.getOperador().getPalavra() + " ";
+                    texto.append(tp);
+                    posicao += tp.length();
                     imprime(operacaoUnaria.getExpressao(), i);
                     break;
                 case OPERACAO_ARITMETICA:
@@ -109,41 +114,45 @@ public class ImpressoraExpressaoV2 {
                 case OPERACAO_LOGICA:
                     Operacao operacao = (Operacao)e;
                     imprime(operacao.getExpressaoEsq(), i);
-                    buf.append(operacao.getOperador().getPalavra()).append(" ");
-                    posicao += operacao.getOperador().getTamanho() + 1;
+                    tp = operacao.getOperador().getPalavra() + " ";
+                    texto.append(tp);
+                    posicao += tp.length();
                     imprime(operacao.getExpressaoDir(), i);
                     break;
                 case OPERANDO_FUNCAO:
                     ChamadaFuncao chamadaFuncao = (ChamadaFuncao)e;
-                    buf.append(chamadaFuncao.getTokenNome().getPalavra()).append(" ");
-                    posicao += chamadaFuncao.getTokenNome().getTamanho() + 1;
-                    buf.append("( ");
-                    posicao += 2;
+                    tp = chamadaFuncao.getTokenNome().getPalavra() + " ( ";
+                    texto.append(tp);
+                    posicao += tp.length();
+                    
                     boolean first = true;
                     for (Expressao expr : chamadaFuncao.getParametros()) {
                         if (first) {
                             first = false;
                         } else {
-                            buf.append(", ");
-                            posicao += 2;
+                            tp = ", ";
+                            texto.append(tp);
+                            posicao += tp.length();
                         }
                         imprime(expr, i);
                     }
-                    buf.append(") ");
-                    posicao += 2;
+                    tp = ") ";
+                    texto.append(tp);
+                    posicao += tp.length();
                     break;
             }
             if (e.getParentesesFecha() != null) {
-                buf.append(e.getParentesesFecha().getPalavra()).append(" ");
-                posicao += e.getParentesesFecha().getTamanho() + 1;
+                tp = e.getParentesesFecha().getPalavra() + " ";
+                texto.append(tp);
+                posicao += tp.length();
             }
-            i.token = geraToken(buf.toString());
+            i.token = geraToken(texto.toString());
         }
         expressoes.add(i);
     }
     
     public String getTexto() {
-        return texto;
+        return texto.toString().trim();
     }
 
     public Token getTokenExprAtual() {
