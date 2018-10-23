@@ -288,21 +288,17 @@ public class PreProcessador extends Verificador {
     private void verificaRepeticaoFaca(Instrucao instrucao) {
         RepeticaoFaca repetitiva = (RepeticaoFaca)instrucao;
         Expressao condicao = repetitiva.getCondicao();
+        verificaInstrucao(repetitiva.getInstrucao());
         verificaExpressao(condicao);
-        int nerr = geraErroTipoDadoCondicional(repetitiva.getTokenFaca(), condicao.getTipoResultado(), TipoDado.LOGICO);
-        if (nerr == 0) {
-            verificaInstrucao(repetitiva.getInstrucao());
-        }
+        geraErroTipoDadoCondicional(repetitiva.getTokenFaca(), condicao.getTipoResultado(), TipoDado.LOGICO);
     }
     
     private void verificaRepeticaoRepita(Instrucao instrucao) {
         RepeticaoRepita repetitiva = (RepeticaoRepita)instrucao;
         Expressao condicao = repetitiva.getCondicao();
+        verificaInstrucao(repetitiva.getInstrucao());
         verificaExpressao(condicao);
-        int nerr = geraErroTipoDadoCondicional(repetitiva.getTokenRepita(), condicao.getTipoResultado(), TipoDado.LOGICO);
-        if (nerr == 0) {
-            verificaInstrucao(repetitiva.getInstrucao());
-        }
+        geraErroTipoDadoCondicional(repetitiva.getTokenRepita(), condicao.getTipoResultado(), TipoDado.LOGICO);
     }
     
     private void verificaRepeticaoPara(Instrucao instrucao) {
