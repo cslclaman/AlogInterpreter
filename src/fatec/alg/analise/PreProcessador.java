@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fatec.alg.analise;
 
 import fatec.alg.geral.expressao.Expressao;
@@ -39,11 +34,15 @@ import java.util.List;
  */
 public class PreProcessador extends Verificador {
     
+    /**
+     * Classe de verificação de variáveis: verifica se foi inicializada e se
+     * possui usos pelo código.
+     */
     private class VariavelVerif {
-        Token token;
-        int chamadas;
-        TipoDado tipo;
-        boolean inicializada;
+        private TipoDado tipo;
+        private Token token;
+        private int chamadas;
+        private boolean inicializada;
 
         public VariavelVerif(Token token, TipoDado tipo) {
             this.token = token;
@@ -53,9 +52,13 @@ public class PreProcessador extends Verificador {
         }
     }
     
+    /**
+     * Classe de verificação de rotinas: verifica o número de chamadas e o número
+     * e tipo dos parâmetros.
+     */
     private class RotinaVerif {
-        int chamadas;
-        TipoDado[] parametros;
+        protected int chamadas;
+        protected TipoDado[] parametros;
 
         public RotinaVerif() {
             this.chamadas = 0;
@@ -67,8 +70,12 @@ public class PreProcessador extends Verificador {
         }
     }
     
+    /**
+     * Classe de verificação de funções: verifica as mesmas coisas que a rotina,
+     * além de analisar seu tipo de retorno.
+     */
     private class FuncaoVerif extends RotinaVerif {
-        TipoDado retorno; 
+        private TipoDado retorno; 
         
         public FuncaoVerif() {
             super();
@@ -133,7 +140,7 @@ public class PreProcessador extends Verificador {
     }
 
     /**
-     * Retorna o programa gerado após o pré-processamento.
+     * Retorna o programa executável gerado após o pré-processamento.
      * @return Programa.
      */
     public Programa getPrograma() {
