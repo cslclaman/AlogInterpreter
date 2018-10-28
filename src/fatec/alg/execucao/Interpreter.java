@@ -37,8 +37,20 @@ import java.util.LinkedList;
 import java.util.NoSuchElementException;
 
 /**
- * Classe que recebe uma expressão e executa.
+ * Classe que recebe um programa e executa as instruções nele contidas.
+ * Esse interpretador é baseado em passos, ou seja, executa um passo (token, 
+ * parte de expressão ou trecho de instrução) a cada chamada do método
+ * {@link #proxima() }.
+ * <br>Alguns passos são executados automaticamente por serem processos internos.
+ * A configuração de execução desses passos pode ser alterada por configurações
+ * no método {@link #setConfigInterpreter(fatec.alg.execucao.config.ConfigInterpreter) }.
+ * <br>Interações de entrada ou saída de dados e outras exibições são realizadas por
+ * meio da interface {@link InterfaceExecucao}.
+ * <br>Operações (aritméticas, lógicas e relacionais) são realizadas por meio da classe
+ * {@link Calculator} após execução de quaisquer sub-expressões que compõe a expressão
+ * sendo executada. 
  * @author Caique
+ * @version 1.0.0
  */
 public class Interpreter extends Verificador {
     
@@ -91,10 +103,18 @@ public class Interpreter extends Verificador {
         locked = false;
     }
 
+    /**
+     * 
+     * @param configInterpreter 
+     */
     public void setConfigInterpreter(ConfigInterpreter configInterpreter) {
         this.configInterpreter = configInterpreter;
     }
     
+    /**
+     * 
+     * @return 
+     */
     public boolean existeProxima() {
         return canGo && (!executed || !pilhaExecucao.isEmpty());
     }

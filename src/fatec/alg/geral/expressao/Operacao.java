@@ -1,14 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fatec.alg.geral.expressao;
 
 import fatec.alg.geral.token.Token;
 
 /**
- *
+ * Expressão de operações binárias.
  * @author Caique Souza
  */
 public class Operacao extends Expressao {
@@ -17,42 +12,79 @@ public class Operacao extends Expressao {
     private Expressao expressaoDir;
     private Token operador;
 
+    /**
+     * Instancia uma expressão sem filhos e tipo indefinido.
+     * O tipo será definido de acordo com o operador.
+     */
     public Operacao() {
         super();
         expressaoEsq = null;
         expressaoDir = null;
     }
 
+    /**
+     * Retorna a expressão à esquerda do operador.
+     * @return expressão esquerda
+     */
     public Expressao getExpressaoEsq() {
         return expressaoEsq;
     }
 
+    /**
+     * Define a expressão à esquerda do operador
+     * @param expressaoEsq expressão
+     */
     public void setExpressaoEsq(Expressao expressaoEsq) {
         this.expressaoEsq = expressaoEsq;
         defineTexto();
     }
 
+    /**
+     * Retorna a expressão à direita do operador.
+     * @return expressão direita
+     */
     public Expressao getExpressaoDir() {
         return expressaoDir;
     }
 
+    /**
+     * Define a expressão à direita do operador
+     * @param expressaoDir expressão
+     */
     public void setExpressaoDir(Expressao expressaoDir) {
         this.expressaoDir = expressaoDir;
         defineTexto();
     }
     
+    /**
+     * Atualiza a expressão à esquerda do operador
+     * @param expressao expressão
+     */
     public void atualizaExpressaoEsq(Expressao expressao) {
         this.expressaoEsq = expressao;
     }
 
+    /**
+     * Atualiza a expressão à direita do operador
+     * @param expressao expressão
+     */
     public void atualizaExpressaoDir(Expressao expressao) {
         this.expressaoDir = expressao;
     }
     
+    /**
+     * Retorna o token que identifica o operador da instrução
+     * @return token
+     */
     public Token getOperador() {
         return operador;
     }
 
+    /**
+     * Define o operador da expressão e define o tipo da expressão
+     * (aritmética, relacional ou lógica)
+     * @param operador token
+     */
     public void setOperador(Token operador) {
         this.operador = operador;
         defineTexto();
@@ -95,6 +127,10 @@ public class Operacao extends Expressao {
         }
     }
     
+    /**
+     * Imprime a expressão recursivamente.
+     * @return "&lt;Expressão Esquerda&gt; &lt;Operador&gt; &lt;Expressão Direita&gt;"
+     */
     @Override
     public String imprimeExpressao (){
         return "< " + 

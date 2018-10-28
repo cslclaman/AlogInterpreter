@@ -14,8 +14,8 @@ import fatec.alg.geral.variavel.Variavel;
  * @author Caique Souza
  */
 public class Calculator {
-    public static final String TRUE = "verdadeiro";
-    public static final String FALSE = "falso";
+    private static final String TRUE = "verdadeiro";
+    private static final String FALSE = "falso";
     
     private TipoDado tipo;
     private String valor;
