@@ -5,84 +5,62 @@
  */
 package fatec.alg.execucao.config;
 
+import java.util.HashMap;
+
 /**
  *
  * @author Caique Siqueira
  */
 public class ConfigInterpreter {
-    private boolean leiaAutoProx;
-    private boolean escrevaAutoProx;
-    private boolean escrevaQuebraLinha;
-    private boolean execConstAutoProx;
-    private boolean execVarAutoProx;
-    private boolean execBinFinAutoProx;
-    private boolean pushExprAutoProx;
     
-    public ConfigInterpreter() {
-        this.leiaAutoProx = false;
-        this.escrevaAutoProx = false;
-        this.escrevaQuebraLinha = true;
-        this.execConstAutoProx = true;
-        this.execVarAutoProx = false;
-        this.execBinFinAutoProx = false;
-        this.pushExprAutoProx = false;
-    }
-
-    public void setLeiaAutoProx(boolean leiaAutoProxLigado) {
-        this.leiaAutoProx = leiaAutoProxLigado;
-    }
-
-    public void setEscrevaAutoProx(boolean escrevaAutoProx) {
-        this.escrevaAutoProx = escrevaAutoProx;
-    }
-
-    public void setEscrevaQuebraLinha(boolean escrevaQuebraLinha) {
-        this.escrevaQuebraLinha = escrevaQuebraLinha;
-    }
-
-    public void setExecConstAutoProx(boolean execConstAutoProx) {
-        this.execConstAutoProx = execConstAutoProx;
-    }
-
-    public void setExecVarAutoProx(boolean ExecVarAutoProx) {
-        this.execVarAutoProx = ExecVarAutoProx;
-    }
-
-    public void setExecBinFinAutoProx(boolean execBinFinAutoProx) {
-        this.execBinFinAutoProx = execBinFinAutoProx;
-    }
-
-    public void setPushExprAutoProx(boolean pushExprAutoProx) {
-        this.pushExprAutoProx = pushExprAutoProx;
+    private HashMap<String, Object> configs;
+    
+    public final static String RUNNEXT_BLOCO_PILHA = "runnext.bloco.pilha";
+    public final static String RUNNEXT_LEIA_ATRIB = "runnext.leia.atrib";
+    public final static String RUNNEXT_ESCREVA_PILHA = "runnext.escreva.pilha";
+    public final static String RUNNEXT_EXPR_PILHA = "runnext.expressao.pilha";
+    public final static String RUNNEXT_EXPR_EXEC_CONST = "runnext.expressao.exec.constante";
+    public final static String RUNNEXT_EXPR_EXEC_VAR = "runnext.expressao.exec.variavel";
+    public final static String RUNNEXT_EXPR_EXEC_FUNC = "runnext.expressao.exec.funcao";
+    public final static String RUNNEXT_EXPR_EXEC_UNARIA = "runnext.expressao.exec.opunaria";
+    public final static String RUNNEXT_EXPR_EXEC_OPBIN = "runnext.expressao.exec.opbinaria";
+    public final static String RUNNEXT_EXPR_RES_CONST = "runnext.expressao.result.constante";
+    public final static String RUNNEXT_EXPR_RES_VAR = "runnext.expressao.result.variavel";
+    public final static String RUNNEXT_EXPR_RES_FUNC = "runnext.expressao.result.funcao";
+    public final static String RUNNEXT_EXPR_RES_UNARIA = "runnext.expressao.result.opunaria";
+    public final static String RUNNEXT_EXPR_RES_OPBIN = "runnext.expressao.result.opbinaria";
+    public final static String FORMAT_ESCREVA_QUEBRA = "format.escreva.quebralinha";
+    
+    public ConfigInterpreter(){
+        configs = new HashMap();
+        
+        configs.put(RUNNEXT_BLOCO_PILHA, true);
+        configs.put(RUNNEXT_LEIA_ATRIB, false);
+        configs.put(RUNNEXT_ESCREVA_PILHA, false);
+        configs.put(FORMAT_ESCREVA_QUEBRA, true);
+        configs.put(RUNNEXT_EXPR_PILHA, true);
+        configs.put(RUNNEXT_EXPR_EXEC_CONST, false);
+        configs.put(RUNNEXT_EXPR_RES_CONST, true);
+        configs.put(RUNNEXT_EXPR_EXEC_VAR, false);
+        configs.put(RUNNEXT_EXPR_RES_VAR, false);
+        configs.put(RUNNEXT_EXPR_EXEC_FUNC, false);
+        configs.put(RUNNEXT_EXPR_RES_FUNC, true);
+        configs.put(RUNNEXT_EXPR_EXEC_UNARIA, false);
+        configs.put(RUNNEXT_EXPR_RES_UNARIA, false);
+        configs.put(RUNNEXT_EXPR_EXEC_OPBIN, false);
+        configs.put(RUNNEXT_EXPR_RES_OPBIN, false);
     }
     
-    public boolean isLeiaAutoProx() {
-        return leiaAutoProx;
-    }
-
-    public boolean isEscrevaAutoProx() {
-        return escrevaAutoProx;
-    }
-
-    public boolean isEscrevaQuebraLinha() {
-        return escrevaQuebraLinha;
-    }
-
-    public boolean isExecConstAutoProx() {
-        return execConstAutoProx;
-    }
-
-    public boolean isExecVarAutoProx() {
-        return execVarAutoProx;
-    }
-
-    public boolean isExecBinFinAutoProx() {
-        return execBinFinAutoProx;
-    }
-
-    public boolean isPushExprAutoProx() {
-        return pushExprAutoProx;
+    public boolean getBoolean(String key){
+        if (configs.containsKey(key) && configs.get(key) instanceof Boolean ) {
+            return (boolean) configs.get(key);
+        } else {
+            return false;
+        }
     }
     
+    public void set (String key, Object valor) {
+        configs.put(key, valor);
+    }
     
 }

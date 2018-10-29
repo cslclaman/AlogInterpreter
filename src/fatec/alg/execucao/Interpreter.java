@@ -77,7 +77,7 @@ public class Interpreter extends Verificador {
     }
     
     private InterfaceExecucao interfaceExecucao;
-    private ConfigInterpreter configInterpreter;
+    private ConfigInterpreter config;
     private HashMap<String, Variavel> variaveis;
     private Programa programa;
     //private LinkedList<Instrucao> filaInstrucoes;
@@ -89,13 +89,17 @@ public class Interpreter extends Verificador {
     private boolean runNext;
     private boolean locked;
 
+    /**
+     * Instancia um interpretador com configurações padrão e em modo de espera.
+     * @param interfaceExecucao Interface de controle, entrada e saída
+     * @param programa O programa (instruções) a ser executado
+     */
     public Interpreter(InterfaceExecucao interfaceExecucao, Programa programa) {
         super();
-        this.configInterpreter = new ConfigInterpreter();
+        this.config = new ConfigInterpreter();
         this.interfaceExecucao = interfaceExecucao;
         this.programa = programa;
         variaveis = new HashMap<>();
-        //filaInstrucoes = new LinkedList<>();
         pilhaExecucao = new LinkedList<>();
         executed = false;
         canGo = true;
@@ -104,15 +108,15 @@ public class Interpreter extends Verificador {
     }
 
     /**
-     * 
+     * Define configurações para a execução do programa
      * @param configInterpreter 
      */
     public void setConfigInterpreter(ConfigInterpreter configInterpreter) {
-        this.configInterpreter = configInterpreter;
+        this.config = configInterpreter;
     }
     
     /**
-     * 
+     * Retorna se ainda existem expressões 
      * @return 
      */
     public boolean existeProxima() {
@@ -120,108 +124,136 @@ public class Interpreter extends Verificador {
     }
     
     public void proxima () {
-        if (locked) return;
+        /*
+         * Bloqueio para evitar casos em que este método é chamado enquanto uma
+         * chamada anterior não foi finalizada ainda.
+         */
+        if (locked) {
+            return;
+        }
         locked = true;
         
         runNext = false;
         do {
-        if (!canGo) return;
-        if (runNext) runNext = false;
-        if (pilhaExecucao.isEmpty()) {
-            if (!executed) {
-                pilhaExecucao.push(new Executavel(programa.getModuloPrincipal()));
-                executed = true;
-                interfaceExecucao.atualizaInstrucao();
-            } else {
+            /*
+             * Caso a execução não seja mais possível (instrução inválida ou
+             * simplesmente fim do programa).
+             */
+            if (!canGo) {
                 return;
             }
-        }
-        
-        Executavel exec;
-        try {
-            exec = pilhaExecucao.pop();
-        } catch (NoSuchElementException ex) {
-            erros.add(new Erro(TipoErro.DEVEL, ' ', 1, 1, 1, String.format(
-                "Pilha sem elemento de instrução: %s - %s",ex.getClass().getName(), ex.getMessage())));
-            Erro fatal = new Erro(TipoErro.ERRO, ' ', 1, 1, 1, 
-                "Falha ao carregar próxima instrução - interpretador finalizado");
-            erros.add(fatal);
-            canGo = false;
-            interfaceExecucao.erroFatal(fatal);
-            return;
-        }
-        
-        switch (exec.instrucao.getTipo()) {
-            case MODULO_PRINCIPAL:
-                executaModuloPrincipal(exec);
-                break;
-            
-            case BLOCO:
-                executaBloco(exec);
-                break;
-
-            case DECLARACAO_VARIAVEL:
-                executaDeclaracaoVariaveis(exec);
-                break;
-
-            case ENTRADA_DE_DADOS:
-                executaEntradaDados(exec);
-                break;
-
-            case SAIDA_DE_DADOS:
-                executaSaidaDados(exec);
-                break;
-
-            case ATRIBUICAO:
-                executaAtribuicao(exec);
-                break;
-
-            case CONDICIONAL:
-                executaCondicional(exec);
-                break;
-
-            case REPETICAO_ENQUANTO:
-                executaRepeticaoEnquanto(exec);
-                break;
-
-            case REPETICAO_FACA:
-                executaRepeticaoFaca(exec);
-                break;
-
-            case REPETICAO_REPITA:
-                executaRepeticaoRepita(exec);
-                break;
-
-            case REPETICAO_PARA:
-                executaRepeticaoPara(exec);
-                break;
-
-            case EXPRESSAO:
-                if (exec.total == 0 || exec.count < exec.total) {
-                    executaExpressao(exec);
+            /*
+             * Desativa execução automática do próximo passo (evita loop infinito)
+             */
+            runNext = false;
+            /*
+             * As instruções/expressões a serem executadas sempre estarão na pilha.
+             * Caso a pilha ainda não tenha sido inicializada (primeira instrução),
+             * adiciona o módulo principal do programa.
+             */
+            if (pilhaExecucao.isEmpty()) {
+                if (!executed) { //Valida que esse programa já foi executado
+                    pilhaExecucao.push(new Executavel(programa.getModuloPrincipal()));
+                    executed = true;
+                    interfaceExecucao.atualizaInstrucao();
                 } else {
-                    try {
-                        Executavel inst = pilhaExecucao.pop();
-                        pilhaExecucao.push(exec);
-                        pilhaExecucao.push(inst);
-                        interfaceExecucao.atualizaExpressaoAtual((Expressao)exec.instrucao);
-                    } catch (NoSuchElementException ex) {
-                        erros.add(new Erro(TipoErro.DEVEL, ' ', 1, 1, 1, String.format(
-                            "Pilha sem elemento de instrução: %s - %s",ex.getClass().getName(), ex.getMessage())));
-                        Erro fatal = new Erro(TipoErro.ERRO, ' ', 1, 1, 1, 
-                            "Falha ao carregar próxima instrução - interpretador finalizado");
-                        erros.add(fatal);
-                        canGo = false;
-                        interfaceExecucao.erroFatal(fatal);
-                    }
+                    return; //Significa que o programa encerrou.
                 }
-                break;
-                
-            default:
-                erros.add(new Erro(TipoErro.DEVEL, exec.instrucao.listaTokens().get(0), 
-                "Instrução \"" + exec.instrucao.getTipo() + "\" não esperada"));
-        }
-        
+            }
+
+            Executavel exec;
+            try {
+                exec = pilhaExecucao.pop();
+            } catch (NoSuchElementException ex) {
+                erros.add(new Erro(TipoErro.DEVEL, ' ', 1, 1, 1, String.format(
+                    "Pilha sem elemento de instrução: %s - %s",ex.getClass().getName(), ex.getMessage())));
+                Erro fatal = new Erro(TipoErro.ERRO, ' ', 1, 1, 1, 
+                    "Falha ao carregar próxima instrução - interpretador finalizado");
+                erros.add(fatal);
+                canGo = false;
+                interfaceExecucao.erroFatal(fatal);
+                return;
+            }
+
+            // Executa a instrução de acordo com seu tipo.
+            switch (exec.instrucao.getTipo()) {
+                case MODULO_PRINCIPAL:
+                    executaModuloPrincipal(exec);
+                    break;
+
+                case BLOCO:
+                    executaBloco(exec);
+                    break;
+
+                case DECLARACAO_VARIAVEL:
+                    executaDeclaracaoVariaveis(exec);
+                    break;
+
+                case ENTRADA_DE_DADOS:
+                    executaEntradaDados(exec);
+                    break;
+
+                case SAIDA_DE_DADOS:
+                    executaSaidaDados(exec);
+                    break;
+
+                case ATRIBUICAO:
+                    executaAtribuicao(exec);
+                    break;
+
+                case CONDICIONAL:
+                    executaCondicional(exec);
+                    break;
+
+                case REPETICAO_ENQUANTO:
+                    executaRepeticaoEnquanto(exec);
+                    break;
+
+                case REPETICAO_FACA:
+                    executaRepeticaoFaca(exec);
+                    break;
+
+                case REPETICAO_REPITA:
+                    executaRepeticaoRepita(exec);
+                    break;
+
+                case REPETICAO_PARA:
+                    executaRepeticaoPara(exec);
+                    break;
+
+                case EXPRESSAO:
+                    if (exec.total == 0 || exec.count < exec.total) {
+                        //Expressão que ainda tem passos para executar
+                        executaExpressao(exec);
+                    } else {
+                        //Expressão finalizada
+                        try {
+                            Executavel inst = pilhaExecucao.pop();
+                            /*
+                             * A manobra abaixo existe porque toda instrução que
+                             * contém uma expressão verifica se há uma expressão
+                             * no topo da pilha (contendo o resultado esperado).
+                             */
+                            pilhaExecucao.push(exec); //Expressão finalizada
+                            pilhaExecucao.push(inst); //Instrução que espera o resultado da expressão.
+                            interfaceExecucao.atualizaExpressaoAtual((Expressao)exec.instrucao);
+                        } catch (NoSuchElementException ex) {
+                            erros.add(new Erro(TipoErro.DEVEL, ' ', 1, 1, 1, String.format(
+                                "Pilha sem elemento de instrução: %s - %s",ex.getClass().getName(), ex.getMessage())));
+                            Erro fatal = new Erro(TipoErro.ERRO, ' ', 1, 1, 1, 
+                                "Falha ao carregar próxima instrução - interpretador finalizado");
+                            erros.add(fatal);
+                            canGo = false;
+                            interfaceExecucao.erroFatal(fatal);
+                        }
+                    }
+                    break;
+
+                default:
+                    erros.add(new Erro(TipoErro.DEVEL, exec.instrucao.listaTokens().get(0), 
+                    "Instrução \"" + exec.instrucao.getTipo() + "\" não esperada"));
+            }
+
         } while (runNext) ;
         
         locked = false;
@@ -237,17 +269,29 @@ public class Interpreter extends Verificador {
         }
         switch (exec.count) {
             case 0:
+                /*
+                 * Passo que exibe declaração de módulo ("Algoritmo NOME").
+                 * Módulos não declarados (leia-se: algoritmos que iniciam com
+                 * "Início" pulam esse passo.
+                 */
                 Token token = geraTokenExib(moduloPrincipal.getTipoModulo(), moduloPrincipal.getNome());
                 interfaceExecucao.atualizaPassoAtual(token);
                 exec.count ++;
                 pilhaExecucao.push(exec);
                 break;
             case 1:
+                /*
+                 * Passo que exibe o token "Início".
+                 */
                 interfaceExecucao.atualizaPassoAtual(moduloPrincipal.getInicio());
                 exec.count ++;
                 pilhaExecucao.push(exec);
                 break;
             case 2:
+                /*
+                 * Passo que controla a instrução em execução enquanto houverem
+                 * instruções a serem executadas.
+                 */
                 Instrucao instrucao = moduloPrincipal.getInstrucaoAt(exec.passo++);
                 if (instrucao != null) {
                     pilhaExecucao.push(exec);
@@ -257,9 +301,13 @@ public class Interpreter extends Verificador {
                     exec.count ++;
                     pilhaExecucao.push(exec);
                 }
-                runNext = true;
+                runNext = config.getBoolean(ConfigInterpreter.RUNNEXT_BLOCO_PILHA);
                 break;
             case 3:
+                /*
+                 * Passo que exibe/seleciona o token "Fim" e informa à interface
+                 * que a execução do algoritmo terminou.
+                 */
                 interfaceExecucao.atualizaPassoAtual(moduloPrincipal.getFim());
                 interfaceExecucao.finalizado();
                 break;
@@ -273,11 +321,18 @@ public class Interpreter extends Verificador {
         } 
         switch (exec.count) {
             case 0:
+                /*
+                 * Passo que exibe o token "Início".
+                 */
                 interfaceExecucao.atualizaPassoAtual(bloco.getInicio());
                 exec.count ++;
                 pilhaExecucao.push(exec);
                 break;
             case 1:
+                /*
+                 * Passo que controla a instrução em execução enquanto houverem
+                 * instruções a serem executadas.
+                 */
                 Instrucao instrucao = bloco.getInstrucaoAt(exec.passo++);
                 if (instrucao != null) {
                     pilhaExecucao.push(exec);
@@ -287,9 +342,12 @@ public class Interpreter extends Verificador {
                     exec.count ++;
                     pilhaExecucao.push(exec);
                 }
-                runNext = true;
+                runNext = config.getBoolean(ConfigInterpreter.RUNNEXT_BLOCO_PILHA);
                 break;
             case 2:
+                /*
+                 * Passo que exibe/seleciona o token "Fim".
+                 */
                 interfaceExecucao.atualizaPassoAtual(bloco.getFim());
                 break;
         }
@@ -300,6 +358,9 @@ public class Interpreter extends Verificador {
         if (exec.total == 0) {
             exec.total = declaracaoVariaveis.getNumVariaveis();
         }
+        /*
+         * Executa enquanto houverem variáveis a declarar.
+         */
         if (exec.count < exec.total) {
             Token token = declaracaoVariaveis.getTokensNomesVariaveis().get(exec.count);
             interfaceExecucao.atualizaPassoAtual(declaracaoVariaveis.getTokenTipoVariavel(), token);
@@ -330,10 +391,17 @@ public class Interpreter extends Verificador {
         if (exec.count < exec.total) {
             switch (exec.count) {
                 case 0:
+                    /*
+                     * Passo em que informa-se à interface qual a variável que
+                     * está sendo lida.
+                     */
                     interfaceExecucao.entradaDados(variavel);
                     exec.count ++;
                     break;
                 case 1:
+                    /*
+                     * Passo em que se obtém o valor lido e armazena na variável.
+                     */
                     String retorno = interfaceExecucao.entradaDadosRetorno();
                     if (retorno == null) {
                         erros.add(new Erro(TipoErro.DEVEL, token, "Retorno nulo"));
@@ -364,10 +432,9 @@ public class Interpreter extends Verificador {
                         variaveis.replace(token.nome(), variavel);
                         interfaceExecucao.defineValorVariavel(token, variavel);
                         
-                        if (configInterpreter.isLeiaAutoProx() && 
-                                exec.passo < entradaDados.getNumParametros()) {
-                            runNext = true;
-                        }
+                        runNext = 
+                                exec.passo < entradaDados.getNumParametros() &&
+                                config.getBoolean(ConfigInterpreter.RUNNEXT_LEIA_ATRIB);
                     } catch (NumberFormatException ex) {
                         erros.add(new Erro(TipoErro.DEVEL, token, String.format(
                             "Conversão não realizada para tipo %s: %s - %s", 
@@ -401,9 +468,7 @@ public class Interpreter extends Verificador {
                 pilhaExecucao.push(new Executavel(expressao));
                 interfaceExecucao.atualizaPassoAtual(saidaDados.getTokenNome(), expressao.getAsToken());
                 interfaceExecucao.atualizaExpressaoAtual(expressao);
-                if (configInterpreter.isEscrevaAutoProx()) {
-                    runNext = true;
-                }
+                runNext = avaliaRunNextExpressao(expressao);
             } else {
                 interfaceExecucao.expressaoFinalizada();
                 interfaceExecucao.atualizaPassoAtual(saidaDados.getTokenNome(), expressao.getAsToken());
@@ -416,7 +481,7 @@ public class Interpreter extends Verificador {
                 if (exec.count < exec.total) {
                     pilhaExecucao.push(exec);
                 } else {
-                    if (configInterpreter.isEscrevaQuebraLinha()) {
+                    if (config.getBoolean(ConfigInterpreter.FORMAT_ESCREVA_QUEBRA)) {
                         interfaceExecucao.saidaDados("\n");
                     }
                 }
@@ -438,6 +503,7 @@ public class Interpreter extends Verificador {
             pilhaExecucao.push(new Executavel(expressao));
             interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
             interfaceExecucao.atualizaExpressaoAtual(expressao);
+            runNext = avaliaRunNextExpressao(expressao);
         } else {
             interfaceExecucao.expressaoFinalizada();
             Token token = atribuicao.getVariavel();
@@ -492,6 +558,7 @@ public class Interpreter extends Verificador {
                 pilhaExecucao.push(new Executavel(expressao));
                 interfaceExecucao.atualizaPassoAtual(condicional.getTokenSe(), expressao.getAsToken());
                 interfaceExecucao.atualizaExpressaoAtual(expressao);
+                runNext = avaliaRunNextExpressao(expressao);
             } else {
                 interfaceExecucao.expressaoFinalizada();
                 if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
@@ -551,6 +618,7 @@ public class Interpreter extends Verificador {
                     pilhaExecucao.push(new Executavel(expressao));
                     interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenEnquanto(), expressao.getAsToken());
                     interfaceExecucao.atualizaExpressaoAtual(expressao);
+                    runNext = avaliaRunNextExpressao(expressao);
                 } else {
                     interfaceExecucao.expressaoFinalizada();
                     if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
@@ -609,6 +677,7 @@ public class Interpreter extends Verificador {
                     pilhaExecucao.push(new Executavel(expressao));
                     interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
                     interfaceExecucao.atualizaExpressaoAtual(expressao);
+                    runNext = avaliaRunNextExpressao(expressao);
                 } else {
                     interfaceExecucao.expressaoFinalizada();
                     if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
@@ -661,6 +730,7 @@ public class Interpreter extends Verificador {
                     pilhaExecucao.push(new Executavel(expressao));
                     interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
                     interfaceExecucao.atualizaExpressaoAtual(expressao);
+                    runNext = avaliaRunNextExpressao(expressao);
                 } else {
                     interfaceExecucao.expressaoFinalizada();
                     if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
@@ -724,6 +794,7 @@ public class Interpreter extends Verificador {
                     pilhaExecucao.push(new Executavel(expressao));
                     interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenPara(), expressao.getAsToken());
                     interfaceExecucao.atualizaExpressaoAtual(expressao);
+                    runNext = avaliaRunNextExpressao(expressao);
                 } else {
                     interfaceExecucao.expressaoFinalizada();
                     TipoDado[] esperados;
@@ -761,6 +832,7 @@ public class Interpreter extends Verificador {
                     pilhaExecucao.push(new Executavel(expressao));
                     interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenPara(), expressao.getAsToken());
                     interfaceExecucao.atualizaExpressaoAtual(expressao);
+                    runNext = avaliaRunNextExpressao(expressao);
                 } else {
                     interfaceExecucao.expressaoFinalizada();
                     TipoDado[] esperados;
@@ -860,6 +932,7 @@ public class Interpreter extends Verificador {
                         variavel.setValor(novoValor.getValor());
                         variaveis.replace(tokenVarCont.nome(), variavel);
                         interfaceExecucao.defineValorVariavel(tokenVarCont, variavel);
+                        runNext = avaliaRunNextExpressao(expressao);
                     }
                     exec.passo ++;
                     expressao = repetitiva.getCondicao();
@@ -889,6 +962,25 @@ public class Interpreter extends Verificador {
                 interfaceExecucao.atualizaInstrucao();
                 break;
         } 
+    }
+    
+    private boolean avaliaRunNextExpressao(Expressao expressao) {
+        switch (expressao.getTipoExpressao()) {
+            case OPERANDO_CONSTANTE:
+                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_EXEC_CONST);
+            case OPERANDO_VARIAVEL:
+                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_EXEC_VAR);
+            case OPERANDO_FUNCAO:
+                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_EXEC_FUNC);
+            case OPERACAO_UNARIA:
+                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_EXEC_UNARIA);
+            case OPERACAO_ARITMETICA:
+            case OPERACAO_RELACIONAL:
+            case OPERACAO_LOGICA:
+                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_EXEC_OPBIN);
+            default:
+                return false;
+        }
     }
     
     private void executaExpressao(Executavel exec) {
@@ -928,9 +1020,7 @@ public class Interpreter extends Verificador {
         exec.instrucao = operando;
         exec.count ++;
         pilhaExecucao.push(exec);
-        if (configInterpreter.isExecConstAutoProx()) {
-            runNext = true;
-        }
+        runNext = config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_RES_CONST);
     }
     
     private void executaExpressaoOperandoVariavel(Executavel exec) {
@@ -952,9 +1042,7 @@ public class Interpreter extends Verificador {
             exec.instrucao = operando;
             exec.count ++;
             pilhaExecucao.push(exec);
-            if (configInterpreter.isExecVarAutoProx()) {
-                runNext = true;
-            }
+            runNext = config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_RES_VAR);
         }
     }
     
@@ -986,15 +1074,13 @@ public class Interpreter extends Verificador {
                 expressao = chamadaFuncao.getParametros().get(exec.count);
                 pilhaExecucao.push(exec);
                 pilhaExecucao.push(new Executavel(expressao));
-                if (configInterpreter.isPushExprAutoProx()) {
-                    runNext = true;
-                }
+                runNext = avaliaRunNextExpressao(expressao);
             } else {
                 if (tiposDadosCorretos(expressao.getTipoResultado(), esperadosPorFuncao(nome.nome())[exec.count])) {
                     chamadaFuncao.atualizaParametro(exec.count, expressao);
                     exec.count ++;
                     pilhaExecucao.push(exec);
-                    runNext = true;
+                    runNext = config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_RES_FUNC);
                 } else {
                     erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
                         "Não interpretou resultado %s (%s) como parâmetro %d de função %s",
@@ -1047,9 +1133,7 @@ public class Interpreter extends Verificador {
                 expressao = operacaoUnaria.getExpressao();
                 pilhaExecucao.push(exec);
                 pilhaExecucao.push(new Executavel(expressao));
-                if (configInterpreter.isPushExprAutoProx()) {
-                    runNext = true;
-                }
+                runNext = avaliaRunNextExpressao(expressao);
             } else {
                 Calculator calc = new Calculator(expressao);
                 Calculator res = null;
@@ -1076,6 +1160,7 @@ public class Interpreter extends Verificador {
                     exec.instrucao = operacaoUnaria;
                     exec.count ++;
                     pilhaExecucao.push(exec);
+                    runNext = config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_RES_UNARIA);
                 }
             }
         }
@@ -1103,9 +1188,7 @@ public class Interpreter extends Verificador {
                         exec.count ++;
                         pilhaExecucao.push(exec);
                     }
-                    if (configInterpreter.isPushExprAutoProx()) {
-                        runNext = true;
-                    }
+                    runNext = avaliaRunNextExpressao(expressao);
                     break;
                 case 1:
                     expressao = removeExpressaoDaPilha();
@@ -1118,9 +1201,7 @@ public class Interpreter extends Verificador {
                         exec.count ++;
                         pilhaExecucao.push(exec);
                     }
-                    if (configInterpreter.isPushExprAutoProx()) {
-                        runNext = true;
-                    }
+                    runNext = avaliaRunNextExpressao(expressao);
                     break;
                 case 2:
                     Calculator calc = new Calculator(operacao.getExpressaoEsq());
@@ -1182,9 +1263,7 @@ public class Interpreter extends Verificador {
                         exec.instrucao = operacao;
                         exec.count ++;
                         pilhaExecucao.push(exec);
-                        if (configInterpreter.isExecBinFinAutoProx()) {
-                            runNext = true;
-                        }
+                        runNext = config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_RES_OPBIN);
                     }
                     break;
             }
@@ -1205,7 +1284,7 @@ public class Interpreter extends Verificador {
         }
         return expressao;
     }
-        
+    
     private boolean tiposDadosCorretos (TipoDado encontrado, TipoDado... esperados){
         boolean found = false;
         for (TipoDado tipo : esperados) {

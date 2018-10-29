@@ -667,16 +667,17 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     txpSaida.setText("");
                     txpSaida.setBackground(backgroundDisabled);
                     
-                    ConfigInterpreter confInterpreter = new ConfigInterpreter();
-                    confInterpreter.setLeiaAutoProx(true);
-                    confInterpreter.setEscrevaAutoProx(true);
-                    confInterpreter.setExecConstAutoProx(true);
-                    confInterpreter.setExecVarAutoProx(true);
-                    confInterpreter.setExecBinFinAutoProx(true);
-                    confInterpreter.setPushExprAutoProx(true);
+                    ConfigInterpreter configInterpr = new ConfigInterpreter();
+                    configInterpr.set(ConfigInterpreter.RUNNEXT_LEIA_ATRIB, true);
+                    configInterpr.set(ConfigInterpreter.RUNNEXT_ESCREVA_PILHA, true);
+                    configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_EXEC_CONST, true);
+                    configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_EXEC_VAR, true);
+                    configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_RES_VAR, true);
+                    configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_RES_UNARIA, true);
+                    configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_RES_OPBIN, true);
                     
                     interpreter = new Interpreter(this, processor.getPrograma());
-                    interpreter.setConfigInterpreter(confInterpreter);
+                    interpreter.setConfigInterpreter(configInterpr);
                     btnProxPerc.setEnabled(interpreter.existeProxima());
                     variaveis = new LinkedList<>();
                     impressoraExpressao = null;
