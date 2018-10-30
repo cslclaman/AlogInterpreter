@@ -104,7 +104,8 @@ public class ImpressoraExpressao {
             }
             texto = print.toString().trim();
         } catch (ArrayIndexOutOfBoundsException ex) {
-            System.err.println(ex.getMessage() + "\nOrdem: " + ordemIni + " / " + ordemFim);
+            System.err.println(ex.getClass().getName() + " - " + ex.getMessage() 
+                    + "\nOrdem: " + ordemIni + " / " + ordemFim);
             texto = expressao.toString();
         }
     }
