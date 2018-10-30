@@ -1,0 +1,15 @@
+Início
+    Inteiro: Num1, Num2, Num3, Num4, Num5, Num6;
+    Caracter: Carac1, Carac2;
+    Leia (Num1);
+    Num2 <- Num1 = "batata";
+    Carac1 <- Carac2;
+    Num3 <- Carac1;
+    Num4 <- Raiz(2, 4);
+    Num5 <- Raiz("a");
+    
+    Se 2.5 mod 2.2 = 1 Então
+        Escreva ("beterraba");
+
+    Escreva (Num1, Num2, Num3, Num4, Num5, Carac1, Carac2);
+Fim

@@ -1,0 +1,42 @@
+Início
+    Inteiro: Result, Multiplic, Num, Num2;
+    
+    Leia(Num);
+    
+    Multiplic <- 1;
+    Enquanto Multiplic <= 10 Faça
+    Início
+        Result <- Num * Multiplic;
+        Escreva (Num, " x ", Multiplic, " = ", Result);
+        Multiplic <- Multiplic + 1;
+    Fim
+
+    Multiplic <- 1;
+    Faça
+    Início
+        Result <- Num * Multiplic;
+        Escreva (Num, " x ", Multiplic, " = ", Result);
+        Multiplic <- Multiplic + 1;
+    Fim
+    Enquanto Multiplic < 10;
+
+    Para Multiplic de 1 até 10 Faça
+    Início
+        Result <- Num * Multiplic;
+        Escreva (Num, " x ", Multiplic, " = ", Result);
+    Fim
+
+    Multiplic <- 1;
+    Repita
+    Início
+        Leia (Num2);
+        Se Num2 = Num Então
+            Num2 <- Num2 + - (-Num2 + +Num);
+        Num <- Num2;
+        Result <- Num * Multiplic;
+        Escreva (Num, " x ", Multiplic, " = ", Result);
+        Multiplic <- Multiplic + 1;
+    Fim
+    Até Multiplic > 10;
+
+Fim

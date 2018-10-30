@@ -1,0 +1,15 @@
+Início
+    Inteiro: Idade;
+    Leia(Idade);
+
+    Se Idade < 13 então
+        Escreva("Criança");
+    Senão
+        Se Idade <= 18 então
+            Escreva("Adolescente");
+        Senão
+            Se Idade < 60 então
+                Escreva("Adulto");
+            Senão
+                Escreva("Idoso");
+Fim

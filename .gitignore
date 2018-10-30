@@ -41,5 +41,4 @@ nb-configuration.xml
 *.ear
 
 # Test Files #
-test/alog/test/
 test_*.txt

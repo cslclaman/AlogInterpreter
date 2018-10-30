@@ -1,0 +1,12 @@
+<#if licenseFirst??>
+${licenseFirst}
+</#if>
+${licensePrefix}Fatec Sorocaba - José Crespo Gonzales
+${licensePrefix}Interpretador de Algoritmos
+${licensePrefix}Trabalho de Graduação do curso de Análise e Desenvolvimento de Sistemas
+${licensePrefix}Autor: Caíque de Souza Lima Siqueira
+${licensePrefix}(caique.siqueira@fatec.sp.gov.br)
+${licensePrefix}Orientador: Prof. Dimas Ferreira Cardoso
+<#if licenseLast??>
+${licenseLast}
+</#if>

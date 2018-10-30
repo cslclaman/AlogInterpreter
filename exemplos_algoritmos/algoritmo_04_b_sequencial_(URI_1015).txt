@@ -1,0 +1,11 @@
+Início
+    Real: X1, X2, Y1, Y2;
+    Real: Res;
+    
+    Leia(X1, Y1);
+    Leia(X2, Y2);
+    
+    Res <- Raiz(Pot(X2 - X1, 2) + Pot(Y2 - Y1, 2));
+    
+    Escreva(Res);
+Fim
