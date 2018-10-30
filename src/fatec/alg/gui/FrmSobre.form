@@ -98,7 +98,7 @@
     <Component class="javax.swing.JLabel" name="jLabel1">
       <Properties>
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-          <Image iconType="3" name="/resources/img/logo-fatecso-64.png"/>
+          <Image iconType="3" name="/fatec/alg/gui/imagens/logo-fatecso-64.png"/>
         </Property>
       </Properties>
     </Component>
@@ -160,7 +160,7 @@
         <Property name="horizontalAlignment" type="int" value="0"/>
         <Property name="text" type="java.lang.String" value="Projeto hospedado em https://github.com/cslclaman/AlogInterpreter"/>
         <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
-          <Color id="Hand Cursor"/>
+          <Color id="Cursor Padr&#xe3;o"/>
         </Property>
       </Properties>
       <Events>

@@ -50,7 +50,7 @@ public class FrmSobre extends javax.swing.JFrame {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Sobre o programa");
 
-        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/resources/img/logo-fatecso-64.png"))); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fatec/alg/gui/imagens/logo-fatecso-64.png"))); // NOI18N
 
         jLabel2.setFont(new java.awt.Font("Tahoma", 1, 14)); // NOI18N
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
@@ -82,7 +82,7 @@ public class FrmSobre extends javax.swing.JFrame {
         jLabel8.setForeground(new java.awt.Color(0, 0, 255));
         jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel8.setText("Projeto hospedado em https://github.com/cslclaman/AlogInterpreter");
-        jLabel8.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        jLabel8.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         jLabel8.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jLabel8MouseClicked(evt);
