@@ -541,22 +541,8 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     }//GEN-LAST:event_btnProxPercActionPerformed
 
     private void btnVerificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerificarActionPerformed
-        if (emExecucao) {
-            if (JOptionPane.OK_OPTION != JOptionPane.showConfirmDialog(
-                    this,
-                    "Deseja interromper a execução e verificar novamente o programa?",
-                    "Reiniciar",
-                    JOptionPane.YES_NO_OPTION)) {
-                return;
-            }
-        }
+        if (!pararExecucao("Verificar e reiniciar")) return;
         
-        emExecucao = false;
-        while (!tokensAnt.isEmpty()){
-            Token tokenAnt = tokensAnt.pop();
-            docIde.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
-        }
-            
         oldText = txpIde.getText();
         
         if (oldText.isEmpty()){
@@ -654,19 +640,6 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     lblPosCaret.setText("Em execução");
                     emExecucao = true;
 
-                    tabVariaveis.setRowCount(0);
-
-                    txpEntrada.setText("");
-                    txpEntrada.setEditable(false);
-                    txpEntrada.setBackground(backgroundDisabled);
-
-                    docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
-                    txpProcessamento.setText("");
-                    txpProcessamento.setBackground(backgroundDisabled);
-
-                    txpSaida.setText("");
-                    txpSaida.setBackground(backgroundDisabled);
-                    
                     ConfigInterpreter configInterpr = new ConfigInterpreter();
                     configInterpr.set(ConfigInterpreter.RUNNEXT_LEIA_ATRIB, true);
                     configInterpr.set(ConfigInterpreter.RUNNEXT_ESCREVA_PILHA, true);
@@ -808,6 +781,8 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     }//GEN-LAST:event_mitSairActionPerformed
 
     private void mitAbrirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitAbrirActionPerformed
+        if (!pararExecucao("Abrir arquivo")) return;
+        
         JFileChooser fileChooser = new JFileChooser(arquivo);
         fileChooser.setFileFilter(new FileNameExtensionFilter("Arquivos de texto", "txt", "alg"));
         fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
@@ -927,6 +902,8 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     }//GEN-LAST:event_btnSairActionPerformed
 
     private void mitNovoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitNovoActionPerformed
+        if (!pararExecucao("Novo programa")) return;
+        
         String atual = txpIde.getText();
         if (!textoOrig.equals(atual)) {
             if (JOptionPane.OK_OPTION == JOptionPane.showConfirmDialog(
@@ -1172,6 +1149,41 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             Token tokenAnt = tokensAnt.pop();
             docIde.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
         }
+    }
+    
+    private boolean pararExecucao(String titulo) {
+        if (emExecucao) {
+            if (JOptionPane.OK_OPTION != JOptionPane.showConfirmDialog(
+                    this,
+                    "Deseja interromper a execução do programa atual?",
+                    titulo,
+                    JOptionPane.YES_NO_OPTION)) {
+                return false;
+            }
+        }
+        
+        emExecucao = false;
+        btnProxPerc.setEnabled(false);
+        
+        while (!tokensAnt.isEmpty()){
+            Token tokenAnt = tokensAnt.pop();
+            docIde.setCharacterAttributes(tokenAnt.getPosicao(), tokenAnt.getTamanho(), stylePlain, true);
+        }
+        
+        tabVariaveis.setRowCount(0);
+
+        txpEntrada.setText("");
+        txpEntrada.setEditable(false);
+        txpEntrada.setBackground(backgroundDisabled);
+
+        docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
+        txpProcessamento.setText("");
+        txpProcessamento.setBackground(backgroundDisabled);
+
+        txpSaida.setText("");
+        txpSaida.setBackground(backgroundDisabled);
+        
+        return true;
     }
     
     private void encerra() {
