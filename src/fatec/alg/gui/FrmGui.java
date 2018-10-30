@@ -671,6 +671,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     configInterpr.set(ConfigInterpreter.RUNNEXT_LEIA_ATRIB, true);
                     configInterpr.set(ConfigInterpreter.RUNNEXT_ESCREVA_PILHA, true);
                     configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_EXEC_CONST, true);
+                    configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_RES_CONST, true);
                     configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_EXEC_VAR, true);
                     configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_RES_VAR, true);
                     configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_RES_UNARIA, true);
