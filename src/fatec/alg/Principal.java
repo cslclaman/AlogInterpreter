@@ -22,7 +22,7 @@ public class Principal {
     /**
      * Número da versão atual
      */
-    public static final String VERSAO_NUM = "1.0.0";
+    public static final String VERSAO_NUM = "1.0.1";
     
     /**
      * Data de lançamento da versão atual
@@ -32,7 +32,7 @@ public class Principal {
     /**
      * Número identificador da compilação atual
      */
-    public static final int VERSAO_BUILD = 3;
+    public static final int VERSAO_BUILD = 4;
     
     /**
      * Método principal de execução da aplicação.
