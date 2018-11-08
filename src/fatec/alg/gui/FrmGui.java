@@ -171,6 +171,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         lblLogo = new javax.swing.JLabel();
         lblLogo1 = new javax.swing.JLabel();
         btnSair = new javax.swing.JButton();
+        lblFontSize = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         mnuArquivo = new javax.swing.JMenu();
         mitNovo = new javax.swing.JMenuItem();
@@ -340,6 +341,9 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             }
         });
 
+        lblFontSize.setFont(new java.awt.Font("Tahoma", 0, 10)); // NOI18N
+        lblFontSize.setHorizontalTextPosition(javax.swing.SwingConstants.LEFT);
+
         mnuArquivo.setText("Arquivo");
 
         mitNovo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_MASK));
@@ -414,7 +418,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         mnuExibir.setText("Exibir");
 
         mitAumentarZoom.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_EQUALS, java.awt.event.InputEvent.CTRL_MASK));
-        mitAumentarZoom.setText("Aumentar letra");
+        mitAumentarZoom.setText("Aumentar fonte");
         mitAumentarZoom.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mitAumentarZoomActionPerformed(evt);
@@ -423,7 +427,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         mnuExibir.add(mitAumentarZoom);
 
         mitDiminuirZoom.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_MINUS, java.awt.event.InputEvent.CTRL_MASK));
-        mitDiminuirZoom.setText("Diminuir letra");
+        mitDiminuirZoom.setText("Diminuir fonte");
         mitDiminuirZoom.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mitDiminuirZoomActionPerformed(evt);
@@ -432,7 +436,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         mnuExibir.add(mitDiminuirZoom);
 
         mitRestaurarZoom.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_0, java.awt.event.InputEvent.CTRL_MASK));
-        mitRestaurarZoom.setText("Restaurar letra");
+        mitRestaurarZoom.setText("Restaurar tam. fonte");
         mitRestaurarZoom.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mitRestaurarZoomActionPerformed(evt);
@@ -513,7 +517,8 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(btnVerificar, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(btnProxPerc, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(btnProxPerc, javax.swing.GroupLayout.PREFERRED_SIZE, 218, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(lblFontSize))
                         .addGap(0, 94, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -537,7 +542,9 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     .addComponent(lblLogo)
                     .addComponent(lblLogo1))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel5)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(lblFontSize))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 307, Short.MAX_VALUE)
@@ -1009,34 +1016,23 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         }
     }//GEN-LAST:event_scrTxpIdeMouseWheelMoved
     
-    /*
-        int pontos = evt.getWheelRotation();
-        boolean wheelUp = false;
-        if (pontos < 0) {
-            wheelUp = true;
-            pontos = -pontos;
-        }
-        if (evt.isControlDown()) {
-            evt.consume();
-            for (int pnt = 0; pnt < pontos; pnt ++) {
-                
-                if (wheelUp) {
-                    ideFontTamanhoAltera(2.0F);
-                } else {
-                    ideFontTamanhoAltera(-2.0F);
-                }
-            } 
-        } */
-    
     private void ideFontTamanhoAltera(float size) {
         Font font = txpIde.getFont();
-        font = font.deriveFont(font.getSize2D() + size);
+        size = font.getSize2D() + size;
+        font = font.deriveFont(size);
         txpIde.setFont(font);
+        if ((int)size != (int)defaultFontSize) {
+            int zoom = (int)(size * 100 / defaultFontSize);
+            lblFontSize.setText("Tamanho da fonte: " + zoom + "%");
+        } else {
+            lblFontSize.setText("");
+        }
     }
     
     private void ideFontTamanhoRestaura() {
         Font font = txpIde.getFont();
         font = font.deriveFont(defaultFontSize);
+        lblFontSize.setText("");
         txpIde.setFont(font);
     }
     
@@ -1055,6 +1051,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JPopupMenu.Separator jSeparator1;
+    private javax.swing.JLabel lblFontSize;
     private javax.swing.JLabel lblLogo;
     private javax.swing.JLabel lblLogo1;
     private javax.swing.JLabel lblPosCaret;
