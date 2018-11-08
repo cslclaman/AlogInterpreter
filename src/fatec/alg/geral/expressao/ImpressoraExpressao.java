@@ -1,7 +1,10 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Fatec Sorocaba - Jose Crespo Gonzales
+ * Interpretador de Algoritmos
+ * Trabalho de Graduação do curso de Analise e Desenvolvimento de Sistemas
+ * Autor: Caique de Souza Lima Siqueira
+ * (caique.siqueira@fatec.sp.gov.br)
+ * Orientador: Prof. Dimas Ferreira Cardoso
  */
 package fatec.alg.geral.expressao;
 
@@ -11,127 +14,159 @@ import java.util.LinkedList;
 /**
  *
  * @author Caique Souza
+ * @version 2
  */
 public class ImpressoraExpressao {
-    private final Token tokenVazio;
-    private int ordemIni;
-    private int ordemFim;
-    private Token[] tokens;
-    private String texto;
-    private Expressao expressao;
     
-    private Token exprAtual;
-    private Token resultado;
+    private class Impressao {
+        private Impressao anterior;
+        private Expressao expressao;
+        private Token token;
+        
+        public Impressao(Expressao expressao) {
+            this.anterior = null;
+            this.expressao = expressao;
+        }
+    }
+    
+    private LinkedList<Impressao> expressoes;
+    private Expressao inicial;
+    private StringBuffer texto;
+    private Token selecionado;
+    private Token resolvido;
+    private int posicao;
     
     public ImpressoraExpressao(Expressao expressao) {
-        tokenVazio = new Token();
-        tokenVazio.setPalavra("");
-        
-        this.expressao = expressao;
-        tokens = new Token[expressao.listaTokens().size()];
-        for (int i = 0; i < tokens.length; i++) {
-            tokens[i] = tokenVazio;
-        }
-        
-        ordemIni = expressao.listaTokens().get(0).getOrdem();
-        ordemFim = expressao.listaTokens().get(expressao.listaTokens().size()-1).getOrdem();
-        
-        exprAtual = tokenVazio;
-        resultado = tokenVazio;
-        defineTexto();
+        expressoes = new LinkedList<>();
+        inicial = expressao;
+        selecionado = geraToken("");
+        resolvido = geraToken("");
+        defineTexto(expressao);
     }
     
     public void setExpressaoAtual(Expressao expressao) {
-        this.expressao = expressao;
-        validaOrdem(expressao);
-        defineTexto();
+        //Para saber se é o início de uma nova expressão ou se é um passo da mesma
+        boolean setted = false; 
+        for (Impressao i : expressoes) {
+            if (i.expressao == expressao) {
+                i.expressao = expressao;
+                setted = true;
+                break;
+            }
+        }
+        if (!setted) {
+            expressoes.clear();
+            expressoes = new LinkedList<>();
+            inicial = expressao;
+        }
+        defineTexto(expressao);
     }
     
-    private void defineTexto(){
-        Token res;
-        
-        if (exprAtual == null) exprAtual = new Token();
-        if (resultado == null) resultado = new Token();
-        Token espec = new Token(0,0,0,-1);
-        LinkedList<Integer> ordens = new LinkedList<>();
-        
-        try {
-            if (!expressao.isResolvida()) {
-                for (Token t : expressao.listaTokens()) {
-                    int ord = t.getOrdem() - ordemIni;
-                    res = new Token(0, 0, 0, ord);
-                    res.setPalavra(t.getPalavra());
-                    tokens[ord] = res;
-                    ordens.offer(ord);
+    private void defineTexto(Expressao exprAtual){
+        posicao = 0;
+        texto = new StringBuffer();
+        imprime(inicial, null);
+        for (Impressao i : expressoes) {
+            if (i.expressao == exprAtual) {
+                selecionado = (i.anterior == null ? i.token : i.anterior.token);
+                if (exprAtual.isResolvida()) {
+                    resolvido = i.token;
+                } else {
+                    resolvido = new Token(0, 0, 0, 0);
                 }
-            } else {
-                Token first = expressao.listaTokens().get(0);
-                int ord = 0;
-                for (Token t : expressao.listaTokens()) {
-                    ord = t.getOrdem() - ordemIni;
-                    tokens[ord] = tokenVazio;
-                }
-                ord = first.getOrdem() - ordemIni;
-                ordens.offer(ord);
-                res = new Token(0, 0, 0, ord);
-                res.setPalavra(expressao.getResultado());
-                tokens[ord] = res;
+                break;
             }
-            StringBuilder print = new StringBuilder();
-            int c = 0;
-            for (int i = 0; i < tokens.length; i++) {
-                Token t = tokens[i];
-                if (!t.getPalavra().isEmpty()) {
-                    print.append(t.getPalavra()).append(" ");
-                }
-                t.setPosicao(c);
-                c += print.length();
-                tokens[i] = t;
-                if (ordens.contains(i)){
-                    if (espec.getOrdem() == -1) {
-                        espec.setPosicao(t.getPosicao());
-                        espec.setOrdem(t.getOrdem());
-                        espec.setColuna(t.getColuna());
-                    }
-                    espec.atualizaPalavra(t.getPalavra() + " ");
-                }
-            }
-            espec.setPalavra(espec.getPalavra().trim());
-            if (!expressao.isResolvida()) {
-                exprAtual = espec;
-            } else {
-                resultado = espec;
-            }
-            texto = print.toString().trim();
-        } catch (ArrayIndexOutOfBoundsException ex) {
-            System.err.println(ex.getClass().getName() + " - " + ex.getMessage() 
-                    + "\nOrdem: " + ordemIni + " / " + ordemFim);
-            texto = expressao.toString();
         }
     }
-
+    
+    private void imprime(Expressao e, Impressao a) {
+        Impressao i = new Impressao(e);
+        if (e != inicial) {
+            i.anterior = a;
+        }
+        if (e.isResolvida()) {
+            i.token = geraToken(e.getResultado() + " ");
+            posicao += i.token.getTamanho() + 1;
+            texto.append(i.token.getPalavra());
+        } else {
+            String tp;
+            if (e.getParentesesAbre() != null) {
+                tp = e.getParentesesAbre().getPalavra() + " ";
+                texto.append(tp);
+                posicao += tp.length();
+            }
+            switch (e.tipoExpressao) {
+                case OPERANDO_CONSTANTE:
+                case OPERANDO_VARIAVEL:
+                    Operando operando = (Operando)e;
+                    tp = operando.getOperando().getPalavra() + " ";
+                    texto.append(tp);
+                    posicao += tp.length();
+                    break;
+                case OPERACAO_UNARIA:
+                    OperacaoUnaria operacaoUnaria = (OperacaoUnaria)e;
+                    tp = operacaoUnaria.getOperador().getPalavra() + " ";
+                    texto.append(tp);
+                    posicao += tp.length();
+                    imprime(operacaoUnaria.getExpressao(), i);
+                    break;
+                case OPERACAO_ARITMETICA:
+                case OPERACAO_RELACIONAL:
+                case OPERACAO_LOGICA:
+                    Operacao operacao = (Operacao)e;
+                    imprime(operacao.getExpressaoEsq(), i);
+                    tp = operacao.getOperador().getPalavra() + " ";
+                    texto.append(tp);
+                    posicao += tp.length();
+                    imprime(operacao.getExpressaoDir(), i);
+                    break;
+                case OPERANDO_FUNCAO:
+                    ChamadaFuncao chamadaFuncao = (ChamadaFuncao)e;
+                    tp = chamadaFuncao.getTokenNome().getPalavra() + " ( ";
+                    texto.append(tp);
+                    posicao += tp.length();
+                    
+                    boolean first = true;
+                    for (Expressao expr : chamadaFuncao.getParametros()) {
+                        if (first) {
+                            first = false;
+                        } else {
+                            tp = ", ";
+                            texto.append(tp);
+                            posicao += tp.length();
+                        }
+                        imprime(expr, i);
+                    }
+                    tp = ") ";
+                    texto.append(tp);
+                    posicao += tp.length();
+                    break;
+            }
+            if (e.getParentesesFecha() != null) {
+                tp = e.getParentesesFecha().getPalavra() + " ";
+                texto.append(tp);
+                posicao += tp.length();
+            }
+            i.token = geraToken(texto.toString());
+        }
+        expressoes.add(i);
+    }
+    
     public String getTexto() {
-        return texto;
+        return texto.toString().trim();
     }
 
     public Token getTokenExprAtual() {
-        return exprAtual;
+        return selecionado;
     }
 
     public Token getTokenResultado() {
-        return resultado;
+        return resolvido;
     }
     
-    private void validaOrdem (Expressao expressao) {
-        int ini = expressao.listaTokens().get(0).getOrdem();
-        if (ini < ordemIni || ini > ordemFim) {
-            ordemIni = expressao.listaTokens().get(0).getOrdem();
-            ordemFim = expressao.listaTokens().get(expressao.listaTokens().size()-1).getOrdem();
-            tokens = new Token[expressao.listaTokens().size()];
-            for (int i = 0; i < tokens.length; i++) {
-                tokens[i] = tokenVazio;
-            }
-        }
+    private Token geraToken(String palavra) {
+        Token token = new Token(0, posicao, posicao, 0);
+        token.setPalavra(palavra);
+        return token;
     }
-    
 }
