@@ -16,27 +16,27 @@ import java.util.LinkedList;
  * @author Caique Souza
  * @version 2
  */
-public class ImpressoraExpressao {
+public class ExibidorExpressao {
     
-    private class Impressao {
-        private Impressao anterior;
+    private class Exibicao {
+        private Exibicao anterior;
         private Expressao expressao;
         private Token token;
         
-        public Impressao(Expressao expressao) {
+        public Exibicao(Expressao expressao) {
             this.anterior = null;
             this.expressao = expressao;
         }
     }
     
-    private LinkedList<Impressao> expressoes;
+    private LinkedList<Exibicao> expressoes;
     private Expressao inicial;
     private StringBuffer texto;
     private Token selecionado;
     private Token resolvido;
     private int posicao;
     
-    public ImpressoraExpressao(Expressao expressao) {
+    public ExibidorExpressao(Expressao expressao) {
         expressoes = new LinkedList<>();
         inicial = expressao;
         selecionado = geraToken("");
@@ -47,7 +47,7 @@ public class ImpressoraExpressao {
     public void setExpressaoAtual(Expressao expressao) {
         //Para saber se é o início de uma nova expressão ou se é um passo da mesma
         boolean setted = false; 
-        for (Impressao i : expressoes) {
+        for (Exibicao i : expressoes) {
             if (i.expressao == expressao) {
                 i.expressao = expressao;
                 setted = true;
@@ -66,7 +66,7 @@ public class ImpressoraExpressao {
         posicao = 0;
         texto = new StringBuffer();
         imprime(inicial, null);
-        for (Impressao i : expressoes) {
+        for (Exibicao i : expressoes) {
             if (i.expressao == exprAtual) {
                 selecionado = (i.anterior == null ? i.token : i.anterior.token);
                 if (exprAtual.isResolvida()) {
@@ -79,8 +79,8 @@ public class ImpressoraExpressao {
         }
     }
     
-    private void imprime(Expressao e, Impressao a) {
-        Impressao i = new Impressao(e);
+    private void imprime(Expressao e, Exibicao a) {
+        Exibicao i = new Exibicao(e);
         if (e != inicial) {
             i.anterior = a;
         }

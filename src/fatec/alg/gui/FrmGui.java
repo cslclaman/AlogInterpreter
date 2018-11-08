@@ -15,7 +15,7 @@ import fatec.alg.analise.AnalisadorSintatico;
 import fatec.alg.analise.PreProcessador;
 import fatec.alg.analise.AnalisadorLexico;
 import fatec.alg.geral.expressao.Expressao;
-import fatec.alg.geral.expressao.ImpressoraExpressao;
+import fatec.alg.geral.expressao.ExibidorExpressao;
 import fatec.alg.geral.instrucao.Instrucao;
 import fatec.alg.geral.token.Token;
 import fatec.alg.geral.variavel.Variavel;
@@ -978,7 +978,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     
     private File arquivo;
     
-    private ImpressoraExpressao impressoraExpressao;
+    private ExibidorExpressao impressoraExpressao;
 
     @Override
     public void atualizaInstrucao() {
@@ -1032,7 +1032,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         docProc.setCharacterAttributes(0, txpProcessamento.getText().length(), stylePlain, true);
         txpProcessamento.setBackground(backgroundEnabled);
         if (impressoraExpressao == null) {
-            impressoraExpressao = new ImpressoraExpressao(expressao);
+            impressoraExpressao = new ExibidorExpressao(expressao);
         } else {
             impressoraExpressao.setExpressaoAtual(expressao);
         }
