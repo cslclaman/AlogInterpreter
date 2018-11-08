@@ -36,14 +36,17 @@ public class ConfigInterpreter {
     public final static String RUNNEXT_EXPR_FIN_UNARIA = "runnext.expressao.final.opunaria";
     public final static String RUNNEXT_EXPR_FIN_OPBIN = "runnext.expressao.final.opbinaria";
     public final static String FORMAT_ESCREVA_QUEBRA = "format.escreva.quebralinha";
+    public final static String FORMAT_ESCREVA_ESPACO = "format.escreva.espacamento";
     
     public ConfigInterpreter(){
         configs = new HashMap();
         
+        configs.put(FORMAT_ESCREVA_QUEBRA, true);
+        configs.put(FORMAT_ESCREVA_ESPACO, false);
+        
         configs.put(RUNNEXT_BLOCO_PILHA, true);
         configs.put(RUNNEXT_LEIA_ATRIB, false);
         configs.put(RUNNEXT_ESCREVA_PILHA, false);
-        configs.put(FORMAT_ESCREVA_QUEBRA, true);
         configs.put(RUNNEXT_EXPR_PILHA, true);
         configs.put(RUNNEXT_PARA_LOOP, true);
         

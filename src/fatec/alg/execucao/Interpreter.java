@@ -480,6 +480,9 @@ public class Interpreter extends Verificador {
                 }
                 exec.count++;
                 if (exec.count < exec.total) {
+                    if (config.getBoolean(ConfigInterpreter.FORMAT_ESCREVA_ESPACO)) {
+                        interfaceExecucao.saidaDados(" ");
+                    }
                     pilhaExecucao.push(exec);
                 } else {
                     if (config.getBoolean(ConfigInterpreter.FORMAT_ESCREVA_QUEBRA)) {
