@@ -23,6 +23,7 @@ import java.util.LinkedList;
 import javax.swing.text.DefaultStyledDocument;
 import fatec.alg.gui.componente.TextLineNumber;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
@@ -74,6 +75,8 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private final Style styleRes;
     private final int FORMAT_ERROR = 2;
     
+    private final float defaultFontSize;
+    
     private final Color backgroundDisabled = javax.swing.UIManager.getDefaults().getColor("FormattedTextField.disabledBackground");
     private final Color backgroundEnabled = javax.swing.UIManager.getDefaults().getColor("FormattedTextField.background");
     
@@ -116,6 +119,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         docIde = (DefaultStyledDocument)txpIde.getDocument();
         docProc = (DefaultStyledDocument)txpProcessamento.getDocument();
         formatacao = FORMAT_PLAIN;
+        defaultFontSize = txpIde.getFont().getSize2D();
         
         tabVariaveis = (DefaultTableModel)tblVariaveis.getModel();
         tokensAnt = new LinkedList<>();
@@ -138,8 +142,15 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jScrollPane2 = new javax.swing.JScrollPane();
-        txpIde = new javax.swing.JTextPane();
+        scrTxpIde = new javax.swing.JScrollPane();
+        txpIde = new javax.swing.JTextPane() {
+            @Override
+            public boolean getScrollableTracksViewportWidth()
+            {
+                return getUI().getPreferredSize(this).width 
+                <= getParent().getSize().width;
+            }
+        };
         btnProxPerc = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblVariaveis = new javax.swing.JTable();
@@ -171,6 +182,10 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         mnuEditar = new javax.swing.JMenu();
         mitDesfazer = new javax.swing.JMenuItem();
         mitRefazer = new javax.swing.JMenuItem();
+        mnuExibir = new javax.swing.JMenu();
+        mitAumentarZoom = new javax.swing.JMenuItem();
+        mitDiminuirZoom = new javax.swing.JMenuItem();
+        mitRestaurarZoom = new javax.swing.JMenuItem();
         mnuVerificar = new javax.swing.JMenu();
         mitVerificarAlgoritmo = new javax.swing.JMenuItem();
         mitExibirErros = new javax.swing.JMenuItem();
@@ -187,7 +202,12 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             }
         });
 
-        jScrollPane2.setVerifyInputWhenFocusTarget(false);
+        scrTxpIde.setVerifyInputWhenFocusTarget(false);
+        scrTxpIde.addMouseWheelListener(new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                scrTxpIdeMouseWheelMoved(evt);
+            }
+        });
 
         txpIde.setFont(new java.awt.Font("Monospaced", 0, 12)); // NOI18N
         txpIde.addCaretListener(new javax.swing.event.CaretListener() {
@@ -210,9 +230,9 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                 txpIdeKeyReleased(evt);
             }
         });
-        jScrollPane2.setViewportView(txpIde);
+        scrTxpIde.setViewportView(txpIde);
 
-        jScrollPane2.setRowHeaderView(new TextLineNumber(txpIde, 2));
+        scrTxpIde.setRowHeaderView(new TextLineNumber(txpIde, 3));
 
         btnProxPerc.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fatec/alg/gui/imagens/icon-next-arrow-24.png"))); // NOI18N
         btnProxPerc.setText("Próximo passo (seta p/ baixo)");
@@ -391,6 +411,37 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
         jMenuBar1.add(mnuEditar);
 
+        mnuExibir.setText("Exibir");
+
+        mitAumentarZoom.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_EQUALS, java.awt.event.InputEvent.CTRL_MASK));
+        mitAumentarZoom.setText("Aumentar letra");
+        mitAumentarZoom.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mitAumentarZoomActionPerformed(evt);
+            }
+        });
+        mnuExibir.add(mitAumentarZoom);
+
+        mitDiminuirZoom.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_MINUS, java.awt.event.InputEvent.CTRL_MASK));
+        mitDiminuirZoom.setText("Diminuir letra");
+        mitDiminuirZoom.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mitDiminuirZoomActionPerformed(evt);
+            }
+        });
+        mnuExibir.add(mitDiminuirZoom);
+
+        mitRestaurarZoom.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_0, java.awt.event.InputEvent.CTRL_MASK));
+        mitRestaurarZoom.setText("Restaurar letra");
+        mitRestaurarZoom.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                mitRestaurarZoomActionPerformed(evt);
+            }
+        });
+        mnuExibir.add(mitRestaurarZoom);
+
+        jMenuBar1.add(mnuExibir);
+
         mnuVerificar.setText("Verificar");
 
         mitVerificarAlgoritmo.setText("Verificar algoritmo");
@@ -442,7 +493,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(scrTxpIde, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(lblPosCaret, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -489,8 +540,8 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                 .addComponent(jLabel5)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
-                    .addComponent(jScrollPane2))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 307, Short.MAX_VALUE)
+                    .addComponent(scrTxpIde))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(lblPosCaret)
                 .addGap(7, 7, 7)
@@ -806,6 +857,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     codigofonte.append("\n");
                 }
                 textoOrig = codigofonte.toString();
+                ideFontTamanhoRestaura();
                 txpIde.setText(textoOrig);
                 br.close();
             } catch (IOException ex){
@@ -914,6 +966,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                 mitSalvarActionPerformed(evt);
             }
         }
+        ideFontTamanhoRestaura();
         docIde.setCharacterAttributes(0, atual.length(), stylePlain, true);
         textoOrig = "";
         txpIde.setText("");
@@ -923,6 +976,69 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         encerra();
     }//GEN-LAST:event_formWindowClosing
+
+    private void mitAumentarZoomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitAumentarZoomActionPerformed
+        ideFontTamanhoAltera(2.0F);
+    }//GEN-LAST:event_mitAumentarZoomActionPerformed
+
+    private void mitDiminuirZoomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitDiminuirZoomActionPerformed
+        ideFontTamanhoAltera(-2.0F);
+    }//GEN-LAST:event_mitDiminuirZoomActionPerformed
+
+    private void mitRestaurarZoomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitRestaurarZoomActionPerformed
+        ideFontTamanhoRestaura();
+    }//GEN-LAST:event_mitRestaurarZoomActionPerformed
+
+    private void scrTxpIdeMouseWheelMoved(java.awt.event.MouseWheelEvent evt) {//GEN-FIRST:event_scrTxpIdeMouseWheelMoved
+        int pontos = evt.getWheelRotation();
+        boolean wheelUp = false;
+        if (pontos < 0) {
+            wheelUp = true;
+            pontos = -pontos;
+        }
+        if (evt.isControlDown()) {
+            evt.consume();
+            for (int pnt = 0; pnt < pontos; pnt ++) {
+                
+                if (wheelUp) {
+                    ideFontTamanhoAltera(2.0F);
+                } else {
+                    ideFontTamanhoAltera(-2.0F);
+                }
+            } 
+        }
+    }//GEN-LAST:event_scrTxpIdeMouseWheelMoved
+    
+    /*
+        int pontos = evt.getWheelRotation();
+        boolean wheelUp = false;
+        if (pontos < 0) {
+            wheelUp = true;
+            pontos = -pontos;
+        }
+        if (evt.isControlDown()) {
+            evt.consume();
+            for (int pnt = 0; pnt < pontos; pnt ++) {
+                
+                if (wheelUp) {
+                    ideFontTamanhoAltera(2.0F);
+                } else {
+                    ideFontTamanhoAltera(-2.0F);
+                }
+            } 
+        } */
+    
+    private void ideFontTamanhoAltera(float size) {
+        Font font = txpIde.getFont();
+        font = font.deriveFont(font.getSize2D() + size);
+        txpIde.setFont(font);
+    }
+    
+    private void ideFontTamanhoRestaura() {
+        Font font = txpIde.getFont();
+        font = font.deriveFont(defaultFontSize);
+        txpIde.setFont(font);
+    }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEntradaConfirma;
@@ -935,7 +1051,6 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane6;
     private javax.swing.JScrollPane jScrollPane7;
@@ -945,11 +1060,14 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private javax.swing.JLabel lblPosCaret;
     private javax.swing.JLabel lblVariavelEntrada;
     private javax.swing.JMenuItem mitAbrir;
+    private javax.swing.JMenuItem mitAumentarZoom;
     private javax.swing.JMenuItem mitDesfazer;
+    private javax.swing.JMenuItem mitDiminuirZoom;
     private javax.swing.JMenuItem mitExibirErros;
     private javax.swing.JMenuItem mitNovo;
     private javax.swing.JMenuItem mitProximoPasso;
     private javax.swing.JMenuItem mitRefazer;
+    private javax.swing.JMenuItem mitRestaurarZoom;
     private javax.swing.JMenuItem mitSair;
     private javax.swing.JMenuItem mitSalvar;
     private javax.swing.JMenuItem mitSalvarComo;
@@ -958,7 +1076,9 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private javax.swing.JMenu mnuAjuda;
     private javax.swing.JMenu mnuArquivo;
     private javax.swing.JMenu mnuEditar;
+    private javax.swing.JMenu mnuExibir;
     private javax.swing.JMenu mnuVerificar;
+    private javax.swing.JScrollPane scrTxpIde;
     private javax.swing.JTable tblVariaveis;
     private javax.swing.JTextPane txpEntrada;
     private javax.swing.JTextPane txpIde;
