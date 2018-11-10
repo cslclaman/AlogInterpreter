@@ -8,10 +8,11 @@ package fatec.alg.gui;
 import fatec.alg.geral.log.Erro;
 import java.util.List;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
 
 /**
  *
- * @author alani
+ * @author Caique Siqueira
  */
 public class FrmListaErros extends javax.swing.JFrame {
 
@@ -20,23 +21,30 @@ public class FrmListaErros extends javax.swing.JFrame {
      */
     public FrmListaErros() {
         initComponents();
-        
+        this.setIconImage(new javax.swing.ImageIcon(
+                getClass().getResource("/fatec/alg/gui/imagens/logo-interpr-64.png"))
+                .getImage()
+        );
+        tabErros = (DefaultTableModel)tblErros.getModel();
+        tcmErros = tblErros.getColumnModel();
+        tcmErros.getColumn(0).setWidth(50);
+        tcmErros.getColumn(0).setPreferredWidth(50);
+        tcmErros.getColumn(1).setWidth(120);
+        tcmErros.getColumn(1).setPreferredWidth(120);
+        tcmErros.getColumn(2).setPreferredWidth(500);
     }
     
     public void setListaErros(List<Erro> listaErros) {
-        tabErros = (DefaultTableModel)tblErros.getModel();
-        
         tabErros.setRowCount(0);
+        
         for (Erro erro : listaErros){
             tabErros.addRow(new String[]{
                 erro.getTipo().toString(),
-                String.valueOf(erro.getToken().getLinha()+1),
-                String.valueOf(erro.getToken().getColuna()+1),
+                erro.getPosicao(),
                 erro.getMensagem()
             });
         }
         
-        setVisible(true);
     }
     
     public boolean hasErrors() {
@@ -62,11 +70,11 @@ public class FrmListaErros extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Tipo", "Linha", "Coluna", "Mensagem"
+                "Tipo", "Posição", "Mensagem"
             }
         ) {
             boolean[] canEdit = new boolean [] {
-                false, false, false, false
+                false, false, false
             };
 
             public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -103,4 +111,5 @@ public class FrmListaErros extends javax.swing.JFrame {
     private javax.swing.JTable tblErros;
     // End of variables declaration//GEN-END:variables
     private DefaultTableModel tabErros;
+    private TableColumnModel tcmErros;
 }
