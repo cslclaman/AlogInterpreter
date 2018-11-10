@@ -41,9 +41,14 @@ public class Erro {
         return mensagem;
     }
     
+    public String getPosicao() {
+        return String.format("Linha %d, Coluna %d",
+                token.getLinha() + 1, token.getColuna() + 1);
+    }
+    
     @Override
     public String toString(){
-        return String.format("%-6s - Linha %d, Coluna %d: %s",
-                status.toString(), token.getLinha() + 1, token.getColuna() + 1, mensagem);
+        return String.format("%-6s - %s: %s",
+                status.toString(), getPosicao() + 1, mensagem);
     }
 }
