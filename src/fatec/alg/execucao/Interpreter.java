@@ -474,12 +474,20 @@ public class Interpreter extends Verificador {
                 interfaceExecucao.expressaoFinalizada();
                 interfaceExecucao.atualizaPassoAtual(saidaDados.getTokenNome(), expressao.getAsToken());
                 if (expressao.getTipoResultado() == TipoDado.CARACTER) {
-                    interfaceExecucao.saidaDados(expressao.getResultadoCaracter());
+                    String impressao = expressao.getResultadoCaracter();
+                    if (config.getBoolean(ConfigInterpreter.FORMAT_ESCREVA_ESPACO) &&
+                        config.getBoolean(ConfigInterpreter.FORMAT_ESCREVA_ESPACO_TRIM)) {
+                        impressao = impressao.trim();
+                    }
+                    interfaceExecucao.saidaDados(impressao);
                 } else {
                     interfaceExecucao.saidaDados(expressao.getResultado());
                 }
                 exec.count++;
                 if (exec.count < exec.total) {
+                    if (config.getBoolean(ConfigInterpreter.FORMAT_ESCREVA_ESPACO)) {
+                        interfaceExecucao.saidaDados(" ");
+                    }
                     pilhaExecucao.push(exec);
                 } else {
                     if (config.getBoolean(ConfigInterpreter.FORMAT_ESCREVA_QUEBRA)) {
@@ -540,6 +548,7 @@ public class Interpreter extends Verificador {
                 Erro erro = new Erro(TipoErro.ERRO, token, String.format(
                     "Falha ao realizar atribuição: não pode atribuir valor %s a variável de tipo %s"
                     + " - interpretador finalizado", expressao.getTipoResultado(), variavel.getTipo()));
+                interfaceExecucao.erroFatal(erro);
                 erros.add(erro);
                 canGo = false;
             }

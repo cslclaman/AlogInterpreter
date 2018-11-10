@@ -1,8 +1,8 @@
 /*
  * Fatec Sorocaba - Jose Crespo Gonzales
  * Interpretador de Algoritmos
- * Trabalho de Graduação do curso de An�lise e Desenvolvimento de Sistemas
- * Autor: Ca�que de Souza Lima Siqueira
+ * Trabalho de Graduação do curso de Analise e Desenvolvimento de Sistemas
+ * Autor: Caique de Souza Lima Siqueira
  * (caique.siqueira@fatec.sp.gov.br)
  * Orientador: Prof. Dimas Ferreira Cardoso
  */
@@ -14,28 +14,29 @@ import java.util.LinkedList;
 /**
  *
  * @author Caique Souza
+ * @version 2
  */
-public class ImpressoraExpressaoV2 {
+public class ExibidorExpressao {
     
-    private class Impressao {
-        private Impressao anterior;
+    private class Exibicao {
+        private Exibicao anterior;
         private Expressao expressao;
         private Token token;
         
-        public Impressao(Expressao e) {
-            anterior = null;
-            expressao = e;
+        public Exibicao(Expressao expressao) {
+            this.anterior = null;
+            this.expressao = expressao;
         }
     }
     
-    private LinkedList<Impressao> expressoes;
+    private LinkedList<Exibicao> expressoes;
     private Expressao inicial;
     private StringBuffer texto;
     private Token selecionado;
     private Token resolvido;
     private int posicao;
     
-    public ImpressoraExpressaoV2(Expressao expressao) {
+    public ExibidorExpressao(Expressao expressao) {
         expressoes = new LinkedList<>();
         inicial = expressao;
         selecionado = geraToken("");
@@ -44,8 +45,9 @@ public class ImpressoraExpressaoV2 {
     }
     
     public void setExpressaoAtual(Expressao expressao) {
-        boolean setted = false;
-        for (Impressao i : expressoes) {
+        //Para saber se é o início de uma nova expressão ou se é um passo da mesma
+        boolean setted = false; 
+        for (Exibicao i : expressoes) {
             if (i.expressao == expressao) {
                 i.expressao = expressao;
                 setted = true;
@@ -64,9 +66,8 @@ public class ImpressoraExpressaoV2 {
         posicao = 0;
         texto = new StringBuffer();
         imprime(inicial, null);
-        for (Impressao i : expressoes) {
+        for (Exibicao i : expressoes) {
             if (i.expressao == exprAtual) {
-                System.out.println(i.expressao);
                 selecionado = (i.anterior == null ? i.token : i.anterior.token);
                 if (exprAtual.isResolvida()) {
                     resolvido = i.token;
@@ -78,8 +79,8 @@ public class ImpressoraExpressaoV2 {
         }
     }
     
-    private void imprime(Expressao e, Impressao a) {
-        Impressao i = new Impressao(e);
+    private void imprime(Expressao e, Exibicao a) {
+        Exibicao i = new Exibicao(e);
         if (e != inicial) {
             i.anterior = a;
         }
