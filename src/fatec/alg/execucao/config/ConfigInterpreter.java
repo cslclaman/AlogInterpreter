@@ -113,12 +113,18 @@ public class ConfigInterpreter extends Configuracao {
      * será impresso na tela um espaço em branco. (Padrão: NÃO)
      */
     public final static String FORMAT_ESCREVA_ESPACO = "format.escreva.espaco";
+    /**
+     * (Boolean) Define, <b>caso a configuração {@link #FORMAT_ESCREVA_ESPACO} seja verdadeira</b>,
+     * se valores caracter terão espaços iniciais e finais removidos. (Padrão: SIM)
+     */
+    public final static String FORMAT_ESCREVA_ESPACO_TRIM = "format.escreva.espaco.trimcarac";
     
     public ConfigInterpreter(){
         super();
         
         configs.put(FORMAT_ESCREVA_QUEBRA, true);
         configs.put(FORMAT_ESCREVA_ESPACO, false);
+        configs.put(FORMAT_ESCREVA_ESPACO_TRIM, true);
         
         configs.put(RUNNEXT_BLOCO_PILHA, true);
         configs.put(RUNNEXT_LEIA_ATRIB, false);
