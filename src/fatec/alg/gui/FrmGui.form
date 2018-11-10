@@ -14,6 +14,9 @@
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
                   <KeyStroke key="Ctrl+N"/>
                 </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/fatec/alg/gui/imagens/icon-new-doc-16.png"/>
+                </Property>
                 <Property name="text" type="java.lang.String" value="Novo"/>
               </Properties>
               <Events>
@@ -25,6 +28,9 @@
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
                   <KeyStroke key="Ctrl+O"/>
                 </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/fatec/alg/gui/imagens/icon-open-folder-16.png"/>
+                </Property>
                 <Property name="text" type="java.lang.String" value="Abrir"/>
               </Properties>
               <Events>
@@ -35,6 +41,9 @@
               <Properties>
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
                   <KeyStroke key="Ctrl+S"/>
+                </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/fatec/alg/gui/imagens/icon-save-diskette-16.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Salvar"/>
               </Properties>
@@ -57,6 +66,9 @@
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="mitSair">
               <Properties>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/fatec/alg/gui/imagens/icon-exit-door-16.png"/>
+                </Property>
                 <Property name="text" type="java.lang.String" value="Sair"/>
               </Properties>
               <Events>
@@ -75,6 +87,9 @@
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
                   <KeyStroke key="Ctrl+Z"/>
                 </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/fatec/alg/gui/imagens/icon-undo-arrow-16.png"/>
+                </Property>
                 <Property name="text" type="java.lang.String" value="Desfazer"/>
               </Properties>
               <Events>
@@ -85,6 +100,9 @@
               <Properties>
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
                   <KeyStroke key="Ctrl+Y"/>
+                </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/fatec/alg/gui/imagens/icon-redo-arrow-16.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Refazer"/>
               </Properties>
@@ -104,6 +122,9 @@
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
                   <KeyStroke key="Ctrl+EQUALS"/>
                 </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/fatec/alg/gui/imagens/icon-magn-zoomin-16.png"/>
+                </Property>
                 <Property name="text" type="java.lang.String" value="Aumentar fonte"/>
               </Properties>
               <Events>
@@ -115,6 +136,9 @@
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
                   <KeyStroke key="Ctrl+MINUS"/>
                 </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/fatec/alg/gui/imagens/icon-magn-zoomout-16.png"/>
+                </Property>
                 <Property name="text" type="java.lang.String" value="Diminuir fonte"/>
               </Properties>
               <Events>
@@ -125,6 +149,9 @@
               <Properties>
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
                   <KeyStroke key="Ctrl+0"/>
+                </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/fatec/alg/gui/imagens/icon-magn-zoom-16.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Restaurar tam. fonte"/>
               </Properties>
@@ -141,6 +168,9 @@
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="mitVerificarAlgoritmo">
               <Properties>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/fatec/alg/gui/imagens/icon-check1-16.png"/>
+                </Property>
                 <Property name="text" type="java.lang.String" value="Verificar algoritmo"/>
               </Properties>
               <Events>
@@ -149,6 +179,9 @@
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="mitExibirErros">
               <Properties>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/fatec/alg/gui/imagens/icon-error-alert-16.png"/>
+                </Property>
                 <Property name="text" type="java.lang.String" value="Exibir erros da &#xfa;ltima verifica&#xe7;&#xe3;o"/>
                 <Property name="enabled" type="boolean" value="false"/>
               </Properties>
@@ -161,12 +194,16 @@
         <Menu class="javax.swing.JMenu" name="mnuExecutar">
           <Properties>
             <Property name="text" type="java.lang.String" value="Executar"/>
+            <Property name="enabled" type="boolean" value="false"/>
           </Properties>
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="mitProximoPasso">
               <Properties>
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
                   <KeyStroke key="DOWN"/>
+                </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/fatec/alg/gui/imagens/icon-next-arrow-16.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Pr&#xf3;ximo passo"/>
               </Properties>
@@ -178,6 +215,9 @@
               <Properties>
                 <Property name="accelerator" type="javax.swing.KeyStroke" editor="org.netbeans.modules.form.editors.KeyStrokeEditor">
                   <KeyStroke key="ESCAPE"/>
+                </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/fatec/alg/gui/imagens/icon-stop-sign-16.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Parar execu&#xe7;&#xe3;o"/>
               </Properties>
@@ -194,6 +234,9 @@
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="mitSobre">
               <Properties>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/fatec/alg/gui/imagens/icon-info-16.png"/>
+                </Property>
                 <Property name="text" type="java.lang.String" value="Sobre"/>
               </Properties>
               <Events>
@@ -361,7 +404,6 @@
           </Properties>
           <Events>
             <EventHandler event="caretUpdate" listener="javax.swing.event.CaretListener" parameters="javax.swing.event.CaretEvent" handler="txpIdeCaretUpdate"/>
-            <EventHandler event="caretPositionChanged" listener="java.awt.event.InputMethodListener" parameters="java.awt.event.InputMethodEvent" handler="txpIdeCaretPositionChanged"/>
             <EventHandler event="keyPressed" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txpIdeKeyPressed"/>
             <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="txpIdeKeyReleased"/>
           </Events>
@@ -511,8 +553,12 @@
     </Container>
     <Component class="javax.swing.JButton" name="btnEntradaConfirma">
       <Properties>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/fatec/alg/gui/imagens/icon-check-sign-16.png"/>
+        </Property>
         <Property name="text" type="java.lang.String" value="Confirmar"/>
         <Property name="enabled" type="boolean" value="false"/>
+        <Property name="horizontalTextPosition" type="int" value="10"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="btnEntradaConfirmaActionPerformed"/>

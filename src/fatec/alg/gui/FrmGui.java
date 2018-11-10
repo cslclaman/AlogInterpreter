@@ -53,6 +53,8 @@ import javax.swing.text.StyleContext;
  */
 public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     
+    private static final int MAX_ALTERACOES = 150;
+    
     private Interpreter interpreter = null;
     private boolean emExecucao = false;
     
@@ -131,6 +133,12 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         
         this.setTitle(String.format("Interpretador de Algoritmos - versão %s do TG do aluno %s - %s",
                 Principal.VERSAO_NUM, "Caíque de Souza Lima Siqueira", Principal.VERSAO_DATA));
+        
+        this.setIconImage(new javax.swing.ImageIcon(
+                getClass().getResource("/fatec/alg/gui/imagens/logo-interpr-64.png"))
+                .getImage()
+        );
+        
     }
 
     /**
@@ -219,13 +227,6 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                 txpIdeCaretUpdate(evt);
             }
         });
-        txpIde.addInputMethodListener(new java.awt.event.InputMethodListener() {
-            public void caretPositionChanged(java.awt.event.InputMethodEvent evt) {
-                txpIdeCaretPositionChanged(evt);
-            }
-            public void inputMethodTextChanged(java.awt.event.InputMethodEvent evt) {
-            }
-        });
         txpIde.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 txpIdeKeyPressed(evt);
@@ -307,8 +308,10 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         txpSaida.setPreferredSize(new java.awt.Dimension(13, 66));
         jScrollPane6.setViewportView(txpSaida);
 
+        btnEntradaConfirma.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fatec/alg/gui/imagens/icon-check-sign-16.png"))); // NOI18N
         btnEntradaConfirma.setText("Confirmar");
         btnEntradaConfirma.setEnabled(false);
+        btnEntradaConfirma.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
         btnEntradaConfirma.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnEntradaConfirmaActionPerformed(evt);
@@ -361,6 +364,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         mnuArquivo.setText("Arquivo");
 
         mitNovo.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.event.InputEvent.CTRL_MASK));
+        mitNovo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fatec/alg/gui/imagens/icon-new-doc-16.png"))); // NOI18N
         mitNovo.setText("Novo");
         mitNovo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -370,6 +374,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         mnuArquivo.add(mitNovo);
 
         mitAbrir.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_O, java.awt.event.InputEvent.CTRL_MASK));
+        mitAbrir.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fatec/alg/gui/imagens/icon-open-folder-16.png"))); // NOI18N
         mitAbrir.setText("Abrir");
         mitAbrir.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -379,6 +384,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         mnuArquivo.add(mitAbrir);
 
         mitSalvar.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.CTRL_MASK));
+        mitSalvar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fatec/alg/gui/imagens/icon-save-diskette-16.png"))); // NOI18N
         mitSalvar.setText("Salvar");
         mitSalvar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -397,6 +403,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         mnuArquivo.add(mitSalvarComo);
         mnuArquivo.add(jSeparator1);
 
+        mitSair.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fatec/alg/gui/imagens/icon-exit-door-16.png"))); // NOI18N
         mitSair.setText("Sair");
         mitSair.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -410,6 +417,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         mnuEditar.setText("Editar");
 
         mitDesfazer.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Z, java.awt.event.InputEvent.CTRL_MASK));
+        mitDesfazer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fatec/alg/gui/imagens/icon-undo-arrow-16.png"))); // NOI18N
         mitDesfazer.setText("Desfazer");
         mitDesfazer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -419,6 +427,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         mnuEditar.add(mitDesfazer);
 
         mitRefazer.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Y, java.awt.event.InputEvent.CTRL_MASK));
+        mitRefazer.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fatec/alg/gui/imagens/icon-redo-arrow-16.png"))); // NOI18N
         mitRefazer.setText("Refazer");
         mitRefazer.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -432,6 +441,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         mnuExibir.setText("Exibir");
 
         mitAumentarZoom.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_EQUALS, java.awt.event.InputEvent.CTRL_MASK));
+        mitAumentarZoom.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fatec/alg/gui/imagens/icon-magn-zoomin-16.png"))); // NOI18N
         mitAumentarZoom.setText("Aumentar fonte");
         mitAumentarZoom.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -441,6 +451,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         mnuExibir.add(mitAumentarZoom);
 
         mitDiminuirZoom.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_MINUS, java.awt.event.InputEvent.CTRL_MASK));
+        mitDiminuirZoom.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fatec/alg/gui/imagens/icon-magn-zoomout-16.png"))); // NOI18N
         mitDiminuirZoom.setText("Diminuir fonte");
         mitDiminuirZoom.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -450,6 +461,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         mnuExibir.add(mitDiminuirZoom);
 
         mitRestaurarZoom.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_0, java.awt.event.InputEvent.CTRL_MASK));
+        mitRestaurarZoom.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fatec/alg/gui/imagens/icon-magn-zoom-16.png"))); // NOI18N
         mitRestaurarZoom.setText("Restaurar tam. fonte");
         mitRestaurarZoom.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -462,6 +474,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
         mnuVerificar.setText("Verificar");
 
+        mitVerificarAlgoritmo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fatec/alg/gui/imagens/icon-check1-16.png"))); // NOI18N
         mitVerificarAlgoritmo.setText("Verificar algoritmo");
         mitVerificarAlgoritmo.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -470,6 +483,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         });
         mnuVerificar.add(mitVerificarAlgoritmo);
 
+        mitExibirErros.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fatec/alg/gui/imagens/icon-error-alert-16.png"))); // NOI18N
         mitExibirErros.setText("Exibir erros da última verificação");
         mitExibirErros.setEnabled(false);
         mitExibirErros.addActionListener(new java.awt.event.ActionListener() {
@@ -482,8 +496,10 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         jMenuBar1.add(mnuVerificar);
 
         mnuExecutar.setText("Executar");
+        mnuExecutar.setEnabled(false);
 
         mitProximoPasso.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_DOWN, 0));
+        mitProximoPasso.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fatec/alg/gui/imagens/icon-next-arrow-16.png"))); // NOI18N
         mitProximoPasso.setText("Próximo passo");
         mitProximoPasso.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -493,6 +509,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         mnuExecutar.add(mitProximoPasso);
 
         mitPararExec.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_ESCAPE, 0));
+        mitPararExec.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fatec/alg/gui/imagens/icon-stop-sign-16.png"))); // NOI18N
         mitPararExec.setText("Parar execução");
         mitPararExec.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -505,6 +522,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
         mnuAjuda.setText("Ajuda");
 
+        mitSobre.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fatec/alg/gui/imagens/icon-info-16.png"))); // NOI18N
         mitSobre.setText("Sobre");
         mitSobre.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -618,6 +636,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         }
         btnProxPerc.setEnabled(enabled && !btnEntradaConfirma.isEnabled());
         btnPararExec.setEnabled(enabled);
+        mnuExecutar.setEnabled(enabled);
         emExecucao = enabled;
         if (!enabled) {
             JOptionPane.showMessageDialog(this, "Execução finalizada", "Execução finalizada", JOptionPane.INFORMATION_MESSAGE);
@@ -628,9 +647,9 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
     private void btnVerificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnVerificarActionPerformed
         if (!pararExecucao("Verificar e reiniciar")) return;
+        pararExecucao();
         
         oldText = txpIde.getText();
-        btnPararExec.setEnabled(false);
         
         if (oldText.isEmpty()){
             JOptionPane.showMessageDialog(this, "Nada para verificar - algoritmo vazio", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
@@ -655,17 +674,13 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                 docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
             }
             
-            btnProxPerc.setEnabled(false);
-
             mitExibirErros.setEnabled(true);
             frmListaErros.setListaErros(scanner.getErros(TipoErro.ALERTA));
             frmListaErros.setVisible(true);
             
         } else {
             AnalisadorSintatico parser = new AnalisadorSintatico(tokens);
-            LinkedList<Instrucao> instrucoes = new LinkedList<>();
-
-            instrucoes = parser.listaInstrucoes();
+            LinkedList<Instrucao> instrucoes = parser.listaInstrucoes();
 
             if (parser.getNumErros(TipoErro.DEVEL) > 0){
                 JOptionPane.showMessageDialog(this, parser.getNumErros(TipoErro.DEVEL) + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.ERROR_MESSAGE);
@@ -676,7 +691,6 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
                     System.out.println(e.toString());
                 }
-                btnProxPerc.setEnabled(false);
                 
                 mitExibirErros.setEnabled(true);
                 frmListaErros.setListaErros(parser.getErros(TipoErro.ALERTA));
@@ -699,7 +713,6 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                         Token t = e.getToken();
                         docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
                     }
-                    btnProxPerc.setEnabled(false);
                     mitExibirErros.setEnabled(true);
                     frmListaErros.setListaErros(processor.getErros(TipoErro.ALERTA));
                     frmListaErros.setVisible(true);
@@ -718,7 +731,6 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                         frmListaErros.setListaErros(processor.getErros(TipoErro.INFO));
                         frmListaErros.setVisible(true);
                         JOptionPane.showMessageDialog(this, nalepp + " alertas detectados - pronto para execução", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
-                        mitExibirErros.setEnabled(false);
                     } else {
                         JOptionPane.showMessageDialog(this, "Nenhum erro encontrado - pronto para execução", "Verificação concluída", JOptionPane.INFORMATION_MESSAGE);
                         mitExibirErros.setEnabled(false);
@@ -741,6 +753,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     interpreter.setConfigInterpreter(configInterpr);
                     btnProxPerc.setEnabled(interpreter.existeProxima());
                     btnPararExec.setEnabled(interpreter.existeProxima());
+                    mnuExecutar.setEnabled(interpreter.existeProxima());
                     txpIde.setEditable(false);
                     variaveis = new LinkedList<>();
                     impressoraExpressao = null;
@@ -848,21 +861,19 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         }
     }//GEN-LAST:event_txpIdeKeyPressed
 
-    private void txpIdeCaretPositionChanged(java.awt.event.InputMethodEvent evt) {//GEN-FIRST:event_txpIdeCaretPositionChanged
-        
-    }//GEN-LAST:event_txpIdeCaretPositionChanged
-
     private void txpIdeCaretUpdate(javax.swing.event.CaretEvent evt) {//GEN-FIRST:event_txpIdeCaretUpdate
-        int lin = 1, col = 1;
-        for (char ch : txpIde.getText().substring(0, evt.getDot()).toCharArray()){
-            if (ch == '\n'){
-                lin ++;
-                col = 1;
-            } else {
-                col ++;
+        if (!emExecucao) {
+            int lin = 1, col = 1;
+            for (char ch : txpIde.getText().substring(0, evt.getDot()).toCharArray()){
+                if (ch == '\n'){
+                    lin ++;
+                    col = 1;
+                } else {
+                    col ++;
+                }
             }
+            lblPosCaret.setText("Linha " + lin + ", Coluna " + col);
         }
-        lblPosCaret.setText("Linha " + lin + ", Coluna " + col);
     }//GEN-LAST:event_txpIdeCaretUpdate
 
     private void mitSairActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitSairActionPerformed
@@ -957,8 +968,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
     private void mitDesfazerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitDesfazerActionPerformed
         if (!alteracoesAnt.isEmpty()) {
-            // Se necessário caso a pilha de alterações estoure a memória...
-            if (alteracoesProx.size() >= 100) {
+            if (MAX_ALTERACOES > 0 && alteracoesProx.size() >= MAX_ALTERACOES) {
                 alteracoesProx.poll();
             } 
             String text = txpIde.getText();
@@ -971,7 +981,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private void mitRefazerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mitRefazerActionPerformed
         if (!alteracoesProx.isEmpty()) {
             // Se necessário caso a pilha de alterações estoure a memória...
-            if (alteracoesAnt.size() >= 100) {
+            if (MAX_ALTERACOES > 0 && alteracoesAnt.size() >= MAX_ALTERACOES) {
                 alteracoesAnt.poll();
             } 
             String text = txpIde.getText();
@@ -1331,6 +1341,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         emExecucao = false;
         btnProxPerc.setEnabled(false);
         btnPararExec.setEnabled(false);
+        mnuExecutar.setEnabled(false);
         
         limpaTokensPercurso();
         
@@ -1361,7 +1372,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     "Fechar programa",
                     JOptionPane.YES_NO_OPTION)) {
                 mitSalvarActionPerformed(null);
-            }
+            } 
         }
         System.exit(0);
     }
