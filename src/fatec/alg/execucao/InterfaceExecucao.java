@@ -30,7 +30,7 @@ public interface InterfaceExecucao {
      * {@link alog.expressao.Expressao#getAsToken() }.
      * @param token token sendo executado.
      */
-    void atualizaPassoAtual(Token token);
+    default void atualizaPassoAtual(Token token) {};
     
     /**
      * Atualiza à interface qual o passo (token) sendo executado dentro da instrução atual. Para fins de controle.
@@ -38,7 +38,7 @@ public interface InterfaceExecucao {
      * @param controle token da instrução 
      * @param token token sendo executado.
      */
-    void atualizaPassoAtual(Token controle, Token token);
+    default void atualizaPassoAtual(Token controle, Token token) {};
     
     /**
      * Atualiza à interface os tokens sendo executados dentro da instrução atual. Para fins de controle.
@@ -46,18 +46,18 @@ public interface InterfaceExecucao {
      * @param controle token da instrução 
      * @param token Array com tokens do passo atual.
      */
-    void atualizaPassoAtual(Token controle, Token... token);
+    default void atualizaPassoAtual(Token controle, Token... token) {};
     
     /**
      * Atualiza à interface uma expressão que esteja sendo executada dentro da instrução atual. Para fins de controle.
      * @param expressao expressão sendo executada.
      */
-    void atualizaExpressaoAtual(Expressao expressao);
+    default void atualizaExpressaoAtual(Expressao expressao) {};
     
     /**
      * Indica que uma expressão foi completamente finalizada.
      */
-    void expressaoFinalizada();
+    default void expressaoFinalizada() {};
     
     /**
      * Indica uma declaração de variável e informa a variável que acabou de ser criada.
