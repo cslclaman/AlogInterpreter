@@ -9,6 +9,7 @@
 
 package fatec.alg;
 
+import fatec.alg.gui.Console;
 import fatec.alg.gui.FrmGui;
 import fatec.alg.util.log.CustomLogHandler;
 import fatec.alg.util.log.SilentFormatter;
@@ -45,18 +46,34 @@ public class Principal {
     private static final Logger logger = Logger.getLogger(Principal.class.getName());
     
     /**
-     * Método principal de execução da aplicação.
-     * Define o tema da interface do Swing.
+     * Método principal de execução da aplicação.<br>
+     * Permite os seguintes argumentos:
+     * <ul>
+     * <li><b>-debuglog</b>: log completo, incluindo classe e método que emitiu</li>
+     * <li><b>-console</b>: execução via console (textual)</li>
+     * <li><b>-filename="&lt;CAMINHO&gt;"</b>: passa um caminho de arquivo (txtalg) a ser aberto</li>
+     * </ul>
      * 
-     * @param args argumentos da linha de comando.
+     * @param args argumentos da linha de comando
      */
     public static void main(String[] args) {
         boolean logInfo = false;
+        boolean console = false;
+        String filename = "";
         
         if (args.length > 0) {
             for (String arg : args) {
                 if (arg.equals("-debuglog")) {
                     logInfo = true;
+                }
+                if (arg.equals("-console")) {
+                    console = true;
+                }
+                if (arg.startsWith("-filename=")) {
+                    filename = arg
+                        .replace("-filename=", "")
+                        .replace("'", "")
+                        .replace("\"", "");
                 }
             }
         }
@@ -77,31 +94,49 @@ public class Principal {
         logger.log(Level.INFO, "Interpretador de Algoritmos - Versao {0}, build {1} ({2}) - INICIADO",
                 new Object[]{VERSAO_NUM, VERSAO_BUILD, VERSAO_DATA});
         
-        try {
-            String theme;
-            if (System.getProperty("os.name").toLowerCase().contains("windows")) {
-                theme = "Windows";
-            } else {
-                theme = "Metal";
-            }
-
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if (info.getName().equals(theme)) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
+        if (console) {
+            if (!logInfo) {
+                for (Handler h : rootLogger.getHandlers()) {
+                    h.setFormatter(new Formatter() {
+                        @Override
+                        public String format(LogRecord record) {
+                            return "";
+                        }
+                    });
                 }
             }
-        } catch (
-                ClassNotFoundException | 
-                InstantiationException | 
-                IllegalAccessException | 
-                javax.swing.UnsupportedLookAndFeelException ex) {
+            Console cmd = new Console(filename);
+            java.awt.EventQueue.invokeLater(() -> {
+                cmd.executa();
+            });
+        } else {
+            try {
+                String theme;
+                if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+                    theme = "Windows";
+                } else {
+                    theme = "Metal";
+                }
 
-            logger.log(java.util.logging.Level.SEVERE, null, ex);
+                for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                    if (info.getName().equals(theme)) {
+                        javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                        break;
+                    }
+                }
+            } catch (
+                    ClassNotFoundException | 
+                    InstantiationException | 
+                    IllegalAccessException | 
+                    javax.swing.UnsupportedLookAndFeelException ex) {
+
+                logger.log(java.util.logging.Level.SEVERE, null, ex);
+            }
+            FrmGui frmGui = new FrmGui(filename);
+            java.awt.EventQueue.invokeLater(() -> {
+                frmGui.setVisible(true);
+            });
         }
-        java.awt.EventQueue.invokeLater(() -> {
-            new FrmGui().setVisible(true);
-        });
     }
     
 }
