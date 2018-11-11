@@ -1,12 +1,7 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fatec.alg.geral.log;
 
 /**
- *
+ * Classe de enumeração de tipos de registros (logs) possíveis.
  * @author Caique Souza
  */
 public enum TipoErro {
@@ -23,22 +18,36 @@ public enum TipoErro {
     ALERTA ("Alerta", 2),
     
     /**
-     * Informação básica que não indica nenhum problema de análise.
+     * Informação básica que não indica nenhum problema de análise, ou pequenos
+     * avisos que não causam interrupção alguma no código.
      */
-    INFO ("Info", 3),
+    INFO ("Info", 3);
+    
     
     /**
-     * Informação que só deveria ser exibida ao desenvolvedor.
+     * Retorna o tipo de registro padrão.
+     * @return ALERTA
      */
-    DEVEL ("Devel", 4);
-    
-    
     public static TipoErro getDefault() {
         return ALERTA;
     }
     
+    /**
+     * Retorna o tipo de registro com nível maior (menor gravidade).
+     * @return 
+     */
     public static TipoErro getMax() {
-        return DEVEL;
+        TipoErro max = null;
+        for (TipoErro tipo : TipoErro.values()) {
+            if (max == null) {
+                max = tipo;
+            } else {
+                if (tipo.nivel > max.nivel) {
+                    max = tipo;
+                }
+            }
+        }
+        return max;
     }
     
     
@@ -50,14 +59,27 @@ public enum TipoErro {
         this.nome = nome;
     }
 
+    /**
+     * Retorna o nome (descrição) do tipo de registro.
+     * @return Nome.
+     */
     public String getNome() {
         return nome;
     }
 
+    /**
+     * Retorna o nível do tipo de registro. Esse nível indica a prioridade
+     * ou gravidade do registro - quanto mais próximo de zero, mais grave.
+     * @return 
+     */
     public int getNivel() {
         return nivel;
     }
     
+    /**
+     * Retorna o nome em maiúsculas.
+     * @return 
+     */
     @Override
     public String toString() {
         return nome.toUpperCase();
