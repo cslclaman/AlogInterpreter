@@ -92,7 +92,7 @@ public class FrmSobre extends javax.swing.JFrame {
 
         lblHospedagem.setForeground(new java.awt.Color(0, 0, 255));
         lblHospedagem.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblHospedagem.setText("Projeto hospedado em ENDERECO");
+        lblHospedagem.setText("Projeto hospedado em ");
         lblHospedagem.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         lblHospedagem.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
