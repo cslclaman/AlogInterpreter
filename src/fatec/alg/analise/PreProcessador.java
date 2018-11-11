@@ -425,10 +425,14 @@ public class PreProcessador extends Verificador {
         nerr += geraErroTipoDadoInvalidoOperador(operador, exprEsq.getAsToken(), exprEsq.getTipoResultado(), esperados);
         nerr += geraErroTipoDadoInvalidoOperador(operador, exprDir.getAsToken(), exprDir.getTipoResultado(), esperados);
         if (nerr == 0) {
-            if (exprEsq.getTipoResultado() == TipoDado.INTEIRO && exprDir.getTipoResultado() == TipoDado.INTEIRO) {
-                operacao.setTipoResultado(TipoDado.INTEIRO);
-            } else {
+            if (operador.getFuncaoToken() == FuncaoToken.OP_MAT_DIV_REAL) {
                 operacao.setTipoResultado(TipoDado.REAL);
+            } else {
+                if (exprEsq.getTipoResultado() == TipoDado.INTEIRO && exprDir.getTipoResultado() == TipoDado.INTEIRO) {
+                    operacao.setTipoResultado(TipoDado.INTEIRO);
+                } else {
+                    operacao.setTipoResultado(TipoDado.REAL);
+                }
             }
         }
     }
