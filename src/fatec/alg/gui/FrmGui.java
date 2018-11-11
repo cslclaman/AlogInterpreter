@@ -87,7 +87,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     /**
      * Creates new form FrmTeste
      */
-    public FrmGui() {
+    public FrmGui(String filename) {
         oldText = "";
         textoOrig = "";
         
@@ -138,6 +138,39 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                 .getImage()
         );
         
+        if (filename != null && !filename.isEmpty()) {
+            openArquivo(filename);
+        }
+    }
+    
+    private void openArquivo(String filename) {
+        try {
+            arquivo = new File(filename);
+            StringBuilder codigofonte = new StringBuilder();
+            BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(arquivo), "UTF-8"));
+            String texto;
+            while ((texto = br.readLine()) != null){
+                for (char ch : texto.toCharArray()){
+                    if (ch == '\t'){
+                        codigofonte.append("    ");
+                    } else {
+                        codigofonte.append(ch);
+                    }
+                }
+                codigofonte.append("\n");
+            }
+            textoOrig = codigofonte.toString();
+            ideFontTamanhoRestaura();
+            txpIde.setText(textoOrig);
+            br.close();
+        } catch (IOException ex){
+            logger.log(Level.WARNING, "{0}\n {1} - {2}",
+                new Object[]{
+                    "Não foi possível carregar o arquivo especificado",
+                    ex.getClass().getName(),
+                    ex.getMessage()
+                });
+        }
     }
 
     /**
@@ -857,7 +890,13 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                                 "Conteúdo a ser colado não suportado",
                                 "Erro ao colar texto",
                                 JOptionPane.WARNING_MESSAGE);
-                        System.err.println(ex.getClass().getName() + " - " + ex.getMessage());
+                        
+                        logger.log(Level.WARNING, "{0}\n {1} - {2}",
+                        new Object[]{
+                            "Conteúdo a ser colado não suportado",
+                            ex.getClass().getName(),
+                            ex.getMessage()
+                        });
                     }
                 }
                 break;
@@ -917,7 +956,13 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                 br.close();
             } catch (IOException ex){
                 JOptionPane.showMessageDialog(this, "Não foi possível carregar o arquivo especificado", "Erro ao abrir arquivo", JOptionPane.ERROR_MESSAGE);
-                System.err.println(ex.toString()); 
+                
+                logger.log(Level.WARNING, "{0}\n {1} - {2}",
+                    new Object[]{
+                        "Não foi possível carregar o arquivo especificado",
+                        ex.getClass().getName(),
+                        ex.getMessage()
+                    });
             }
         }
     }//GEN-LAST:event_mitAbrirActionPerformed
@@ -938,7 +983,13 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                 fos.close();
             } catch (IOException ex){
                 JOptionPane.showMessageDialog(this, "Não foi possível salvar o arquivo especificado", "Erro ao salvar arquivo", JOptionPane.ERROR_MESSAGE);
-                System.err.println(ex.toString()); 
+                
+                logger.log(Level.WARNING, "{0}\n {1} - {2}",
+                    new Object[]{
+                        "Não foi possível salvar o arquivo especificado",
+                        ex.getClass().getName(),
+                        ex.getMessage()
+                    });
             }
         }
     }//GEN-LAST:event_mitSalvarActionPerformed
