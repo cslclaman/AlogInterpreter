@@ -21,10 +21,13 @@ import fatec.alg.geral.log.TipoErro;
 import fatec.alg.geral.tipo.TipoDado;
 import fatec.alg.geral.modulo.ModuloPrincipal;
 import fatec.alg.geral.programa.Programa;
+import fatec.alg.geral.token.FuncaoToken;
 import fatec.alg.geral.token.Token;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Analisador semântico e pré-processador que verifica a coerência das expressões criadas pelo Parser.
@@ -33,6 +36,7 @@ import java.util.List;
  * @author Caique
  */
 public class PreProcessador extends Verificador {
+    private static final Logger logger = Logger.getLogger(PreProcessador.class.getName());
     
     /**
      * Classe de verificação de variáveis: verifica se foi inicializada e se
@@ -149,13 +153,16 @@ public class PreProcessador extends Verificador {
     
     private void verificaInstrucao(Instrucao instrucao) {
         if (instrucao == null) {
-            erros.add(new Erro(TipoErro.DEVEL, ' ', 1, 1, 1, 
-                "Instrução nula"));
+            logger.log(Level.WARNING, "Instrução nula");
             return;
         }
         if (!instrucao.isValida()) {
-            erros.add(new Erro(TipoErro.DEVEL, instrucao.listaTokens().get(0), 
-                "Instrução \"" + instrucao.getTipo() + "\" inválida/incorreta"));
+            logger.log(Level.WARNING, "{0} {1} {2}",
+                    new Object[]{
+                        "Instrução \"",
+                        instrucao.getTipo(),
+                        "\" inválida/incorreta"
+                    });
             return;
         }
         switch (instrucao.getTipo()) {
@@ -205,8 +212,13 @@ public class PreProcessador extends Verificador {
                 break;
 
             default:
-                erros.add(new Erro(TipoErro.DEVEL, instrucao.listaTokens().get(0), 
-                "Instrução \"" + instrucao.getTipo() + "\" não esperada"));
+                logger.log(Level.WARNING, "{0} {1} {2}",
+                    new Object[]{
+                        "Instrução \"",
+                        instrucao.getTipo(),
+                        "\" não esperada"
+                    });
+                break;
         }
     }
     

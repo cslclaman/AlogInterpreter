@@ -35,6 +35,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.NoSuchElementException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Classe que recebe um programa e executa as instruções nele contidas.
@@ -53,6 +55,7 @@ import java.util.NoSuchElementException;
  * @version 1.0.0
  */
 public class Interpreter extends Verificador {
+    private static final Logger logger = Logger.getLogger(Interpreter.class.getName());
     
     private class Executavel {
         Instrucao instrucao;
@@ -164,10 +167,14 @@ public class Interpreter extends Verificador {
             try {
                 exec = pilhaExecucao.pop();
             } catch (NoSuchElementException ex) {
-                erros.add(new Erro(TipoErro.DEVEL, ' ', 1, 1, 1, String.format(
-                    "Pilha sem elemento de instrução: %s - %s",ex.getClass().getName(), ex.getMessage())));
                 Erro fatal = new Erro(TipoErro.ERRO, ' ', 1, 1, 1, 
                     "Falha ao carregar próxima instrução - interpretador finalizado");
+                logger.log(Level.WARNING, "{0}:\n {1} - {2}",
+                    new Object[]{
+                        "Pilha sem elemento de instrução",
+                        ex.getClass().getName(),
+                        ex.getMessage()
+                    });
                 erros.add(fatal);
                 canGo = false;
                 interfaceExecucao.erroFatal(fatal);
@@ -239,10 +246,14 @@ public class Interpreter extends Verificador {
                             interfaceExecucao.atualizaExpressaoAtual(expr);
                             runNext = avaliaRunNextCloseExpressao(expr);
                         } catch (NoSuchElementException ex) {
-                            erros.add(new Erro(TipoErro.DEVEL, ' ', 1, 1, 1, String.format(
-                                "Pilha sem elemento de instrução: %s - %s",ex.getClass().getName(), ex.getMessage())));
                             Erro fatal = new Erro(TipoErro.ERRO, ' ', 1, 1, 1, 
                                 "Falha ao carregar próxima instrução - interpretador finalizado");
+                            logger.log(Level.WARNING, "{0}:\n {1} - {2}",
+                                new Object[]{
+                                    "Pilha sem elemento de instrução",
+                                    ex.getClass().getName(),
+                                    ex.getMessage()
+                                });
                             erros.add(fatal);
                             canGo = false;
                             interfaceExecucao.erroFatal(fatal);
@@ -251,8 +262,13 @@ public class Interpreter extends Verificador {
                     break;
 
                 default:
-                    erros.add(new Erro(TipoErro.DEVEL, exec.instrucao.listaTokens().get(0), 
-                    "Instrução \"" + exec.instrucao.getTipo() + "\" não esperada"));
+                    logger.log(Level.WARNING, "{0} {1} {2}",
+                        new Object[]{
+                            "Instrução \"",
+                            exec.instrucao.getTipo(),
+                            "\" não esperada"
+                        });
+                    break;
             }
 
         } while (runNext) ;
@@ -405,9 +421,9 @@ public class Interpreter extends Verificador {
                      */
                     String retorno = interfaceExecucao.entradaDadosRetorno();
                     if (retorno == null) {
-                        erros.add(new Erro(TipoErro.DEVEL, token, "Retorno nulo"));
                         Erro erro = new Erro(TipoErro.ERRO, token, 
                             "Falha ao realizar entrada de dados - interpretador finalizado");
+                        logger.log(Level.WARNING, "Retorno nulo");
                         erros.add(erro);
                         canGo = false;
                         return;
@@ -437,12 +453,16 @@ public class Interpreter extends Verificador {
                                 exec.passo < entradaDados.getNumParametros() &&
                                 config.getBoolean(ConfigInterpreter.RUNNEXT_LEIA_ATRIB);
                     } catch (NumberFormatException ex) {
-                        erros.add(new Erro(TipoErro.DEVEL, token, String.format(
-                            "Conversão não realizada para tipo %s: %s - %s", 
-                                variavel.getTipo().toString(), ex.getClass().getName(), ex.getMessage())));
                         Erro erro = new Erro(TipoErro.ERRO, token, 
                             "Valor informado não era do tipo " + variavel.getTipo().toString() + " - tente novamente");
                         erros.add(erro);
+                        logger.log(Level.WARNING, "{0} {1}:\n {2} - {3}",
+                        new Object[]{
+                            "Conversão não realizada para tipo",
+                            variavel.getTipo().toString(),
+                            ex.getClass().getName(),
+                            ex.getMessage()
+                        });
                         interfaceExecucao.erroEntradaDados(variavel, erro);
                         runNext = true;
                     }
@@ -542,9 +562,14 @@ public class Interpreter extends Verificador {
                 interfaceExecucao.defineValorVariavel(token, variavel);
                 exec.count++;
             } else {
-                erros.add(new Erro(TipoErro.DEVEL, token, String.format(
-                    "Não pode atribuir valor %s (%s) a variável %s"
-                    + " - interpretador finalizado", retorno, expressao.getTipoResultado(), variavel.getTipo())));
+                logger.log(Level.WARNING, "{0} {1} (tipo {2}) {3} tipo {4}",
+                    new Object[]{
+                        "Não pode atribuir valor",
+                        retorno,
+                        expressao.getTipoResultado(),
+                        "a variável",
+                        variavel.getTipo()
+                    });
                 Erro erro = new Erro(TipoErro.ERRO, token, String.format(
                     "Falha ao realizar atribuição: não pode atribuir valor %s a variável de tipo %s"
                     + " - interpretador finalizado", expressao.getTipoResultado(), variavel.getTipo()));
@@ -572,9 +597,11 @@ public class Interpreter extends Verificador {
             } else {
                 interfaceExecucao.expressaoFinalizada();
                 if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
-                    erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
-                        "Não interpretou resultado %s (%s) como lógico para condicional",
-                        expressao.getResultado(), expressao.getTipoResultado())));
+                    logger.log(Level.WARNING, "Não interpretou resultado {0} (tipo {1}) como lógico para condicional",
+                    new Object[]{
+                        expressao.getResultado(),
+                        expressao.getTipoResultado()
+                    });
                     Erro erro = new Erro(TipoErro.ERRO, expressao.getAsToken(), String.format(
                         "Esperava um resultado lógico para a condição, mas encontrou %s"
                         + " - interpretador finalizado", expressao.getTipoResultado()));
@@ -632,9 +659,11 @@ public class Interpreter extends Verificador {
                 } else {
                     interfaceExecucao.expressaoFinalizada();
                     if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
-                        erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
-                            "Não interpretou resultado %s (%s) como lógico para repetição",
-                            expressao.getResultado(), expressao.getTipoResultado())));
+                        logger.log(Level.WARNING, "Não interpretou resultado {0} (tipo {1}) como lógico para repetição",
+                        new Object[]{
+                            expressao.getResultado(),
+                            expressao.getTipoResultado()
+                        });
                         Erro erro = new Erro(TipoErro.ERRO, expressao.getAsToken(), String.format(
                             "Esperava um resultado lógico para a condição, mas encontrou %s"
                             + " - interpretador finalizado", expressao.getTipoResultado()));
@@ -691,9 +720,11 @@ public class Interpreter extends Verificador {
                 } else {
                     interfaceExecucao.expressaoFinalizada();
                     if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
-                        erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
-                            "Não interpretou resultado %s (%s) como lógico para repetição",
-                            expressao.getResultado(), expressao.getTipoResultado())));
+                        logger.log(Level.WARNING, "Não interpretou resultado {0} (tipo {1}) como lógico para repetição",
+                        new Object[]{
+                            expressao.getResultado(),
+                            expressao.getTipoResultado()
+                        });
                         Erro erro = new Erro(TipoErro.ERRO, expressao.getAsToken(), String.format(
                             "Esperava um resultado lógico para a condição, mas encontrou %s"
                             + " - interpretador finalizado", expressao.getTipoResultado()));
@@ -744,9 +775,11 @@ public class Interpreter extends Verificador {
                 } else {
                     interfaceExecucao.expressaoFinalizada();
                     if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
-                        erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
-                            "Não interpretou resultado %s (%s) como lógico para repetição",
-                            expressao.getResultado(), expressao.getTipoResultado())));
+                        logger.log(Level.WARNING, "Não interpretou resultado {0} (tipo {1}) como lógico para repetição",
+                        new Object[]{
+                            expressao.getResultado(),
+                            expressao.getTipoResultado()
+                        });
                         Erro erro = new Erro(TipoErro.ERRO, expressao.getAsToken(), String.format(
                             "Esperava um resultado lógico para a condição, mas encontrou %s"
                             + " - interpretador finalizado", expressao.getTipoResultado()));
@@ -782,8 +815,10 @@ public class Interpreter extends Verificador {
                 interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenPara(), tokenVarCont);
                 
                 if (!tiposDadosCorretos(variavel.getTipo(), TipoDado.INTEIRO, TipoDado.REAL)){
-                    erros.add(new Erro(TipoErro.DEVEL, tokenVarCont, String.format(
-                        "Variável de tipo inválido: %s", variavel.getTipo())));
+                    logger.log(Level.WARNING, "Variável de tipo inválido: {0}",
+                        new Object[]{
+                            variavel.getTipo()
+                        });
                     Erro erro = new Erro(TipoErro.ERRO, tokenVarCont, String.format(
                         "Variável contadora deve ser numérica (inteira ou real), mas encontrou %s "
                                 + "- interpretador finalizado", variavel.getTipo()));
@@ -821,9 +856,11 @@ public class Interpreter extends Verificador {
                         exec.count ++;
                         pilhaExecucao.push(exec);
                     } else {
-                        erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
-                            "Não interpretou resultado %s (%s) como numérico para repetição",
-                            expressao.getResultado(), expressao.getTipoResultado())));
+                        logger.log(Level.WARNING, "Não interpretou resultado {0} (tipo {1}) como numérico para incremento de repetição",
+                        new Object[]{
+                            expressao.getResultado(),
+                            expressao.getTipoResultado()
+                        });
                         Erro erro = new Erro(TipoErro.ERRO, expressao.getAsToken(), String.format(
                             "Esperava um resultado %s para início de repetição, mas encontrou %s"
                             + " - interpretador finalizado", variavel.getTipo(), expressao.getTipoResultado()));
@@ -939,9 +976,11 @@ public class Interpreter extends Verificador {
                         exec.count ++;
                         pilhaExecucao.push(exec);
                     } else {
-                        erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
-                            "Não interpretou resultado %s (%s) como numérico para repetição",
-                            expressao.getResultado(), expressao.getTipoResultado())));
+                        logger.log(Level.WARNING, "Não interpretou resultado {0} (tipo {1}) como numérico para incremento de repetição",
+                        new Object[]{
+                            expressao.getResultado(),
+                            expressao.getTipoResultado()
+                        });
                         Erro erro = new Erro(TipoErro.ERRO, expressao.getAsToken(), String.format(
                             "Esperava um resultado %s para início de repetição, mas encontrou %s"
                             + " - interpretador finalizado", variavel.getTipo(), expressao.getTipoResultado()));
@@ -1144,9 +1183,13 @@ public class Interpreter extends Verificador {
                     pilhaExecucao.push(exec);
                     runNext = config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_RES_FUNC);
                 } else {
-                    erros.add(new Erro(TipoErro.DEVEL, expressao.getAsToken(), String.format(
-                        "Não interpretou resultado %s (%s) como parâmetro %d de função %s",
-                        expressao.getResultado(), expressao.getTipoResultado(), exec.count, nome.getPalavra())));
+                    logger.log(Level.WARNING, "Não interpretou resultado {0} (tipo {1}) como parâmetro {2} de função {3}",
+                        new Object[]{
+                            expressao.getResultado(),
+                            expressao.getTipoResultado(),
+                            exec.count + 1, 
+                            nome.getPalavra()
+                        });
                     Erro erro = new Erro(TipoErro.ERRO, expressao.getAsToken(), String.format(
                         "Esperava um resultado %s para o parâmetro, mas encontrou %s"
                         + " - interpretador finalizado", "Inteiro ou real", expressao.getTipoResultado()));

@@ -38,6 +38,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -52,15 +54,12 @@ import javax.swing.text.StyleContext;
  * @author Caique
  */
 public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
+    private static final Logger logger = Logger.getLogger(FrmGui.class.getName());
     
     private static final int MAX_ALTERACOES = 150;
     
     private Interpreter interpreter = null;
     private boolean emExecucao = false;
-    
-    private boolean modoEntradaDados = false;
-    private boolean modoSaidaDados = false;
-    private boolean modoExpressao = false;
     
     StyleContext sc;
     private final Style stylePlain;
@@ -659,18 +658,19 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         AnalisadorLexico scanner = new AnalisadorLexico(oldText);
         List<Token> tokens = scanner.listaTokens();
         
-        if (scanner.getNumErros(TipoErro.DEVEL) > 0){
+        if (scanner.getNumErros(TipoErro.getMax()) > 0){
             JOptionPane.showMessageDialog(
                     this,
-                    scanner.getNumErros(TipoErro.DEVEL) +
+                    scanner.getNumErros(TipoErro.getMax()) +
                             " erros encontrados - verifique seu algoritmo",
                     "Verificação concluída",
                     JOptionPane.ERROR_MESSAGE);
             formatacao = FORMAT_ERROR;
-            System.out.println("SCANNER (Análise Léxica)");
-            for (Erro e : scanner.getErros(TipoErro.DEVEL)){
+            logger.log(Level.WARNING, "SCANNER (Análise Léxica)");
+            
+            for (Erro e : scanner.getErros(TipoErro.getMax())){
                 Token t = e.getToken();
-                System.out.println(e.toString());
+                logger.log(Level.WARNING, e.toString());
                 docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
             }
             
@@ -682,14 +682,19 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             AnalisadorSintatico parser = new AnalisadorSintatico(tokens);
             LinkedList<Instrucao> instrucoes = parser.listaInstrucoes();
 
-            if (parser.getNumErros(TipoErro.DEVEL) > 0){
-                JOptionPane.showMessageDialog(this, parser.getNumErros(TipoErro.DEVEL) + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.ERROR_MESSAGE);
+            if (parser.getNumErros(TipoErro.getMax()) > 0){
+                JOptionPane.showMessageDialog(this,
+                        String.format("%d erros encontrado%s - verifique seu algoritmo",
+                            parser.getNumErros(TipoErro.getMax()),
+                            parser.getNumErros(TipoErro.getMax()) != 1 ? "" : "s"
+                        ),
+                        "Verificação concluída", JOptionPane.ERROR_MESSAGE);
                 formatacao = FORMAT_ERROR;
-                System.out.println("PARSER (Análise Sintática)");
-                for (Erro e : parser.getErros(TipoErro.DEVEL)){
+                logger.log(Level.WARNING, "PARSER (Análise Sintática)");
+                for (Erro e : parser.getErros(TipoErro.getMax())){
                     Token t = e.getToken();
                     docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
-                    System.out.println(e.toString());
+                    logger.log(Level.WARNING, e.toString());
                 }
                 
                 mitExibirErros.setEnabled(true);
@@ -708,10 +713,11 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                 if (nerrpp > 0){
                     JOptionPane.showMessageDialog(this, nerrpp + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.ERROR_MESSAGE);
                     formatacao = FORMAT_ERROR;
-                    System.out.println("PRE PROCESSOR (Análise Semântica)");
+                    logger.log(Level.WARNING, "PRE PROCESSOR (Análise Semântica)");
                     for (Erro e : processor.getErros(TipoErro.ERRO)){
                         Token t = e.getToken();
                         docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleError, true);
+                        logger.log(Level.WARNING, e.toString());
                     }
                     mitExibirErros.setEnabled(true);
                     frmListaErros.setListaErros(processor.getErros(TipoErro.ALERTA));
@@ -1215,7 +1221,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         Token tokenRes = impressoraExpressao.getTokenResultado();
         docProc.setCharacterAttributes(tokenExpr.getPosicao(), tokenExpr.getTamanho(), styleOper, true);
         docProc.setCharacterAttributes(tokenRes.getPosicao(), tokenRes.getTamanho(), styleRes, true);*/
-        //System.out.println(expressao.imprimeExpressao());
+        //logger.log(Level.WARNING, expressao.imprimeExpressao());
     }
 
     @Override

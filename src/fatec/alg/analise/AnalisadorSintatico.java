@@ -31,6 +31,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Analisador sintático (parser) que verifica uma sequência de tokens
@@ -38,6 +40,8 @@ import java.util.NoSuchElementException;
  * @author Caique
  */
 public class AnalisadorSintatico extends Verificador {
+    private static final Logger logger = Logger.getLogger(AnalisadorSintatico.class.getName());
+    
     private final List<Token> tokens;
     
     private Map<String, TipoDado> declVariaveis;
@@ -1284,8 +1288,12 @@ public class AnalisadorSintatico extends Verificador {
                     } catch (NoSuchElementException ex){
                         erros.add(new Erro(TipoErro.ERRO, t, 
                             "Erro ao montar expressão - operando não encontrado"));
-                        erros.add(new Erro(TipoErro.DEVEL, t, String.format(
-                            "Pilha sem elemento p/ gerar operação unária: %s - %s",ex.getClass().getName(), ex.getMessage())));
+                        logger.log(Level.WARNING, "{0}:\n {1} - {2}",
+                                new Object[]{
+                                    "Pilha sem elemento p/ gerar operação unária",
+                                    ex.getClass().getName(),
+                                    ex.getMessage()
+                                });
                         expressaoValida = false;
                         operacaoUnaria.addToken(t);
                     }
@@ -1317,9 +1325,14 @@ public class AnalisadorSintatico extends Verificador {
                     } catch (NoSuchElementException ex){
                         erros.add(new Erro(TipoErro.ERRO, t, 
                             "Erro ao montar expressão - operando não encontrado"));
-                        erros.add(new Erro(TipoErro.DEVEL, t, String.format(
-                            "Pilha sem %do elemento p/ gerar operação binária: %s - %s",
-                                devCount + 1, ex.getClass().getName(), ex.getMessage())));
+                        logger.log(Level.WARNING, "{0}{1}{2}:\n{1} - {2}",
+                                new Object[]{
+                                    "Pilha sem elemento ",
+                                    devCount + 1,
+                                    "  p/ gerar operação binária",
+                                    ex.getClass().getName(),
+                                    ex.getMessage()
+                                });
                         expressaoValida = false;
                         subExpressao.addToken(t);
                     }
@@ -1339,26 +1352,26 @@ public class AnalisadorSintatico extends Verificador {
                             TokenDelimitador abrePar = (TokenDelimitador)pilhaExpressoes.pop();
                             parenteseada.setParentesesAbre(abrePar.getDelimitador());
                             parenteseada.setParentesesFecha(t);
-                        } catch (NoSuchElementException ex){
+                        } catch (NoSuchElementException | ClassCastException ex){
                             erros.add(new Erro(TipoErro.ALERTA, t,
                                 "Alerta ao montar expressão - não pôde encontrar parênteses"));
-                            erros.add(new Erro(TipoErro.DEVEL, t, String.format(
-                                "Pilha sem elemento Abre Parênteses: %s - %s",
-                                    ex.getClass().getName(), ex.getMessage())));
-                        } catch (ClassCastException ex) {
-                            erros.add(new Erro(TipoErro.ALERTA, t, 
-                                "Alerta ao montar expressão - não pôde encontrar parênteses"));
-                            erros.add(new Erro(TipoErro.DEVEL, t, String.format(
-                                "Pilha sem elemento de abertura de parênteses: %s - %s",
-                                    ex.getClass().getName(), ex.getMessage())));
-                        }
+                            logger.log(Level.WARNING, "{0}:\n{1} - {2}",
+                                new Object[]{
+                                    "Pilha sem elemento Abre Parênteses",
+                                    ex.getClass().getName(),
+                                    ex.getMessage()
+                                });
+                        } 
                         pilhaExpressoes.push(parenteseada);
                     } catch (NoSuchElementException ex){
                         erros.add(new Erro(TipoErro.ERRO, t, 
                             "Erro ao montar expressão - operando não encontrado"));
-                        erros.add(new Erro(TipoErro.DEVEL, t, String.format(
-                            "Pilha sem expressão a colocar parênteses: %s - %s", 
-                                ex.getClass().getName(), ex.getMessage())));
+                        logger.log(Level.WARNING, "{0}:\n{1} - {2}",
+                                new Object[]{
+                                    "Pilha sem expressão a colocar parênteses",
+                                    ex.getClass().getName(),
+                                    ex.getMessage()
+                                });
                     }
                     break;
             }
@@ -1369,8 +1382,12 @@ public class AnalisadorSintatico extends Verificador {
         } catch (NoSuchElementException ex){
             erros.add(new Erro(TipoErro.ERRO, tokens.get(pos-1), 
                 "Erro ao finalizar expressão - última operação inválida ou nula"));
-            erros.add(new Erro(TipoErro.DEVEL, tokens.get(pos-1), String.format(
-                "Pilha vazia ao finalizar: %s - %s", ex.getClass().getName(), ex.getMessage())));
+            logger.log(Level.WARNING, "{0}:\n{1} - {2}",
+                    new Object[]{
+                        "Pilha vazia ao finalizar",
+                        ex.getClass().getName(),
+                        ex.getMessage()
+                    });
             expressaoValida = false;
             expressao = new Operando();
         }
