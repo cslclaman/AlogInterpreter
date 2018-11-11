@@ -34,6 +34,7 @@ import fatec.alg.geral.token.Token;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -493,16 +494,28 @@ public class Interpreter extends Verificador {
             } else {
                 interfaceExecucao.expressaoFinalizada();
                 interfaceExecucao.atualizaPassoAtual(saidaDados.getTokenNome(), expressao.getAsToken());
-                if (expressao.getTipoResultado() == TipoDado.CARACTER) {
-                    String impressao = expressao.getResultadoCaracter();
-                    if (config.getBoolean(ConfigInterpreter.FORMAT_ESCREVA_ESPACO) &&
-                        config.getBoolean(ConfigInterpreter.FORMAT_ESCREVA_ESPACO_TRIM)) {
-                        impressao = impressao.trim();
-                    }
-                    interfaceExecucao.saidaDados(impressao);
-                } else {
-                    interfaceExecucao.saidaDados(expressao.getResultado());
+                String impressao = "";
+                switch (expressao.getTipoResultado()) {
+                    case CARACTER: {
+                        impressao = expressao.getResultadoCaracter();
+                        if (config.getBoolean(ConfigInterpreter.FORMAT_ESCREVA_ESPACO) &&
+                            config.getBoolean(ConfigInterpreter.FORMAT_ESCREVA_ESPACO_TRIM)) {
+                            impressao = impressao.trim();
+                        }
+                        break;
+                    } case REAL: {
+                        String format = config.getString(ConfigInterpreter.FORMAT_ESCREVA_REAL);
+                        if (!format.isEmpty()) {
+                            impressao = String.format(Locale.ENGLISH, format, expressao.getResultadoReal());
+                        } else {
+                            impressao = String.format(Locale.ENGLISH, "%.3f", expressao.getResultadoReal());
+                        }
+                        break;
+                    } default:
+                        impressao = expressao.getResultado();
+                        break;
                 }
+                interfaceExecucao.saidaDados(impressao);
                 exec.count++;
                 if (exec.count < exec.total) {
                     if (config.getBoolean(ConfigInterpreter.FORMAT_ESCREVA_ESPACO)) {

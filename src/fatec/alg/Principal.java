@@ -51,7 +51,7 @@ public class Principal {
      * <ul>
      * <li><b>-debuglog</b>: log completo, incluindo classe e método que emitiu</li>
      * <li><b>-console</b>: execução via console (textual)</li>
-     * <li><b>-filename="&lt;CAMINHO&gt;"</b>: passa um caminho de arquivo (txtalg) a ser aberto</li>
+     * <li><b>-filename="&lt;CAMINHO&gt;"</b>: passa um caminho de arquivo (txt/alg) a ser aberto</li>
      * </ul>
      * 
      * @param args argumentos da linha de comando

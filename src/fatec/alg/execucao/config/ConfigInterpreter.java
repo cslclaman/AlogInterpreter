@@ -118,35 +118,44 @@ public class ConfigInterpreter extends Configuracao {
      * se valores caracter terão espaços iniciais e finais removidos. (Padrão: SIM)
      */
     public final static String FORMAT_ESCREVA_ESPACO_TRIM = "format.escreva.espaco.trimcarac";
+    /**
+     * (String) Define o formato de números decimais. (Padrão: %.3f)
+     */
+    public final static String FORMAT_ESCREVA_REAL = "format.escreva.num.real";
     
     public ConfigInterpreter(){
         super();
+        defaults();
+    }
+    
+    private void defaults(){
+        set(FORMAT_ESCREVA_QUEBRA, true);
+        set(FORMAT_ESCREVA_ESPACO, false);
+        set(FORMAT_ESCREVA_ESPACO_TRIM, true);
         
-        configs.put(FORMAT_ESCREVA_QUEBRA, true);
-        configs.put(FORMAT_ESCREVA_ESPACO, false);
-        configs.put(FORMAT_ESCREVA_ESPACO_TRIM, true);
+        set(FORMAT_ESCREVA_REAL, "%.3f");
         
-        configs.put(RUNNEXT_BLOCO_PILHA, true);
-        configs.put(RUNNEXT_LEIA_ATRIB, false);
-        configs.put(RUNNEXT_PARA_LOOP, true);
+        set(RUNNEXT_BLOCO_PILHA, true);
+        set(RUNNEXT_LEIA_ATRIB, false);
+        set(RUNNEXT_PARA_LOOP, true);
         
-        configs.put(RUNNEXT_EXPR_EXEC_CONST, false);
-        configs.put(RUNNEXT_EXPR_EXEC_VAR, false);
-        configs.put(RUNNEXT_EXPR_EXEC_FUNC, false);
-        configs.put(RUNNEXT_EXPR_EXEC_UNARIA, false);
-        configs.put(RUNNEXT_EXPR_EXEC_OPBIN, false);
+        set(RUNNEXT_EXPR_EXEC_CONST, false);
+        set(RUNNEXT_EXPR_EXEC_VAR, false);
+        set(RUNNEXT_EXPR_EXEC_FUNC, false);
+        set(RUNNEXT_EXPR_EXEC_UNARIA, false);
+        set(RUNNEXT_EXPR_EXEC_OPBIN, false);
         
-        configs.put(RUNNEXT_EXPR_RES_CONST, true);
-        configs.put(RUNNEXT_EXPR_RES_VAR, false);
-        configs.put(RUNNEXT_EXPR_RES_FUNC, true);
-        configs.put(RUNNEXT_EXPR_RES_UNARIA, false);
-        configs.put(RUNNEXT_EXPR_RES_OPBIN, false);
+        set(RUNNEXT_EXPR_RES_CONST, true);
+        set(RUNNEXT_EXPR_RES_VAR, false);
+        set(RUNNEXT_EXPR_RES_FUNC, true);
+        set(RUNNEXT_EXPR_RES_UNARIA, false);
+        set(RUNNEXT_EXPR_RES_OPBIN, false);
         
-        configs.put(RUNNEXT_EXPR_FIN_CONST, true);
-        configs.put(RUNNEXT_EXPR_FIN_VAR, false);
-        configs.put(RUNNEXT_EXPR_FIN_FUNC, false);
-        configs.put(RUNNEXT_EXPR_FIN_UNARIA, false);
-        configs.put(RUNNEXT_EXPR_FIN_OPBIN, false);
+        set(RUNNEXT_EXPR_FIN_CONST, true);
+        set(RUNNEXT_EXPR_FIN_VAR, false);
+        set(RUNNEXT_EXPR_FIN_FUNC, false);
+        set(RUNNEXT_EXPR_FIN_UNARIA, false);
+        set(RUNNEXT_EXPR_FIN_OPBIN, false);
     }
     
 }

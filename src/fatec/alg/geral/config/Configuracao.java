@@ -36,13 +36,26 @@ public abstract class Configuracao {
     }
     
     /**
+     * Retorna o valor de um parâmetro texto de configuração.
+     * @param key Chave do valor a obter
+     * @return valor, ou "" (String vazia) caso não exista ou não seja String.
+     */
+    public String getString(String key){
+        if (configs.containsKey(key) && configs.get(key) instanceof String ) {
+            return (String) configs.get(key);
+        } else {
+            return "";
+        }
+    }
+    
+    /**
      * Define o valor associado a uma chave de identificação.
      * Se não existir, cria. Se existir, substitui. Se o valor for nulo,
      * deleta a propriedade.
      * @param key Chave
      * @param valor Objeto com o valor a definir.
      */
-    public void set (String key, Object valor) {
+    public final void set (String key, Object valor) {
         if (valor != null) {
             configs.put(key, valor);
         } else {
