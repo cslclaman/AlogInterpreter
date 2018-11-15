@@ -142,4 +142,10 @@ public class Operacao extends Expressao {
                 " >";
     }
 
+    @Override
+    public void redefine() {
+        super.redefine();
+        expressaoEsq.redefine();
+        expressaoDir.redefine();
+    }
 }

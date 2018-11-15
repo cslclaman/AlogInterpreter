@@ -62,5 +62,11 @@ public class OperacaoUnaria extends Expressao {
                 (parentesesFecha == null ? "" : " )") +
                 " >";
     }
+    
+    @Override
+    public void redefine() {
+        super.redefine();
+        expressao.redefine();
+    }
 
 }

@@ -113,4 +113,12 @@ public class ChamadaFuncao extends Operando {
                     numValidos == numParametros;
         }
     }
+    
+    @Override
+    public void redefine() {
+        super.redefine();
+        for (Expressao e : parametros) {
+            e.redefine();
+        }
+    }
 }
