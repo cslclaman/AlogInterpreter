@@ -181,7 +181,7 @@ public class Interpreter extends Verificador {
                 interfaceExecucao.erroFatal(fatal);
                 return;
             }
-
+            
             // Executa a instrução de acordo com seu tipo.
             switch (exec.instrucao.getTipo()) {
                 case MODULO_PRINCIPAL:
@@ -231,6 +231,7 @@ public class Interpreter extends Verificador {
                 case EXPRESSAO:
                     if (exec.total == 0 || exec.count < exec.total) {
                         //Expressão que ainda tem passos para executar
+                        interfaceExecucao.atualizaExpressaoAtual((Expressao)exec.instrucao);
                         executaExpressao(exec);
                     } else {
                         //Expressão finalizada
@@ -275,6 +276,7 @@ public class Interpreter extends Verificador {
         } while (runNext) ;
         
         locked = false;
+        interfaceExecucao.finalizaPasso();
     }
     
     private void executaModuloPrincipal (Executavel exec) {
@@ -490,9 +492,9 @@ public class Interpreter extends Verificador {
                 pilhaExecucao.push(new Executavel(expressao));
                 interfaceExecucao.atualizaPassoAtual(saidaDados.getTokenNome(), expressao.getAsToken());
                 interfaceExecucao.atualizaExpressaoAtual(expressao);
-                runNext = avaliaRunNextExecExpressao(expressao);
+                runNext = avaliaRunNextPilhaExpressao(expressao);
             } else {
-                interfaceExecucao.expressaoFinalizada();
+                interfaceExecucao.finalizaExpressao();
                 interfaceExecucao.atualizaPassoAtual(saidaDados.getTokenNome(), expressao.getAsToken());
                 String impressao = "";
                 switch (expressao.getTipoResultado()) {
@@ -545,9 +547,9 @@ public class Interpreter extends Verificador {
             pilhaExecucao.push(new Executavel(expressao));
             interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
             interfaceExecucao.atualizaExpressaoAtual(expressao);
-            runNext = avaliaRunNextExecExpressao(expressao);
+            runNext = avaliaRunNextPilhaExpressao(expressao);
         } else {
-            interfaceExecucao.expressaoFinalizada();
+            interfaceExecucao.finalizaExpressao();
             Token token = atribuicao.getVariavel();
             Variavel variavel = variaveis.get(token.nome());
             interfaceExecucao.selecionaVariavel(variavel);
@@ -606,9 +608,9 @@ public class Interpreter extends Verificador {
                 pilhaExecucao.push(new Executavel(expressao));
                 interfaceExecucao.atualizaPassoAtual(condicional.getTokenSe(), expressao.getAsToken());
                 interfaceExecucao.atualizaExpressaoAtual(expressao);
-                runNext = avaliaRunNextExecExpressao(expressao);
+                runNext = avaliaRunNextPilhaExpressao(expressao);
             } else {
-                interfaceExecucao.expressaoFinalizada();
+                interfaceExecucao.finalizaExpressao();
                 if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
                     logger.log(Level.WARNING, "Não interpretou resultado {0} (tipo {1}) como lógico para condicional",
                     new Object[]{
@@ -668,9 +670,9 @@ public class Interpreter extends Verificador {
                     pilhaExecucao.push(new Executavel(expressao));
                     interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenEnquanto(), expressao.getAsToken());
                     interfaceExecucao.atualizaExpressaoAtual(expressao);
-                    runNext = avaliaRunNextExecExpressao(expressao);
+                    runNext = avaliaRunNextPilhaExpressao(expressao);
                 } else {
-                    interfaceExecucao.expressaoFinalizada();
+                    interfaceExecucao.finalizaExpressao();
                     if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
                         logger.log(Level.WARNING, "Não interpretou resultado {0} (tipo {1}) como lógico para repetição",
                         new Object[]{
@@ -729,9 +731,9 @@ public class Interpreter extends Verificador {
                     pilhaExecucao.push(new Executavel(expressao));
                     interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
                     interfaceExecucao.atualizaExpressaoAtual(expressao);
-                    runNext = avaliaRunNextExecExpressao(expressao);
+                    runNext = avaliaRunNextPilhaExpressao(expressao);
                 } else {
-                    interfaceExecucao.expressaoFinalizada();
+                    interfaceExecucao.finalizaExpressao();
                     if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
                         logger.log(Level.WARNING, "Não interpretou resultado {0} (tipo {1}) como lógico para repetição",
                         new Object[]{
@@ -784,9 +786,9 @@ public class Interpreter extends Verificador {
                     pilhaExecucao.push(new Executavel(expressao));
                     interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
                     interfaceExecucao.atualizaExpressaoAtual(expressao);
-                    runNext = avaliaRunNextExecExpressao(expressao);
+                    runNext = avaliaRunNextPilhaExpressao(expressao);
                 } else {
-                    interfaceExecucao.expressaoFinalizada();
+                    interfaceExecucao.finalizaExpressao();
                     if (!tiposDadosCorretos(expressao.getTipoResultado(), TipoDado.LOGICO)) {
                         logger.log(Level.WARNING, "Não interpretou resultado {0} (tipo {1}) como lógico para repetição",
                         new Object[]{
@@ -852,9 +854,9 @@ public class Interpreter extends Verificador {
                     pilhaExecucao.push(new Executavel(expressao));
                     interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenPara(), expressao.getAsToken());
                     interfaceExecucao.atualizaExpressaoAtual(expressao);
-                    runNext = avaliaRunNextExecExpressao(expressao);
+                    runNext = avaliaRunNextPilhaExpressao(expressao);
                 } else {
-                    interfaceExecucao.expressaoFinalizada();
+                    interfaceExecucao.finalizaExpressao();
                     TipoDado[] esperados;
                     if (variavel.getTipo() == TipoDado.INTEIRO) {
                         esperados = new TipoDado[] {TipoDado.INTEIRO};
@@ -892,9 +894,9 @@ public class Interpreter extends Verificador {
                     pilhaExecucao.push(new Executavel(expressao));
                     interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenPara(), expressao.getAsToken());
                     interfaceExecucao.atualizaExpressaoAtual(expressao);
-                    runNext = avaliaRunNextExecExpressao(expressao);
+                    runNext = avaliaRunNextPilhaExpressao(expressao);
                 } else {
-                    interfaceExecucao.expressaoFinalizada();
+                    interfaceExecucao.finalizaExpressao();
                     TipoDado[] esperados;
                     if (variavel.getTipo() == TipoDado.INTEIRO) {
                         esperados = new TipoDado[] {TipoDado.INTEIRO};
@@ -1015,7 +1017,7 @@ public class Interpreter extends Verificador {
                             tokenVarCont, repetitiva.getExpressaoAte().getAsToken());
                     interfaceExecucao.atualizaExpressaoAtual(expressao);
                 } else {
-                    interfaceExecucao.expressaoFinalizada();
+                    interfaceExecucao.finalizaExpressao();
                     if (expressao.getResultadoLogico()) {
                         interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenPara(), repetitiva.getTokenFaca());
                         exec.count += 1;
@@ -1043,10 +1045,9 @@ public class Interpreter extends Verificador {
                     interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenPara(), 
                             tokenVarCont);
                     interfaceExecucao.atualizaExpressaoAtual(expressao);
-                    runNext = avaliaRunNextExecExpressao(expressao);
+                    runNext = avaliaRunNextPilhaExpressao(expressao);
                 } else {
-                    interfaceExecucao.expressaoFinalizada();
-                    interfaceExecucao.expressaoFinalizada();
+                    interfaceExecucao.finalizaExpressao();
                     interfaceExecucao.selecionaVariavel(variavel);
                     String retorno = expressao.getResultado();
                     variavel.setValor(retorno);
@@ -1057,44 +1058,6 @@ public class Interpreter extends Verificador {
                 }
                 break;
         } 
-    }
-    
-    private boolean avaliaRunNextExecExpressao(Expressao expressao) {
-        switch (expressao.getTipoExpressao()) {
-            case OPERANDO_CONSTANTE:
-                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_EXEC_CONST);
-            case OPERANDO_VARIAVEL:
-                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_EXEC_VAR);
-            case OPERANDO_FUNCAO:
-                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_EXEC_FUNC);
-            case OPERACAO_UNARIA:
-                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_EXEC_UNARIA);
-            case OPERACAO_ARITMETICA:
-            case OPERACAO_RELACIONAL:
-            case OPERACAO_LOGICA:
-                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_EXEC_OPBIN);
-            default:
-                return false;
-        }
-    }
-    
-    private boolean avaliaRunNextCloseExpressao(Expressao expressao) {
-        switch (expressao.getTipoExpressao()) {
-            case OPERANDO_CONSTANTE:
-                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_FIN_CONST);
-            case OPERANDO_VARIAVEL:
-                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_FIN_VAR);
-            case OPERANDO_FUNCAO:
-                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_FIN_FUNC);
-            case OPERACAO_UNARIA:
-                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_FIN_UNARIA);
-            case OPERACAO_ARITMETICA:
-            case OPERACAO_RELACIONAL:
-            case OPERACAO_LOGICA:
-                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_FIN_OPBIN);
-            default:
-                return false;
-        }
     }
     
     private void executaExpressao(Executavel exec) {
@@ -1385,6 +1348,63 @@ public class Interpreter extends Verificador {
                     }
                     break;
             }
+        }
+    }
+    
+    private boolean avaliaRunNextPilhaExpressao(Expressao expressao) {
+        switch (expressao.getTipoExpressao()) {
+            case OPERANDO_CONSTANTE:
+                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_PILHA_CONST);
+            case OPERANDO_VARIAVEL:
+                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_PILHA_VAR);
+            case OPERANDO_FUNCAO:
+                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_PILHA_FUNC);
+            case OPERACAO_UNARIA:
+                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_PILHA_UNARIA);
+            case OPERACAO_ARITMETICA:
+            case OPERACAO_RELACIONAL:
+            case OPERACAO_LOGICA:
+                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_PILHA_OPBIN);
+            default:
+                return false;
+        }
+    }
+    
+    private boolean avaliaRunNextExecExpressao(Expressao expressao) {
+        switch (expressao.getTipoExpressao()) {
+            case OPERANDO_CONSTANTE:
+                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_EXEC_CONST);
+            case OPERANDO_VARIAVEL:
+                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_EXEC_VAR);
+            case OPERANDO_FUNCAO:
+                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_EXEC_FUNC);
+            case OPERACAO_UNARIA:
+                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_EXEC_UNARIA);
+            case OPERACAO_ARITMETICA:
+            case OPERACAO_RELACIONAL:
+            case OPERACAO_LOGICA:
+                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_EXEC_OPBIN);
+            default:
+                return false;
+        }
+    }
+    
+    private boolean avaliaRunNextCloseExpressao(Expressao expressao) {
+        switch (expressao.getTipoExpressao()) {
+            case OPERANDO_CONSTANTE:
+                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_FIN_CONST);
+            case OPERANDO_VARIAVEL:
+                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_FIN_VAR);
+            case OPERANDO_FUNCAO:
+                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_FIN_FUNC);
+            case OPERACAO_UNARIA:
+                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_FIN_UNARIA);
+            case OPERACAO_ARITMETICA:
+            case OPERACAO_RELACIONAL:
+            case OPERACAO_LOGICA:
+                return config.getBoolean(ConfigInterpreter.RUNNEXT_EXPR_FIN_OPBIN);
+            default:
+                return false;
         }
     }
     
