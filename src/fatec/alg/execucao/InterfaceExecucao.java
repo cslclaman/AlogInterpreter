@@ -57,7 +57,12 @@ public interface InterfaceExecucao {
     /**
      * Indica que uma expressão foi completamente finalizada.
      */
-    default void expressaoFinalizada() {};
+    default void finalizaExpressao() {};
+    
+    /**
+     * Indica que o passo foi concluído e a próxima instrução pode ser executada.
+     */
+    default void finalizaPasso() {};
     
     /**
      * Indica uma declaração de variável e informa a variável que acabou de ser criada.
