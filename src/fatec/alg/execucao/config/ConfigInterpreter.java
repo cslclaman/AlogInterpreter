@@ -32,25 +32,50 @@ public class ConfigInterpreter extends Configuracao {
      * (Boolean) Avalia se uma expressão constante será executada assim que for inserida
      * na pilha de execução por uma instrução. (padrão: NÃO)
      */
-    public final static String RUNNEXT_EXPR_EXEC_CONST = "runnext.expressao.exec.constante";
+    public final static String RUNNEXT_EXPR_PILHA_CONST = "runnext.expressao.pilha.constante";
     /**
      * (Boolean) Avalia se uma expressão com variável será executada assim que for inserida
      * na pilha de execução por uma instrução. (padrão: NÃO)
      */
-    public final static String RUNNEXT_EXPR_EXEC_VAR = "runnext.expressao.exec.variavel";
+    public final static String RUNNEXT_EXPR_PILHA_VAR = "runnext.expressao.pilha.variavel";
     /**
      * (Boolean) Avalia se uma expressão de função será executada assim que for inserida
      * na pilha de execução por uma instrução. (padrão: NÃO)
      */
-    public final static String RUNNEXT_EXPR_EXEC_FUNC = "runnext.expressao.exec.funcao";
+    public final static String RUNNEXT_EXPR_PILHA_FUNC = "runnext.expressao.pilha.funcao";
     /**
      * (Boolean) Avalia se uma expressão unária será executada assim que for inserida
      * na pilha de execução por uma instrução. (padrão: NÃO)
      */
-    public final static String RUNNEXT_EXPR_EXEC_UNARIA = "runnext.expressao.exec.opunaria";
+    public final static String RUNNEXT_EXPR_PILHA_UNARIA = "runnext.expressao.pilha.opunaria";
     /**
      * (Boolean) Avalia se uma expressão binária será executada assim que for inserida
      * na pilha de execução por uma instrução. (padrão: NÃO)
+     */
+    public final static String RUNNEXT_EXPR_PILHA_OPBIN = "runnext.expressao.pilha.opbinaria";
+    /**
+     * (Boolean) Avalia se uma expressão constante será executada assim que for inserida
+     * na pilha de execução por uma expressão. (padrão: SIM)
+     */
+    public final static String RUNNEXT_EXPR_EXEC_CONST = "runnext.expressao.exec.constante";
+    /**
+     * (Boolean) Avalia se uma expressão com variável será executada assim que for inserida
+     * na pilha de execução por uma expressão. (padrão: SIM)
+     */
+    public final static String RUNNEXT_EXPR_EXEC_VAR = "runnext.expressao.exec.variavel";
+    /**
+     * (Boolean) Avalia se uma expressão de função será executada assim que for inserida
+     * na pilha de execução por uma expressão. (padrão: NÃO)
+     */
+    public final static String RUNNEXT_EXPR_EXEC_FUNC = "runnext.expressao.exec.funcao";
+    /**
+     * (Boolean) Avalia se uma expressão unária será executada assim que for inserida
+     * na pilha de execução por uma expressão. (padrão: NÃO)
+     */
+    public final static String RUNNEXT_EXPR_EXEC_UNARIA = "runnext.expressao.exec.opunaria";
+    /**
+     * (Boolean) Avalia se uma expressão binária será executada assim que for inserida
+     * na pilha de execução por uma expressão. (padrão: NÃO)
      */
     public final static String RUNNEXT_EXPR_EXEC_OPBIN = "runnext.expressao.exec.opbinaria";
     /**
@@ -139,8 +164,14 @@ public class ConfigInterpreter extends Configuracao {
         set(RUNNEXT_LEIA_ATRIB, false);
         set(RUNNEXT_PARA_LOOP, true);
         
-        set(RUNNEXT_EXPR_EXEC_CONST, false);
-        set(RUNNEXT_EXPR_EXEC_VAR, false);
+        set(RUNNEXT_EXPR_PILHA_CONST, false);
+        set(RUNNEXT_EXPR_PILHA_VAR, false);
+        set(RUNNEXT_EXPR_PILHA_FUNC, false);
+        set(RUNNEXT_EXPR_PILHA_UNARIA, false);
+        set(RUNNEXT_EXPR_PILHA_OPBIN, false);
+        
+        set(RUNNEXT_EXPR_EXEC_CONST, true);
+        set(RUNNEXT_EXPR_EXEC_VAR, true);
         set(RUNNEXT_EXPR_EXEC_FUNC, false);
         set(RUNNEXT_EXPR_EXEC_UNARIA, false);
         set(RUNNEXT_EXPR_EXEC_OPBIN, false);
