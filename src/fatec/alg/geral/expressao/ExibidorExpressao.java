@@ -35,6 +35,7 @@ public class ExibidorExpressao {
     private Token selecionado;
     private Token resolvido;
     private int posicao;
+    private boolean hasResult;
     
     public ExibidorExpressao(Expressao expressao) {
         expressoes = new LinkedList<>();
@@ -55,24 +56,25 @@ public class ExibidorExpressao {
             }
         }
         if (!setted) {
-            expressoes.clear();
-            expressoes = new LinkedList<>();
             inicial = expressao;
         }
         defineTexto(expressao);
     }
     
     private void defineTexto(Expressao exprAtual){
+        expressoes.clear();
+        expressoes = new LinkedList<>();
         posicao = 0;
         texto = new StringBuffer();
         imprime(inicial, null);
         for (Exibicao i : expressoes) {
             if (i.expressao == exprAtual) {
-                selecionado = (i.anterior == null ? i.token : i.anterior.token);
-                if (exprAtual.isResolvida()) {
+                if (hasResult = exprAtual.isResolvida()) {
                     resolvido = i.token;
+                    selecionado = (i.anterior == null ? i.token : i.anterior.token);
                 } else {
                     resolvido = new Token(0, 0, 0, 0);
+                    selecionado = i.token;
                 }
                 break;
             }
@@ -85,11 +87,12 @@ public class ExibidorExpressao {
             i.anterior = a;
         }
         if (e.isResolvida()) {
-            i.token = geraToken(e.getResultado() + " ");
+            i.token = geraToken(e.getResultado());
             posicao += i.token.getTamanho() + 1;
-            texto.append(i.token.getPalavra());
+            texto.append(i.token.getPalavra()).append(" ");
         } else {
             String tp;
+            int posIni = posicao;
             if (e.getParentesesAbre() != null) {
                 tp = e.getParentesesAbre().getPalavra() + " ";
                 texto.append(tp);
@@ -147,7 +150,7 @@ public class ExibidorExpressao {
                 texto.append(tp);
                 posicao += tp.length();
             }
-            i.token = geraToken(texto.toString());
+            i.token = geraToken(posIni, texto.toString().substring(posIni, posicao));
         }
         expressoes.add(i);
     }
@@ -164,9 +167,17 @@ public class ExibidorExpressao {
         return resolvido;
     }
     
+    public boolean hasTokenResultado() {
+        return hasResult;
+    }
+    
     private Token geraToken(String palavra) {
-        Token token = new Token(0, posicao, posicao, 0);
-        token.setPalavra(palavra);
+        return geraToken(posicao, palavra);
+    }
+    
+    private Token geraToken(int pos, String palavra) {
+        Token token = new Token(0, pos, pos, 0);
+        token.setPalavra(palavra.trim());
         return token;
     }
 }
