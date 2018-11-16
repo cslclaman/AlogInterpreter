@@ -294,8 +294,7 @@ public class Interpreter extends Verificador {
                  * Módulos não declarados (leia-se: algoritmos que iniciam com
                  * "Início" pulam esse passo.
                  */
-                Token token = geraTokenExib(moduloPrincipal.getTipoModulo(), moduloPrincipal.getNome());
-                interfaceExecucao.atualizaPassoAtual(token);
+                interfaceExecucao.atualizaPassoAtual(moduloPrincipal.getTipoModulo(), moduloPrincipal.getNome());
                 exec.count ++;
                 pilhaExecucao.push(exec);
                 break;

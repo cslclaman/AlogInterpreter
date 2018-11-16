@@ -117,6 +117,17 @@ public class AnalisadorSintatico extends Verificador {
         }
         
         switch(token.getFuncaoToken()){
+            
+            //Algoritmo nomeado
+            case RES_ALGORITMO:
+                instrucao = instrucaoModuloPrincipal();
+                if (((ModuloPrincipal)instrucao).listaInstrucoes().isEmpty()) {
+                    erros.add(new Erro(TipoErro.ALERTA, ((ModuloPrincipal)instrucao).getTipoModulo(),
+                        "Módulo principal vazio declarado"));
+                }
+                funcoesEsperadas.clear();
+                break;
+                
             //Inicializa uma instrução tipo bloco
             case RES_BLOCO_INICIO:
                 instrucao = instrucaoBloco();
@@ -127,11 +138,11 @@ public class AnalisadorSintatico extends Verificador {
                 
                 funcoesEsperadas.clear();
                 switch (tipoUltimaInstrucao){
-                    case _INDEFINIDO:
-                        //funcoesEsperadas = funcoesAlgoritmo();
-                        break;
                     case BLOCO:
+                    case MODULO_PRINCIPAL:
                         funcoesEsperadas = funcoesBloco();
+                        break;
+                    case _INDEFINIDO:
                         break;
                 }
                 break;
@@ -269,6 +280,102 @@ public class AnalisadorSintatico extends Verificador {
         }
     }
         
+    /**
+     * Analisa a sintaxe de um módulo principal.
+     * <br>Sintaxe válida:
+     * <p><code>Algoritmo &lt;Nome do algoritmo sem espaços&gt;
+     * <p><code>Início
+     * <br>    ... &lt;lista de instruções&gt; ...
+     * <br>Fim</code></p>
+     * <br>Erros possíveis:
+     * <ul>
+     * <li>Nome inválido (iniciado em números ou sem espaço)
+     * <li>Módulo iniciado não fechado corretamente (falta de "FIM")
+     * </ul>
+     * @return Módulo Principal.
+     */
+    private Bloco instrucaoModuloPrincipal(){
+        ModuloPrincipal moduloPrincipal = new ModuloPrincipal();
+        
+        boolean go = true;
+        while (go && existeProxima()){
+            Token token = tokens.get(pos++);
+            if (!funcaoValida(token)){
+                moduloPrincipal.invalidaInstrucao();
+            }
+        
+            switch (token.getFuncaoToken()){
+                case RES_ALGORITMO:
+                    moduloPrincipal.setTipoModulo(token);
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFABETICO);
+                    funcoesEsperadas.add(FuncaoToken._INDEF_ALFANUMERICO);
+                    funcoesEsperadas.add(FuncaoToken.CONST_CARACTER);
+                    break;
+                            
+                case _INDEF_ALFABETICO:
+                case _INDEF_ALFANUMERICO:
+                    char inicial = token.nome().charAt(0);
+                    if (Character.isDigit(inicial)){
+                        moduloPrincipal.addToken(token);
+                        erros.add(new Erro(TipoErro.ERRO, token,
+                                "Identificador de variável não pode começar com número"));
+                        moduloPrincipal.invalidaInstrucao();
+                    } else {
+                        token.setFuncaoToken(FuncaoToken.IDENT_NOME_ALGORITMO);
+                        moduloPrincipal.setNome(token);
+                    }
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.RES_BLOCO_INICIO);
+                    break;
+                    
+                //Para pessoas que insistirem em dar nome entre aspas para o algoritmo (como se fosse o Portugol do Visualg)
+                case CONST_CARACTER:
+                    moduloPrincipal.setNome(token);
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.RES_BLOCO_INICIO);
+                    break;
+                    
+                case RES_BLOCO_INICIO:
+                    moduloPrincipal.setInicio(token);
+
+                    AnalisadorSintatico parserInterno = new AnalisadorSintatico(tokens);
+                    parserInterno.declVariaveis = declVariaveis;
+                    parserInterno.pos = pos;
+                    parserInterno.tipoUltimaInstrucao = moduloPrincipal.getTipo();
+                    parserInterno.funcoesEsperadas = funcoesBloco();
+
+                    while (parserInterno.existeProxima() && !parserInterno.fimAtingido){
+                        Instrucao proxima = parserInterno.proxima();
+                        if (!(proxima instanceof FimBloco)){
+                            moduloPrincipal.addInstrucao(proxima);
+                        }
+                    }
+
+                    erros.addAll(parserInterno.erros);
+                    pos = parserInterno.pos;
+                    declVariaveis = parserInterno.declVariaveis;
+
+                    if (!existeProxima() && !parserInterno.fimAtingido){
+                        erros.add(new Erro(
+                                TipoErro.ERRO, 
+                                moduloPrincipal.getInicio(),
+                                "Módulo principal iniciado não foi fechado corretamente"));
+                        go = false;
+                    } 
+                    funcoesEsperadas.clear();
+                    funcoesEsperadas.add(FuncaoToken.RES_BLOCO_FIM);
+                    break;
+                    
+                case RES_BLOCO_FIM:
+                    moduloPrincipal.setFim(token);
+                    break;
+            }
+        }
+        
+        return moduloPrincipal;
+    }
+    
     /**
      * Analisa a sintaxe de um bloco de instruções.
      * <br>Sintaxe válida:
@@ -1453,14 +1560,14 @@ public class AnalisadorSintatico extends Verificador {
     // <editor-fold defaultstate="collapsed" desc="Funções esperadas no início de um algoritmo">
     private static LinkedList<FuncaoToken> funcoesAlgoritmo(){
         LinkedList<FuncaoToken> funcoes = new LinkedList<>();
-        /*
+
         // Espera por declaração de função
-        funcoes.add(FuncaoToken.RES_MOD_FUNCAO);
+        /*funcoes.add(FuncaoToken.RES_MOD_FUNCAO);*/
         // Espera por declaração de rotina
-        funcoes.add(FuncaoToken.RES_MOD_ROTINA);
+        /*funcoes.add(FuncaoToken.RES_MOD_ROTINA);*/
         // Espera por declaração de nome de algoritmo
         funcoes.add(FuncaoToken.RES_ALGORITMO);
-        */
+        
         // Espera por início de bloco caso não modularizado
         funcoes.add(FuncaoToken.RES_BLOCO_INICIO);
         return funcoes;
