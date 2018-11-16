@@ -61,6 +61,8 @@ public interface InterfaceExecucao {
     
     /**
      * Indica que o passo foi concluído e a próxima instrução pode ser executada.
+     * <br>Como nota, Esse método é chamado após o bloqueio do método
+     * {@link Interpreter#proxima() } ser removido, ou seja, quando o método termina.
      */
     default void finalizaPasso() {};
     
