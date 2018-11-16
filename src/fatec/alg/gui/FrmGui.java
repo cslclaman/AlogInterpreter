@@ -68,6 +68,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private final Style stylePerc;
     private final Style styleVarS;
     private final Style styleOper;
+    private final Style styleExpr;
     private final int FORMAT_PERC = 1;
     
     private final Style styleError;
@@ -80,6 +81,8 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     
     private final Color backgroundDisabled = javax.swing.UIManager.getDefaults().getColor("FormattedTextField.disabledBackground");
     private final Color backgroundEnabled = javax.swing.UIManager.getDefaults().getColor("FormattedTextField.background");
+    
+    private final ConfigInterpreter configInterpr = new ConfigInterpreter();
     
     private FrmListaErros frmListaErros;
     private String textoOrig;
@@ -106,7 +109,12 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         styleRes.addAttribute(StyleConstants.Foreground, Color.BLUE);
         
         styleOper = sc.addStyle("percursoOperador", null);
+        styleOper.addAttribute(StyleConstants.Foreground, Color.BLACK);
         styleOper.addAttribute(StyleConstants.Background, Color.CYAN);
+        styleExpr = sc.addStyle("percursoExpressao", null);
+        styleExpr.addAttribute(StyleConstants.Foreground, Color.BLUE);
+        styleExpr.addAttribute(StyleConstants.Bold, true);
+        styleExpr.addAttribute(StyleConstants.Underline, true);
         
         styleError = sc.addStyle("tokenErrado", null);
         styleError.addAttribute(StyleConstants.Background, Color.RED);
@@ -114,6 +122,17 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         styleWarn.addAttribute(StyleConstants.Background, Color.ORANGE);
         styleInfo = sc.addStyle("tokenInfo", null);
         styleInfo.addAttribute(StyleConstants.Background, Color.LIGHT_GRAY);
+        
+        configInterpr.set(ConfigInterpreter.RUNNEXT_LEIA_ATRIB, true);
+        configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_EXEC_FUNC, true);
+        configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_EXEC_UNARIA, true);
+        configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_EXEC_OPBIN, true);
+        configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_RES_CONST, true);
+        configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_RES_VAR, true);
+        configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_RES_FUNC, true);
+        configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_RES_UNARIA, true);
+        configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_RES_OPBIN, true);
+        configInterpr.set(ConfigInterpreter.FORMAT_ESCREVA_ESPACO, true);
         
         initComponents();
         txpIde.setDocument(new DefaultStyledDocument());
@@ -778,16 +797,6 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     lblPosCaret.setText("Em execução");
                     emExecucao = true;
 
-                    ConfigInterpreter configInterpr = new ConfigInterpreter();
-                    configInterpr.set(ConfigInterpreter.RUNNEXT_LEIA_ATRIB, true);
-                    configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_EXEC_CONST, true);
-                    configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_RES_CONST, true);
-                    configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_EXEC_VAR, true);
-                    configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_RES_VAR, true);
-                    configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_RES_UNARIA, true);
-                    configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_RES_OPBIN, true);
-                    configInterpr.set(ConfigInterpreter.FORMAT_ESCREVA_ESPACO, true);
-                    
                     interpreter = new Interpreter(this, processor.getPrograma());
                     interpreter.setConfigInterpreter(configInterpr);
                     btnProxPerc.setEnabled(interpreter.existeProxima());
@@ -1209,7 +1218,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private File arquivo;
     
     private ExibidorExpressao impressoraExpressao;
-
+    
     @Override
     public void atualizaInstrucao() {
         //impressoraExpressao = null;
@@ -1219,7 +1228,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     }
 
     @Override
-    public void expressaoFinalizada() {
+    public void finalizaExpressao() {
         //impressoraExpressao = null;
         docProc.setCharacterAttributes(0, txpProcessamento.getText().length(), stylePlain, true);
         txpProcessamento.setText("");
@@ -1258,8 +1267,6 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
     @Override
     public void atualizaExpressaoAtual(Expressao expressao) {
-        
-        docProc.setCharacterAttributes(0, txpProcessamento.getText().length(), stylePlain, true);
         txpProcessamento.setBackground(backgroundEnabled);
         if (impressoraExpressao == null) {
             impressoraExpressao = new ExibidorExpressao(expressao);
@@ -1267,14 +1274,16 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             impressoraExpressao.setExpressaoAtual(expressao);
         }
         txpProcessamento.setText(impressoraExpressao.getTexto());
-        /*
+        docProc.setCharacterAttributes(0, txpProcessamento.getText().length(), stylePlain, true);
+
         Token tokenExpr = impressoraExpressao.getTokenExprAtual();
         Token tokenRes = impressoraExpressao.getTokenResultado();
         docProc.setCharacterAttributes(tokenExpr.getPosicao(), tokenExpr.getTamanho(), styleOper, true);
-        docProc.setCharacterAttributes(tokenRes.getPosicao(), tokenRes.getTamanho(), styleRes, true);*/
-        //logger.log(Level.WARNING, expressao.imprimeExpressao());
+        if (impressoraExpressao.hasTokenResultado()) {
+            docProc.setCharacterAttributes(tokenRes.getPosicao(), tokenRes.getTamanho(), styleExpr, false);
+        }
     }
-
+    
     @Override
     public void declaracaoVariavel(Variavel variavel) {
         variaveis.add(variavel);
