@@ -9,6 +9,7 @@ import fatec.alg.geral.token.Token;
  */
 public class RepeticaoEnquanto extends EstruturaControle {
     private Token tokenEnquanto;
+    private Token tokenFaca;
     
     /**
      * Instancia uma instrução com tipo REPETICAO_ENQUANTO
@@ -33,6 +34,23 @@ public class RepeticaoEnquanto extends EstruturaControle {
      */
     public Token getTokenEnquanto() {
         return tokenEnquanto;
+    }
+    
+    /**
+     * Define o token reservado Faça
+     * @param tokenFaca token
+     */
+    public void setTokenFaca(Token tokenFaca) {
+        this.tokenFaca = tokenFaca;
+        super.addToken(tokenFaca);
+    }
+
+    /**
+     * Retorna o token reservado Faça
+     * @return token
+     */
+    public Token getTokenFaca() {
+        return tokenFaca;
     }
     
     /**

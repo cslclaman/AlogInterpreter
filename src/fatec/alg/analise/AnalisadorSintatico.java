@@ -802,7 +802,7 @@ public class AnalisadorSintatico extends Verificador {
                     break;
                     
                 case RES_REP_FACA:
-                    repetitiva.addToken(token);
+                    repetitiva.setTokenFaca(token);
                     funcoesEsperadas.clear();
                     
                     AnalisadorSintatico parserInterno = new AnalisadorSintatico(tokens);

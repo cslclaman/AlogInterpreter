@@ -697,6 +697,7 @@ public class Interpreter extends Verificador {
                 }
                 break;
             case 1: // Instrução a ser repetida
+                interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenEnquanto(), repetitiva.getTokenFaca());
                 exec.count = 0; // para repetir
                 pilhaExecucao.push(exec);
                 pilhaExecucao.push(new Executavel(repetitiva.getInstrucao()));
@@ -729,7 +730,7 @@ public class Interpreter extends Verificador {
                     expressao = repetitiva.getCondicao();
                     pilhaExecucao.push(exec);
                     pilhaExecucao.push(new Executavel(expressao));
-                    interfaceExecucao.atualizaPassoAtual(expressao.getAsToken());
+                    interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenEnquanto(), expressao.getAsToken());
                     interfaceExecucao.atualizaExpressaoAtual(expressao);
                     runNext = avaliaRunNextPilhaExpressao(expressao);
                 } else {
