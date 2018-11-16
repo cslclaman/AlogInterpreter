@@ -49,6 +49,6 @@ public class Erro {
     @Override
     public String toString(){
         return String.format("%-6s - %s: %s",
-                status.toString(), getPosicao() + 1, mensagem);
+                status.toString(), getPosicao(), mensagem);
     }
 }

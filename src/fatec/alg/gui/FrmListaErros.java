@@ -41,7 +41,7 @@ public class FrmListaErros extends javax.swing.JFrame {
             tabErros.addRow(new String[]{
                 erro.getTipo().toString(),
                 erro.getPosicao(),
-                erro.getMensagem()
+                erro.getMensagem().replace("-", "ou")
             });
         }
         

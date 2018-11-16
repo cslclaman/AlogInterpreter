@@ -124,6 +124,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         styleInfo.addAttribute(StyleConstants.Background, Color.LIGHT_GRAY);
         
         configInterpr.set(ConfigInterpreter.RUNNEXT_LEIA_ATRIB, true);
+        configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_PILHA_CONST, true);
         configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_EXEC_FUNC, true);
         configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_EXEC_UNARIA, true);
         configInterpr.set(ConfigInterpreter.RUNNEXT_EXPR_EXEC_OPBIN, true);
@@ -679,6 +680,10 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private void btnProxPercActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnProxPercActionPerformed
         boolean enabled;
         
+        if (formatacao != FORMAT_PLAIN && formatacao != FORMAT_PERC){
+            docIde.setCharacterAttributes(0, docIde.getLength(), stylePlain, true);
+            formatacao = FORMAT_PERC;
+        }
         if (interpreter == null) {
             enabled = false;
         } else {
@@ -710,13 +715,17 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         AnalisadorLexico scanner = new AnalisadorLexico(oldText);
         List<Token> tokens = scanner.listaTokens();
         
+        TipoErro erroNivelMax = TipoErro.getMax();
+        
+        int numErros = scanner.getNumErros(erroNivelMax);
         if (scanner.getNumErros(TipoErro.getMax()) > 0){
-            JOptionPane.showMessageDialog(
-                    this,
-                    scanner.getNumErros(TipoErro.getMax()) +
-                            " erros encontrados - verifique seu algoritmo",
-                    "Verificação concluída",
-                    JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    String.format("%d erro%s encontrado%s - verifique seu algoritmo",
+                        numErros,
+                        numErros == 1 ? "" : "s",
+                        numErros == 1 ? "" : "s"
+                    ),
+                    "Verificação - Análise Léxica", JOptionPane.ERROR_MESSAGE);
             formatacao = FORMAT_ERROR;
             logger.log(Level.WARNING, "SCANNER (Análise Léxica)");
             
@@ -734,13 +743,15 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             AnalisadorSintatico parser = new AnalisadorSintatico(tokens);
             LinkedList<Instrucao> instrucoes = parser.listaInstrucoes();
 
-            if (parser.getNumErros(TipoErro.getMax()) > 0){
+            numErros = parser.getNumErros(TipoErro.getMax());
+            if (numErros > 0){
                 JOptionPane.showMessageDialog(this,
-                        String.format("%d erros encontrado%s - verifique seu algoritmo",
-                            parser.getNumErros(TipoErro.getMax()),
-                            parser.getNumErros(TipoErro.getMax()) != 1 ? "" : "s"
+                        String.format("%d erro%s encontrado%s - verifique seu algoritmo",
+                            numErros,
+                            numErros == 1 ? "" : "s",
+                            numErros == 1 ? "" : "s"
                         ),
-                        "Verificação concluída", JOptionPane.ERROR_MESSAGE);
+                        "Verificação - Análise Sintática", JOptionPane.ERROR_MESSAGE);
                 formatacao = FORMAT_ERROR;
                 logger.log(Level.WARNING, "PARSER (Análise Sintática)");
                 for (Erro e : parser.getErros(TipoErro.getMax())){
@@ -750,7 +761,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                 }
                 
                 mitExibirErros.setEnabled(true);
-                frmListaErros.setListaErros(parser.getErros(TipoErro.ALERTA));
+                frmListaErros.setListaErros(parser.getErros(TipoErro.getMax()));
                 frmListaErros.setVisible(true);
                 
             } else {
@@ -758,12 +769,18 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                 PreProcessador processor = new PreProcessador(instrucoes);
                 processor.verificaPrograma();
                 
-                int nfl = processor.getNumErros(TipoErro.INFO);
-                int nerrpp = processor.getNumErros(TipoErro.ERRO);
-                int nalepp = nfl - nerrpp;
+                numErros = processor.getNumErros(TipoErro.INFO);
+                int numErrSemant = processor.getNumErros(TipoErro.ERRO);
+                int numInfos = numErros - numErrSemant;
                 
-                if (nerrpp > 0){
-                    JOptionPane.showMessageDialog(this, nerrpp + " erros encontrados - verifique seu algoritmo", "Verificação concluída", JOptionPane.ERROR_MESSAGE);
+                if (numErrSemant > 0){
+                    JOptionPane.showMessageDialog(this,
+                        String.format("%d erro%s encontrado%s - verifique seu algoritmo",
+                            numErrSemant,
+                            numErrSemant == 1 ? "" : "s",
+                            numErrSemant == 1 ? "" : "s"
+                        ),
+                        "Verificação - Análise Semântica", JOptionPane.ERROR_MESSAGE);
                     formatacao = FORMAT_ERROR;
                     logger.log(Level.WARNING, "PRE PROCESSOR (Análise Semântica)");
                     for (Erro e : processor.getErros(TipoErro.ERRO)){
@@ -775,8 +792,8 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     frmListaErros.setListaErros(processor.getErros(TipoErro.ALERTA));
                     frmListaErros.setVisible(true);
                 } else {
-                    if (nalepp > 0) {
-                        for (Erro e : processor.getErros(TipoErro.ALERTA)){
+                    if (numInfos > 0) {
+                        for (Erro e : processor.getErros(TipoErro.INFO)){
                             Token t = e.getToken();
                             if (e.getTipo() == TipoErro.ALERTA) {
                                 docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleWarn, true);
@@ -785,13 +802,38 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                                 docIde.setCharacterAttributes(t.getPosicao(), t.getTamanho(), styleInfo, true);
                             }
                         }
+                        formatacao = FORMAT_ERROR;
+                        
+                        boolean cancelar = false;
+                        if (JOptionPane.OK_OPTION != JOptionPane.showConfirmDialog(this,
+                                String.format("%d alerta%s encontrado%s."
+                                        + "\nO programa pode ser executado, mas erros podem ocorrer."
+                                        + "\nDeseja executar mesmo assim?",
+                                    numInfos,
+                                    numInfos == 1 ? "" : "s",
+                                    numInfos == 1 ? "" : "s"
+                                ),
+                                "Verificação - Análise Semântica", 
+                                JOptionPane.OK_CANCEL_OPTION,
+                                JOptionPane.QUESTION_MESSAGE)) {
+                            
+                            cancelar = true;
+                        }
+                        
                         mitExibirErros.setEnabled(true);
                         frmListaErros.setListaErros(processor.getErros(TipoErro.INFO));
                         frmListaErros.setVisible(true);
-                        JOptionPane.showMessageDialog(this, nalepp + " alertas detectados - pronto para execução", "Verificação concluída", JOptionPane.WARNING_MESSAGE);
+                        
+                        if (cancelar) return;
                     } else {
-                        JOptionPane.showMessageDialog(this, "Nenhum erro encontrado - pronto para execução", "Verificação concluída", JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.showMessageDialog(this,
+                                "Nenhum erro encontrado - pronto para execução",
+                                "Verificação concluída",
+                                JOptionPane.INFORMATION_MESSAGE);
                         mitExibirErros.setEnabled(false);
+                        if (frmListaErros.isVisible()) {
+                            frmListaErros.setVisible(false);
+                        }
                     }
                     
                     lblPosCaret.setText("Em execução");
@@ -816,9 +858,9 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             btnVerificar.setEnabled(true);
             alteracoesProx.clear();
             // para garantir que não vai estourar a pilha
-            if (alteracoesAnt.size() > 100) {
+            if (MAX_ALTERACOES > 0 && alteracoesAnt.size() >= MAX_ALTERACOES) {
                 alteracoesAnt.poll();
-            }
+            } 
             alteracoesAnt.push(oldText);
         }
         if (formatacao != FORMAT_PLAIN){
@@ -1418,6 +1460,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         txpEntrada.setBackground(backgroundDisabled);
 
         docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
+        formatacao = FORMAT_PLAIN;
         txpProcessamento.setText("");
         txpProcessamento.setBackground(backgroundDisabled);
 
@@ -1432,13 +1475,18 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private void encerra() {
         String atual = txpIde.getText();
         if (!textoOrig.equals(atual)) {
-            if (JOptionPane.OK_OPTION == JOptionPane.showConfirmDialog(
+            int opcao = JOptionPane.showConfirmDialog(
                     this,
                     "Deseja salvar o seu código atual antes de sair?",
                     "Fechar programa",
-                    JOptionPane.YES_NO_OPTION)) {
+                    JOptionPane.YES_NO_OPTION);
+            
+            if (opcao == JOptionPane.OK_OPTION) {
                 mitSalvarActionPerformed(null);
             } 
+            if (opcao == JOptionPane.CANCEL_OPTION || opcao == JOptionPane.CLOSED_OPTION) {
+                return;
+            }
         }
         System.exit(0);
     }
