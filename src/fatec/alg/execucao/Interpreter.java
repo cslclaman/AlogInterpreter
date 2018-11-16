@@ -640,11 +640,12 @@ public class Interpreter extends Verificador {
                     pilhaExecucao.push(exec);
                 }
                 pilhaExecucao.push(new Executavel(condicional.getInstrucaoSe()));
+                interfaceExecucao.atualizaPassoAtual(condicional.getTokenSe(), condicional.getTokenEntao());
                 interfaceExecucao.atualizaInstrucao();
                 break;
             case 2: // Senão INSTRUÇÃO (caso seja composta)
                 if (condicional.isComposta()) {
-                    interfaceExecucao.atualizaPassoAtual(condicional.getTokenSenao());
+                    interfaceExecucao.atualizaPassoAtual(condicional.getTokenSe(), condicional.getTokenSenao());
                     pilhaExecucao.push(new Executavel(condicional.getInstrucaoSenao()));
                     interfaceExecucao.atualizaInstrucao();
                     exec.count ++;
