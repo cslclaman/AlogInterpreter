@@ -27,6 +27,7 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
@@ -36,15 +37,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.nio.CharBuffer;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.Caret;
+import javax.swing.text.DefaultEditorKit;
+import javax.swing.text.EditorKit;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
@@ -987,38 +992,25 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                 if ((evt.getKeyCode() == KeyEvent.VK_V && evt.isControlDown()) || 
                     (evt.getKeyCode() == KeyEvent.VK_INSERT && evt.isShiftDown()) ) {
                     evt.consume();
-                    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                    try {
-                        String text = clipboard.getData(DataFlavor.stringFlavor).toString();
-                        int pos = txpIde.getCaretPosition();
-                        String txta = txpIde.getText().substring(0, pos);
-                        String txtb = txpIde.getText().substring(pos);
-                        
-                        String subst;
-                        if (text.contains("\r")) {
-                            if (text.contains("\n")) {
-                                subst = "";
-                            } else {
-                                subst = "\n";
-                            }
-                            text = text.replace("\r", subst);
+                    txpIde.paste();
+                    String text = txpIde.getText();
+                    int pos = txpIde.getCaretPosition();
+                    int dif = text.length();
+
+                    String subst;
+                    if (text.contains("\r")) {
+                        if (text.contains("\n")) {
+                            subst = "";
+                        } else {
+                            subst = "\n";
                         }
-                        text = text.replace("\t", "    ");
-                        txpIde.setText(txta + text + txtb);
-                        txpIde.setCaretPosition(pos + text.length());
-                    } catch (IOException | UnsupportedFlavorException ex) {
-                        JOptionPane.showMessageDialog(this,
-                                "Conteúdo a ser colado não suportado",
-                                "Erro ao colar texto",
-                                JOptionPane.WARNING_MESSAGE);
-                        
-                        logger.log(Level.WARNING, "{0}\n {1} - {2}",
-                        new Object[]{
-                            "Conteúdo a ser colado não suportado",
-                            ex.getClass().getName(),
-                            ex.getMessage()
-                        });
+                        text = text.replace("\r", subst);
                     }
+                    text = text.replace("\t", "    ");
+                    
+                    txpIde.setText(text);
+                    txpIde.setCaretPosition(pos + text.length() - dif);
+                    
                 }
                 break;
             }
