@@ -31,7 +31,7 @@ public class Principal {
     /**
      * Número da versão atual
      */
-    public static final String VERSAO_NUM = "1.0.2";
+    public static final String VERSAO_NUM = "1.0.3";
     
     /**
      * Data de lançamento da versão atual
@@ -41,7 +41,7 @@ public class Principal {
     /**
      * Número identificador da compilação atual
      */
-    public static final int VERSAO_BUILD = 5;
+    public static final int VERSAO_BUILD = 6;
     
     private static final Logger logger = Logger.getLogger(Principal.class.getName());
     
