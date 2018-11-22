@@ -159,13 +159,18 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         );
         
         if (filename != null && !filename.isEmpty()) {
-            openArquivo(filename);
+            abreArquivo(filename);
         }
     }
     
-    private void openArquivo(String filename) {
+    private void abreArquivo(String filename) {
+        arquivo = new File(filename);
+        abreArquivo();
+    }
+    
+    private void abreArquivo() {
+        String nomeArq = "Algoritmo";
         try {
-            arquivo = new File(filename);
             StringBuilder codigofonte = new StringBuilder();
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(arquivo), "UTF-8"));
             String texto;
@@ -182,11 +187,46 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             textoOrig = codigofonte.toString();
             ideFontTamanhoRestaura();
             txpIde.setText(textoOrig);
+            nomeArq = arquivo.getName();
             br.close();
         } catch (IOException ex){
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Não foi possível carregar o arquivo especificado",
+                    "Erro ao abrir arquivo",
+                    JOptionPane.ERROR_MESSAGE);
+            
             logger.log(Level.WARNING, "{0}\n {1} - {2}",
                 new Object[]{
                     "Não foi possível carregar o arquivo especificado",
+                    ex.getClass().getName(),
+                    ex.getMessage()
+                });            
+        }
+        lblNomeArquivo.setText(nomeArq);
+        lblNomeArquivo.setFont(lblNomeArquivo.getFont().deriveFont(Font.PLAIN));
+        lblNomeArquivo.setToolTipText(null);
+    }
+    
+    private void salvaArquivo() {
+        try {
+            textoOrig = txpIde.getText();
+            FileOutputStream fos = new FileOutputStream(arquivo, false);
+            OutputStreamWriter wr = new OutputStreamWriter(fos,"UTF-8");
+            wr.write(textoOrig);
+            
+            lblNomeArquivo.setText(arquivo.getName());
+            lblNomeArquivo.setFont(lblNomeArquivo.getFont().deriveFont(Font.PLAIN));
+            lblNomeArquivo.setToolTipText(null);
+            
+            wr.close();
+            fos.close();
+        } catch (IOException ex){
+            JOptionPane.showMessageDialog(this, "Não foi possível salvar o arquivo especificado", "Erro ao salvar arquivo", JOptionPane.ERROR_MESSAGE);
+
+            logger.log(Level.WARNING, "{0}\n {1} - {2}",
+                new Object[]{
+                    "Não foi possível salvar o arquivo especificado",
                     ex.getClass().getName(),
                     ex.getMessage()
                 });
@@ -226,13 +266,15 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         btnEntradaConfirma = new javax.swing.JButton();
         btnVerificar = new javax.swing.JButton();
         lblVariavelEntrada = new javax.swing.JLabel();
-        lblPosCaret = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         lblLogo = new javax.swing.JLabel();
         lblLogo1 = new javax.swing.JLabel();
         btnSair = new javax.swing.JButton();
         lblFontSize = new javax.swing.JLabel();
         btnPararExec = new javax.swing.JButton();
+        pnlStatus = new javax.swing.JPanel();
+        lblPosCaret = new javax.swing.JLabel();
+        lblNomeArquivo = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         mnuArquivo = new javax.swing.JMenu();
         mitNovo = new javax.swing.JMenuItem();
@@ -381,11 +423,6 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
 
         lblVariavelEntrada.setFont(new java.awt.Font("Tahoma", 1, 12)); // NOI18N
 
-        lblPosCaret.setFont(new java.awt.Font("Consolas", 0, 11)); // NOI18N
-        lblPosCaret.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
-        lblPosCaret.setText("Linha 1, Coluna 1");
-        lblPosCaret.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
         jLabel5.setText("Variáveis");
 
         lblLogo.setIcon(new javax.swing.ImageIcon(getClass().getResource("/fatec/alg/gui/imagens/logo-fatecso-64.png"))); // NOI18N
@@ -412,6 +449,32 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                 btnPararExecActionPerformed(evt);
             }
         });
+
+        pnlStatus.setBorder(javax.swing.BorderFactory.createEtchedBorder());
+
+        lblPosCaret.setFont(new java.awt.Font("Consolas", 0, 11)); // NOI18N
+        lblPosCaret.setHorizontalAlignment(javax.swing.SwingConstants.TRAILING);
+        lblPosCaret.setText("Linha 1, Coluna 1");
+
+        lblNomeArquivo.setText("Algoritmo");
+
+        javax.swing.GroupLayout pnlStatusLayout = new javax.swing.GroupLayout(pnlStatus);
+        pnlStatus.setLayout(pnlStatusLayout);
+        pnlStatusLayout.setHorizontalGroup(
+            pnlStatusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, pnlStatusLayout.createSequentialGroup()
+                .addComponent(lblNomeArquivo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblPosCaret, javax.swing.GroupLayout.PREFERRED_SIZE, 200, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+        pnlStatusLayout.setVerticalGroup(
+            pnlStatusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(pnlStatusLayout.createSequentialGroup()
+                .addGroup(pnlStatusLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(lblPosCaret)
+                    .addComponent(lblNomeArquivo))
+                .addGap(0, 0, Short.MAX_VALUE))
+        );
 
         mnuArquivo.setText("Arquivo");
 
@@ -591,19 +654,18 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(scrTxpIde, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(lblPosCaret, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(scrTxpIde)
+                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jScrollPane7)
                             .addComponent(jScrollPane3)
                             .addComponent(jScrollPane6))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnEntradaConfirma, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel1)
@@ -618,7 +680,8 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                                 .addComponent(btnProxPerc, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnPararExec, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 75, Short.MAX_VALUE)))
+                        .addGap(0, 75, Short.MAX_VALUE))
+                    .addComponent(pnlStatus, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
@@ -647,17 +710,17 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     .addComponent(lblFontSize))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 323, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 326, Short.MAX_VALUE)
                     .addComponent(scrTxpIde))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pnlStatus, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(3, 3, 3)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(lblVariavelEntrada))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(lblPosCaret)
-                        .addGap(7, 7, 7)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jLabel1)
-                            .addComponent(lblVariavelEntrada))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(btnEntradaConfirma, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jScrollPane3))
@@ -862,6 +925,13 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                 alteracoesAnt.poll();
             } 
             alteracoesAnt.push(oldText);
+            
+            String nomeArq = lblNomeArquivo.getText();
+            if (!nomeArq.endsWith(" *")) {
+                lblNomeArquivo.setText(nomeArq + " *");
+                lblNomeArquivo.setFont(lblNomeArquivo.getFont().deriveFont(Font.BOLD));
+                lblNomeArquivo.setToolTipText("Algoritmo com alterações não salvas");
+            }
         }
         if (formatacao != FORMAT_PLAIN){
             docIde.setCharacterAttributes(0, docIde.getLength(), stylePlain, true);
@@ -987,34 +1057,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         
         if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION){
             arquivo = fileChooser.getSelectedFile();
-            try {
-                StringBuilder codigofonte = new StringBuilder();
-                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(arquivo), "UTF-8"));
-                String texto;
-                while ((texto = br.readLine()) != null){
-                    for (char ch : texto.toCharArray()){
-                        if (ch == '\t'){
-                            codigofonte.append("    ");
-                        } else {
-                            codigofonte.append(ch);
-                        }
-                    }
-                    codigofonte.append("\n");
-                }
-                textoOrig = codigofonte.toString();
-                ideFontTamanhoRestaura();
-                txpIde.setText(textoOrig);
-                br.close();
-            } catch (IOException ex){
-                JOptionPane.showMessageDialog(this, "Não foi possível carregar o arquivo especificado", "Erro ao abrir arquivo", JOptionPane.ERROR_MESSAGE);
-                
-                logger.log(Level.WARNING, "{0}\n {1} - {2}",
-                    new Object[]{
-                        "Não foi possível carregar o arquivo especificado",
-                        ex.getClass().getName(),
-                        ex.getMessage()
-                    });
-            }
+            abreArquivo();
         }
     }//GEN-LAST:event_mitAbrirActionPerformed
 
@@ -1025,23 +1068,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             
             mitSalvarComoActionPerformed(evt);
         } else {
-            try {
-                textoOrig = txpIde.getText();
-                FileOutputStream fos = new FileOutputStream(arquivo, false);
-                OutputStreamWriter wr = new OutputStreamWriter(fos,"UTF-8");
-                wr.write(textoOrig);
-                wr.close();
-                fos.close();
-            } catch (IOException ex){
-                JOptionPane.showMessageDialog(this, "Não foi possível salvar o arquivo especificado", "Erro ao salvar arquivo", JOptionPane.ERROR_MESSAGE);
-                
-                logger.log(Level.WARNING, "{0}\n {1} - {2}",
-                    new Object[]{
-                        "Não foi possível salvar o arquivo especificado",
-                        ex.getClass().getName(),
-                        ex.getMessage()
-                    });
-            }
+            salvaArquivo();
         }
     }//GEN-LAST:event_mitSalvarActionPerformed
 
@@ -1216,6 +1243,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private javax.swing.JLabel lblFontSize;
     private javax.swing.JLabel lblLogo;
     private javax.swing.JLabel lblLogo1;
+    private javax.swing.JLabel lblNomeArquivo;
     private javax.swing.JLabel lblPosCaret;
     private javax.swing.JLabel lblVariavelEntrada;
     private javax.swing.JMenuItem mitAbrir;
@@ -1239,6 +1267,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     private javax.swing.JMenu mnuExecutar;
     private javax.swing.JMenu mnuExibir;
     private javax.swing.JMenu mnuVerificar;
+    private javax.swing.JPanel pnlStatus;
     private javax.swing.JScrollPane scrTxpIde;
     private javax.swing.JTable tblVariaveis;
     private javax.swing.JTextPane txpEntrada;
@@ -1468,7 +1497,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         txpSaida.setBackground(backgroundDisabled);
         
         txpIde.setEditable(true);
-        
+        lblPosCaret.setText("Finalizado");
         return true;
     }
     
