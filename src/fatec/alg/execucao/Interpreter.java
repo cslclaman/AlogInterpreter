@@ -709,22 +709,18 @@ public class Interpreter extends Verificador {
     private void executaRepeticaoFaca(Executavel exec) {
         RepeticaoFaca repetitiva = (RepeticaoFaca)exec.instrucao;
         if (exec.total == 0) {
-            exec.total = 3;
+            exec.total = 2;
         }
         
         switch (exec.count) {
-            case 0: // Faça 
+            case 0: // Instrução a ser repetida
                 interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenFaca());
-                exec.count ++;
-                pilhaExecucao.push(exec);
-                break;
-            case 1: // Instrução a ser repetida
                 exec.count ++;
                 pilhaExecucao.push(exec);
                 pilhaExecucao.push(new Executavel(repetitiva.getInstrucao()));
                 interfaceExecucao.atualizaInstrucao();
                 break;
-            case 2: // Enquanto
+            case 1: // Enquanto
                 Expressao expressao = removeExpressaoDaPilha();
                 if (expressao == null) {
                     expressao = repetitiva.getCondicao();
@@ -751,7 +747,7 @@ public class Interpreter extends Verificador {
                     }
 
                     if (expressao.getResultadoLogico()) {
-                        exec.count = 1;
+                        exec.count = 0;
                         pilhaExecucao.push(exec);
                     } else {
                         exec.count ++;
@@ -764,22 +760,18 @@ public class Interpreter extends Verificador {
     private void executaRepeticaoRepita(Executavel exec) {
         RepeticaoRepita repetitiva = (RepeticaoRepita)exec.instrucao;
         if (exec.total == 0) {
-            exec.total = 3;
+            exec.total = 2;
         }
         
         switch (exec.count) {
-            case 0: // Repita
+            case 0: // Instrução a ser repetida
                 interfaceExecucao.atualizaPassoAtual(repetitiva.getTokenRepita());
-                exec.count ++;
-                pilhaExecucao.push(exec);
-                break;
-            case 1: // Instrução a ser repetida
                 exec.count ++;
                 pilhaExecucao.push(exec);
                 pilhaExecucao.push(new Executavel(repetitiva.getInstrucao()));
                 interfaceExecucao.atualizaInstrucao();
                 break;
-            case 2: // Até
+            case 1: // Até
                 Expressao expressao = removeExpressaoDaPilha();
                 if (expressao == null) {
                     expressao = repetitiva.getCondicao();
@@ -806,7 +798,7 @@ public class Interpreter extends Verificador {
                     }
 
                     if (!expressao.getResultadoLogico()) {
-                        exec.count = 1;
+                        exec.count = 0;
                         pilhaExecucao.push(exec);
                     } else {
                         exec.count ++;
