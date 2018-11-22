@@ -690,10 +690,10 @@ public class Interpreter extends Verificador {
 
                     if (expressao.getResultadoLogico()) {
                         exec.count += 1;
+                        pilhaExecucao.push(exec);
                     } else {
                         exec.count += 2;
                     }
-                    pilhaExecucao.push(exec);
                 }
                 break;
             case 1: // Instrução a ser repetida
