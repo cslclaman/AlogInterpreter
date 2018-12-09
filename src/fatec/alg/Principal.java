@@ -134,6 +134,7 @@ public class Principal {
             }
             FrmGui frmGui = new FrmGui(filename);
             java.awt.EventQueue.invokeLater(() -> {
+                frmGui.setExtendedState(FrmGui.MAXIMIZED_BOTH);
                 frmGui.setVisible(true);
             });
         }
