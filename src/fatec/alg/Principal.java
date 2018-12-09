@@ -31,17 +31,17 @@ public class Principal {
     /**
      * Número da versão atual
      */
-    public static final String VERSAO_NUM = "1.0.3";
+    public static final String VERSAO_NUM = "1.0.4";
     
     /**
      * Data de lançamento da versão atual
      */
-    public static final String VERSAO_DATA = "Nov/2018";
+    public static final String VERSAO_DATA = "Dez/2018";
     
     /**
      * Número identificador da compilação atual
      */
-    public static final int VERSAO_BUILD = 6;
+    public static final int VERSAO_BUILD = 7;
     
     private static final Logger logger = Logger.getLogger(Principal.class.getName());
     
