@@ -24,11 +24,6 @@ import javax.swing.text.DefaultStyledDocument;
 import fatec.alg.gui.componente.TextLineNumber;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.File;
@@ -37,19 +32,15 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.nio.CharBuffer;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.Caret;
-import javax.swing.text.DefaultEditorKit;
-import javax.swing.text.EditorKit;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
@@ -227,7 +218,11 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
             wr.close();
             fos.close();
         } catch (IOException ex){
-            JOptionPane.showMessageDialog(this, "Não foi possível salvar o arquivo especificado", "Erro ao salvar arquivo", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Não foi possível salvar o arquivo especificado",
+                    "Erro ao salvar arquivo",
+                    JOptionPane.ERROR_MESSAGE);
 
             logger.log(Level.WARNING, "{0}\n {1} - {2}",
                 new Object[]{
@@ -1471,6 +1466,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         btnProxPerc.setEnabled(false);
         btnPararExec.setEnabled(false);
         mnuExecutar.setEnabled(false);
+        btnEntradaConfirma.setEnabled(false);
         
         limpaTokensPercurso();
         
@@ -1490,10 +1486,14 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         
         txpIde.setEditable(true);
         lblPosCaret.setText("Finalizado");
+        
+        interpreter.reinicia();
         return true;
     }
     
     private void encerra() {
+        pararExecucao();
+        
         String atual = txpIde.getText();
         if (!textoOrig.equals(atual)) {
             int opcao = JOptionPane.showConfirmDialog(

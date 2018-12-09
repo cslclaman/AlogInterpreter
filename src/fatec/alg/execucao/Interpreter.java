@@ -98,7 +98,7 @@ public class Interpreter extends Verificador {
      * @param interfaceExecucao Interface de controle, entrada e saída
      * @param programa O programa (instruções) a ser executado
      */
-    public Interpreter(InterfaceExecucao interfaceExecucao, Programa programa) {
+    public Interpreter(InterfaceExecucao interfaceExecucao) {
         super();
         this.config = new ConfigInterpreter();
         this.interfaceExecucao = interfaceExecucao;
@@ -117,6 +117,17 @@ public class Interpreter extends Verificador {
      */
     public void setConfigInterpreter(ConfigInterpreter configInterpreter) {
         this.config = configInterpreter;
+    }
+
+    /**
+     * Finaliza a execução e reinicia o interpretador.
+     * Esse método permite que seu programa carregado
+     * possa ser reexecutado limpando a pilha de execução e
+     * definindo o programa como não executado ainda.
+     */
+    public void reinicia() {
+        pilhaExecucao.clear();
+        executed = false;
     }
     
     /**
@@ -242,6 +253,8 @@ public class Interpreter extends Verificador {
                              * A manobra abaixo existe porque toda instrução que
                              * contém uma expressão verifica se há uma expressão
                              * no topo da pilha (contendo o resultado esperado).
+                             * A instrução que aguarda o resultado da expressão 
+                             * deve ser carregada primeiro (fica no topo da pilha)
                              */
                             pilhaExecucao.push(exec); //Expressão finalizada
                             pilhaExecucao.push(inst); //Instrução que espera o resultado da expressão.
@@ -273,6 +286,15 @@ public class Interpreter extends Verificador {
                     break;
             }
 
+        /*
+         * Algumas instruções não devem depender de uma nova chamada deste método
+         * para poderem ser executadas. Conforme as configurações passadas,
+         * em determinadas instruções esse boolean runNext será ativado e,
+         * enquanto ele for verdadeiro já repete a instrução.
+         * A ideia original era fazer recursão (se o runNext fosse verdadeiro, 
+         * chamava novamente o método proxima), mas aconteceram problemas de
+         * estouro da pilha de execução do Java.
+         */
         } while (runNext) ;
         
         locked = false;
