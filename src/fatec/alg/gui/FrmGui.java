@@ -1478,7 +1478,8 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         txpEntrada.setText("");
         txpEntrada.setEditable(false);
         txpEntrada.setBackground(backgroundDisabled);
-
+        lblVariavelEntrada.setText("");
+        
         docProc.setCharacterAttributes(0, docProc.getLength(), stylePlain, true);
         formatacao = FORMAT_PLAIN;
         txpProcessamento.setText("");
