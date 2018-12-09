@@ -581,7 +581,7 @@ public class PreProcessador extends Verificador {
         if (numParamsEsperado != numParamsPassado) {
             erros.add(new Erro(TipoErro.ALERTA, token,
                 String.format("Função \"%s\" encontrou %d parâmetro(s), mas esperava %d",
-                token.getPalavra(), numParamsEsperado, numParamsPassado)));
+                token.getPalavra(), numParamsPassado, numParamsEsperado)));
             count ++;
         } else {
             for (int c = 0; c < numParamsEsperado; c++) {
@@ -589,8 +589,8 @@ public class PreProcessador extends Verificador {
                     !(paramsDeclarados[c] == TipoDado.REAL && parametros[c] == TipoDado.INTEIRO)
                 ) {
                     count ++;
-                    lista.append(String.format("\n - %do Parâmetro: - Encontrou %s, esperava %s",
-                    c + 1, parametros[c] == null ? "": parametros[c], paramsDeclarados[c]));
+                    lista.append(String.format("\n %do Parâmetro: Encontrou %s, esperava %s.",
+                            c + 1, parametros[c] == null ? "": parametros[c], paramsDeclarados[c]));
                 }
             }
             if (count > 0) {
@@ -616,7 +616,7 @@ public class PreProcessador extends Verificador {
             }
         }
         erros.add(new Erro(TipoErro.ERRO, operando, 
-                String.format("Tipo de dado inválido para operador \"%s\"\n - Encontrou %s, esperava %s",
+                String.format("Tipo de dado inválido para operador \"%s\":\n Encontrou %s, esperava %s",
                 operador.getPalavra(), encontrado, lista.toString())));
         return 1;
     }
@@ -634,7 +634,7 @@ public class PreProcessador extends Verificador {
             }
         }
         erros.add(new Erro(TipoErro.ERRO, token,
-            String.format("Resultado da expressão inválido para estrutura \"%s\"\n - Encontrou %s, esperava %s",
+            String.format("Resultado da expressão inválido para estrutura \"%s\":\n Encontrou %s, esperava %s",
             token.getFuncaoToken().toString(), encontrado, lista.toString())));
         return 1;
     }
@@ -647,7 +647,7 @@ public class PreProcessador extends Verificador {
             return 0;
         } else {
             erros.add(new Erro(TipoErro.ERRO, token,
-                String.format("Tipo de expressão inválido para atribuir à variável \"%s\"\n - Encontrou %s, esperava %s",
+                String.format("Tipo de expressão inválido para atribuir à variável \"%s\":\n Encontrou %s, esperava %s",
                 token.getPalavra(), encontrado, esperado)));
             return 1;
         }

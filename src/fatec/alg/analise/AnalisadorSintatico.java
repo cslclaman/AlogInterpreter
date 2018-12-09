@@ -1397,7 +1397,7 @@ public class AnalisadorSintatico extends Verificador {
                             "Erro ao montar expressão - operando não encontrado"));
                         logger.log(Level.WARNING, "{0}:\n {1} - {2}",
                                 new Object[]{
-                                    "Pilha sem elemento p/ gerar operação unária",
+                                    "Pilha sem elemento para gerar operação unária",
                                     ex.getClass().getName(),
                                     ex.getMessage()
                                 });
@@ -1432,11 +1432,11 @@ public class AnalisadorSintatico extends Verificador {
                     } catch (NoSuchElementException ex){
                         erros.add(new Erro(TipoErro.ERRO, t, 
                             "Erro ao montar expressão - operando não encontrado"));
-                        logger.log(Level.WARNING, "{0}{1}{2}:\n{1} - {2}",
+                        logger.log(Level.WARNING, "{0}{1}{2}:\n{3} - {4}",
                                 new Object[]{
                                     "Pilha sem elemento ",
                                     devCount + 1,
-                                    "  p/ gerar operação binária",
+                                    " para gerar operação binária",
                                     ex.getClass().getName(),
                                     ex.getMessage()
                                 });
