@@ -96,9 +96,26 @@ public class Interpreter extends Verificador {
     /**
      * Instancia um interpretador com configurações padrão e em modo de espera.
      * @param interfaceExecucao Interface de controle, entrada e saída
-     * @param programa O programa (instruções) a ser executado
      */
     public Interpreter(InterfaceExecucao interfaceExecucao) {
+        super();
+        this.config = new ConfigInterpreter();
+        this.interfaceExecucao = interfaceExecucao;
+        variaveis = new HashMap<>();
+        pilhaExecucao = new LinkedList<>();
+        executed = false;
+        canGo = true;
+        runNext = false;
+        locked = false;
+        programa = null;
+    }
+    
+    /**
+     * Instancia um interpretador com configurações padrão e em modo de espera.
+     * @param interfaceExecucao Interface de controle, entrada e saída
+     * @param programa O programa (instruções) a ser executado
+     */
+    public Interpreter(InterfaceExecucao interfaceExecucao, Programa programa) {
         super();
         this.config = new ConfigInterpreter();
         this.interfaceExecucao = interfaceExecucao;
@@ -120,6 +137,15 @@ public class Interpreter extends Verificador {
     }
 
     /**
+     * Define o programa a ser executado. 
+     * @param programa 
+     */
+    public void setPrograma(Programa programa) {
+        this.programa = programa;
+        reinicia();
+    }
+    
+    /**
      * Finaliza a execução e reinicia o interpretador.
      * Esse método permite que seu programa carregado
      * possa ser reexecutado limpando a pilha de execução e
@@ -127,15 +153,24 @@ public class Interpreter extends Verificador {
      */
     public void reinicia() {
         pilhaExecucao.clear();
+        variaveis.clear();
         executed = false;
+        canGo = true;
+        locked = false;
     }
     
     /**
-     * Retorna se ainda existem expressões 
-     * @return 
+     * Retorna se ainda existem expressões a serem executadas.
+     * @return TRUE se existirem instruções a executar.
      */
     public boolean existeProxima() {
-        return canGo && (!executed || !pilhaExecucao.isEmpty());
+        /*
+         * Lógica:
+         * 1. O programa não pode ser nulo.
+         * 2. O programa não pode ter sido finalizado (com sucesso ou com erro)
+         * 3. A pilha deve ter instruções e, se não tiver, deve ser porque o programa ainda não foi executado.
+         */
+        return (programa != null) && canGo && (!pilhaExecucao.isEmpty() || !executed);
     }
     
     public void proxima () {

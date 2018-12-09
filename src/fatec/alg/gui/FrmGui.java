@@ -17,6 +17,7 @@ import fatec.alg.analise.AnalisadorLexico;
 import fatec.alg.geral.expressao.Expressao;
 import fatec.alg.geral.expressao.ExibidorExpressao;
 import fatec.alg.geral.instrucao.Instrucao;
+import fatec.alg.geral.programa.Programa;
 import fatec.alg.geral.token.Token;
 import fatec.alg.geral.variavel.Variavel;
 import java.util.LinkedList;
@@ -54,7 +55,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
     
     private static final int MAX_ALTERACOES = 150;
     
-    private Interpreter interpreter = null;
+    private final Interpreter interpreter;
     private boolean emExecucao = false;
     
     StyleContext sc;
@@ -145,6 +146,9 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         
         alteracoesAnt = new LinkedList<>();
         alteracoesProx = new LinkedList<>();
+        
+        interpreter = new Interpreter(this);
+        interpreter.setConfigInterpreter(configInterpr);
         
         this.setTitle(String.format("Interpretador de Algoritmos - versão %s do TG do aluno %s - %s",
                 Principal.VERSAO_NUM, "Caíque de Souza Lima Siqueira", Principal.VERSAO_DATA));
@@ -902,8 +906,7 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
                     lblPosCaret.setText("Em execução");
                     emExecucao = true;
 
-                    interpreter = new Interpreter(this, processor.getPrograma());
-                    interpreter.setConfigInterpreter(configInterpr);
+                    interpreter.setPrograma(processor.getPrograma());
                     btnProxPerc.setEnabled(interpreter.existeProxima());
                     btnPararExec.setEnabled(interpreter.existeProxima());
                     mnuExecutar.setEnabled(interpreter.existeProxima());
