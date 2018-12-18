@@ -41,7 +41,7 @@ public class Principal {
     /**
      * Número identificador da compilação atual
      */
-    public static final int VERSAO_BUILD = 7;
+    public static final int VERSAO_BUILD = 8;
     
     private static final Logger logger = Logger.getLogger(Principal.class.getName());
     

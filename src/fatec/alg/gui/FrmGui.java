@@ -410,6 +410,9 @@ public class FrmGui extends javax.swing.JFrame implements InterfaceExecucao {
         btnEntradaConfirma.setText("Confirmar");
         btnEntradaConfirma.setEnabled(false);
         btnEntradaConfirma.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
+        btnEntradaConfirma.setMaximumSize(new java.awt.Dimension(115, 25));
+        btnEntradaConfirma.setMinimumSize(new java.awt.Dimension(105, 25));
+        btnEntradaConfirma.setPreferredSize(new java.awt.Dimension(110, 25));
         btnEntradaConfirma.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnEntradaConfirmaActionPerformed(evt);
